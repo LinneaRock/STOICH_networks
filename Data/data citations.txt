@@ -1,0 +1,18 @@
+Arikree Glacier SWC							Caine, T. 2021. Stream water chemistry data for Arikaree cirque, 1984 - ongoing. ver 13. Environmental Data Initiative. https://doi.org/10.6073/pasta/db83e4bb2f3fb8c9be1fafa5956957d0 (Accessed 2022-10-26).
+Navajo Meadow Flow							Caine, N. and Niwot Ridge LTER. 2021. Streamflow data for outlet from Navajo meadow, 1994 - 2014 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/e2abf6afe49c0a58bab46e13fc4eb55f (Accessed 2022-10-26).
+
+GL5 inlet, lake, outlet WC (limited)		Mcknight, D., P. Johnson, K. Loria, Niwot Ridge LTER, and S. Dykema. 2021. Stream and lake water chemistry data for Green Lakes Valley, 1998 - ongoing. ver 3. Environmental Data Initiative. https://doi.org/10.6073/pasta/811e22e67aa850fa6c03148ab621e76e (Accessed 2022-10-26).	
+GL5 Outlet SWC								Caine, T. 2021. Stream water chemistry data for Green Lake 5 outlet, 1984 - ongoing. ver 12. Environmental Data Initiative. https://doi.org/10.6073/pasta/effe6d9f1a764ebaccb7ae9b28cba7a5 (Accessed 2022-10-26).
+GL5 Outlet Flow								Caine, N. and Niwot Ridge LTER. 2021. Streamflow data for Green Lake 5 outlet, 2006 - 2017 ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/c193b3d06d941a074a9d407a3548c4b2 (Accessed 2022-10-26).
+GL4 inlet, lake, outlet WC (limited)		Mcknight, D., P. Johnson, K. Loria, Niwot Ridge LTER, and S. Dykema. 2021. Stream and lake water chemistry data for Green Lakes Valley, 1998 - ongoing. ver 3. Environmental Data Initiative. https://doi.org/10.6073/pasta/811e22e67aa850fa6c03148ab621e76e (Accessed 2022-10-26).	
+GL4 Outlet SWC 								Caine, T. 2021. Stream water chemistry data for Green Lake 4, 1982 - ongoing. ver 12. Environmental Data Initiative. https://doi.org/10.6073/pasta/277121f0334757746d9d52ce2c2e82ab (Accessed 2022-10-26).
+GL4 outlet Flow 							Caine, N., J. Morse, and Niwot Ridge LTER. 2022. Streamflow for Green Lake 4, 1981 - ongoing. ver 16. Environmental Data Initiative. https://doi.org/10.6073/pasta/3749d944650633f794fd673234274498 (Accessed 2022-10-26).
+GL3,2,1 WC 									Mcknight, D., P. Johnson, K. Loria, Niwot Ridge LTER, and S. Dykema. 2021. Stream and lake water chemistry data for Green Lakes Valley, 1998 - ongoing. ver 3. Environmental Data Initiative. https://doi.org/10.6073/pasta/811e22e67aa850fa6c03148ab621e76e (Accessed 2022-10-26).
+Albion inlet, lake, outlet WC (limited)		Mcknight, D., P. Johnson, K. Loria, Niwot Ridge LTER, and S. Dykema. 2021. Stream and lake water chemistry data for Green Lakes Valley, 1998 - ongoing. ver 3. Environmental Data Initiative. https://doi.org/10.6073/pasta/811e22e67aa850fa6c03148ab621e76e (Accessed 2022-10-26).	
+Albion inlet SWC						    Caine, T. 2019. Stream water chemistry data for Lake Albion inlet, 1984 - 2004. ver 7. Environmental Data Initiative. https://doi.org/10.6073/pasta/9f5908f3c9853be7aa48a3ea8971d301 (Accessed 2022-10-26).
+
+Albion Camp SWC 							Caine, T. 2021. Stream water chemistry data for Albion site, 1982 - ongoing. ver 14. Environmental Data Initiative. https://doi.org/10.6073/pasta/59396e2b8d291badcfb140425e1b3a38 (Accessed 2022-10-26).
+Albion Camp Flow							Caine, N., J. Morse, and Niwot Ridge LTER. 2022. Streamflow data for Albion camp, 1981 - ongoing. ver 17. Environmental Data Initiative. https://doi.org/10.6073/pasta/81ef15564db3a999ea28c02697550525 (Accessed 2022-10-26).
+
+Watershed Flume SWC							Caine, T. 2019. Stream water chemistry data for Watershed Flume site, 2005 - ongoing. ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/7624d220c8ab0e7caca719320fe7f36f (Accessed 2022-10-26).
+
