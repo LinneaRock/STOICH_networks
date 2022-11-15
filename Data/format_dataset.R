@@ -1,22 +1,22 @@
 library(tidyverse)
 library(lubridate)
 
-lakes <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.10.3/glvwatsolu.dm.data.csv")
+lakes <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.10.3/glvwatsolu.dm.data.csv")
 
-albdis <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.102.17/albdisch.nc.data.csv")
-albwq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.103.14/albisolu.nc.data.csv")
+albdis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.102.17/albdisch.nc.data.csv")
+albwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.103.14/albisolu.nc.data.csv")
 
-arikwq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.104.13/ariksolu.nc.data.csv")
-navdis <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.169.1/navdisch.nc.data.csv")
+arikwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.104.13/ariksolu.nc.data.csv")
+navdis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.169.1/navdisch.nc.data.csv")
 
-gl4dis <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.105.16/gl4disch.nc.data.csv")
-gl4wq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.108.12/gre4solu.nc.data.csv")
+gl4dis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.105.16/gl4disch.nc.data.csv")
+gl4wq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.108.12/gre4solu.nc.data.csv")
 
-gl5wq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.109.12/gre5solu.nc.data.csv")
-gl5dis <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.170.1/gl5disch.nc.data.csv") 
+gl5wq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.109.12/gre5solu.nc.data.csv")
+gl5dis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.170.1/gl5disch.nc.data.csv") 
 
-albinwq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.110.7/inlesolu.nc.data.csv")
-flumewq <- read.csv("C:/Users/linne/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.162.1/flumesolu.nc.data.csv")
+albinwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.110.7/inlesolu.nc.data.csv")
+flumewq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.162.1/flumesolu.nc.data.csv")
 
 
 lakes_format <- lakes |>
@@ -72,7 +72,7 @@ alb_camp_format <- left_join(albdis, albwq, by = "date") |>
          depth_m = 0) |>
   relocate(site) |>
   select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
-  mutate(across(c(3,4,7:32), as.numeric)) |>
+  mutate(across(c(3,4,6:31), as.numeric)) |>
   mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
          ANC_ueqL = ANC,
@@ -115,7 +115,8 @@ nav_format <- navdis |>
 arik_format <- left_join(nav_format, arikwq |> mutate(date = as.Date(date)), by = "date") |>
   rename(site = local_site) |>
   relocate(site) |>
-  mutate(year = year(date)) |>
+  mutate(year = year(date),
+         year = as.factor(year)) |>
   select(-LTER_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(4,6:31), as.numeric)) |>
   rename(SpC_uscm = cond,
@@ -328,4 +329,7 @@ flume_format <- flume_format |>
   filter(check != 0) |>
   select(-check)
 
+greenlakesnetwork <- bind_rows(alb_camp_format, albin_format, arik_format, flume_format, gl4_format, gl5_format, lakes_format) 
+
+write.csv(greenlakesnetwork, "Data/greenlakes_network.csv")
          
