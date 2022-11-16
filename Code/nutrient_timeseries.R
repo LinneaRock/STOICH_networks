@@ -3,7 +3,8 @@ library(tidyverse)
 
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   select(-X) |>
-  mutate(date = as.Date(date))
+  mutate(date = as.Date(date)) |>
+  mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL))
 
 # not very much TOC data
 ggplot(gl_network, aes(date, TOC_mgL, color = site)) +
