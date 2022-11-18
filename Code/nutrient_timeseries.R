@@ -64,3 +64,21 @@ ggplot(gl_network |> filter(year>1997), aes(date, IP_umolL, color = site)) +
 ggplot(gl_network|> filter(year > 1995), aes(date, DOP_umolL, color = site)) +
   geom_point() +
   geom_line()
+
+
+ggplot(gl_network, aes(date, NO3_ueqL, color = site)) +
+  geom_point() +
+  geom_line()
+
+ggplot(gl_network, aes(date, NH4_ueqL, color = site)) +
+  geom_point() +
+  geom_line()
+
+ggplot(gl_network, aes(date, PO4_ueqL, color = site)) +
+  geom_point() +
+  geom_line()
+
+
+ggplot(gl_network, aes(date, daily_dis_m3, color = site)) +
+  geom_point() +
+  geom_line()

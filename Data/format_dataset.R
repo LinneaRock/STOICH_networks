@@ -332,4 +332,37 @@ flume_format <- flume_format |>
 greenlakesnetwork <- bind_rows(alb_camp_format, albin_format, arik_format, flume_format, gl4_format, gl5_format, lakes_format) 
 
 write.csv(greenlakesnetwork, "Data/greenlakes_network.csv")
-         
+
+gl_network <- read.csv("Data/greenlakes_network.csv") |>
+  select(-X) |>
+  mutate(date = as.Date(date)) |>
+  mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL))|>
+  mutate(DON_umolL = ifelse(DON_umolL < 0, NA, IP_umolL)) |>
+  mutate(IP_umolL = ifelse(is.na(IP_umolL), PO4_ueqL/3, IP_umolL)) |>
+  mutate(IN_ueqL = ifelse(is.na(IN_ueqL), NH4_ueqL + NO3_ueqL, IN_ueqL)) |>
+  rename(IN_umolL = IN_ueqL)
+
+write.csv(gl_network, "Data/greenlakes_network.csv")
+
+
+#| umol/L IP is umol PO4 as P.
+#| ueq/L NO3 and ueq/L NH4 is umol NO3 as N and NH4 as N!!!!!!!!!!!
+
+
+#   mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL))|>
+#   mutate(DON_umolL = ifelse(DON_umolL < 0, NA, IP_umolL)) |>
+#   mutate(NO3_N_mgL = NO3_ueqL/16.13 * 0.2259) |>
+#   mutate(NH4_N_mgL = NH4_ueqL/55.44 * 0.7765) |>
+#   mutate(PO4_P_mgL = PO4_ueqL/31.59 * 0.3261)
+# 
+# 
+# library(biogas)
+# 
+# Pmol <- molMass("P") * 1000 #mg/mol
+# Nmol <- molMass("N") * 1000 #mg/mol
+# 
+# gl_network <- gl_network |>
+#   mutate(NO3_N_umolL = NO3_N_mgL/Nmol * 1000 * 1000) |>
+#   mutate(NH4_N_umolL = NH4_N_mgL/Nmol * 1000 * 1000) |>
+#   mutate(PO4_P_umolL = PO4_P_mgL/Pmol * 1000 * 1000) |>
+#   relocate(NO3_N_umolL, NH4_N_umolL, PO4_P_umolL)
