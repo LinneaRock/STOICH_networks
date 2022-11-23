@@ -366,3 +366,11 @@ write.csv(gl_network, "Data/greenlakes_network.csv")
 #   mutate(NH4_N_umolL = NH4_N_mgL/Nmol * 1000 * 1000) |>
 #   mutate(PO4_P_umolL = PO4_P_mgL/Pmol * 1000 * 1000) |>
 #   relocate(NO3_N_umolL, NH4_N_umolL, PO4_P_umolL)
+
+
+# sites ####
+# gl_network_sites <- read.csv("Data/greenlakes_network.csv") |>
+#   select(site, arik_flow_site) |>
+#   unique()
+# write.csv(gl_network_sites, "Data/sites.csv")
+# saved and manually added lat long and network position
