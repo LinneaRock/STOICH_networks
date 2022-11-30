@@ -19,11 +19,12 @@ subset <- gl_network |>
   mutate(parameter = sub('\\_.*', "", parameter)) |>
   group_by(season, yr, site, network_position, eco_type, parameter) |>
   summarise(meanconc_umolL = mean(concentration_umol_L)) |>
-  ungroup()
+  ungroup() |>
+  mutate(parameter = factor(parameter, levels = c("TN", "TDN", "IN", "DON", "PN", "TP", "TDP", "IP", "DOP", "PP")))
          
 
-ggplot(subset, aes(yr, meanconc_umolL, color = network_position)) +
-  geom_line() +
+ggplot(subset, aes(yr, meanconc_umolL, color = network_position, group = site)) +
+  geom_path(aes(group = season)) +
   geom_point() +
   facet_wrap(~parameter, scales = "free_y",ncol = 3) +
   theme_bw()
@@ -33,5 +34,5 @@ ggplot(subset, aes(yr, meanconc_umolL, color = network_position)) +
 
 
 forms_subset <- gl_network |>
-  select(3:17, network_position, eco_type, - NO3_ueqL, -NH4_ueqL, -PO4_ueqL) |>
+  select(3:17, network_position, eco_type) |>
   drop_na()
