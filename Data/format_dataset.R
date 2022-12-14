@@ -345,6 +345,17 @@ gl_network <- read.csv("Data/greenlakes_network.csv") |>
 write.csv(gl_network, "Data/greenlakes_network.csv")
 
 
+# Add seasons to dataset ####
+library(lubridate)
+gl_network <- read.csv("Data/greenlakes_network.csv") |>
+  mutate(mon = month(date)) |> #and add seasons to the dataframe
+  mutate(season = case_when(mon %in% c(10,11,12) ~ "Oct-Dec",
+                            mon %in% c(1,2,3) ~ "Jan-Mar",
+                            mon %in% c(4,5,6)  ~ "Apr-Jun",
+                            mon %in% c(7,8,9) ~ "Jul-Sep"))
+write.csv(gl_network, "Data/greenlakes_network.csv")
+
+
 #| umol/L IP is umol PO4 as P.
 #| ueq/L NO3 and ueq/L NH4 is umol NO3 as N and NH4 as N!!!!!!!!!!!
 

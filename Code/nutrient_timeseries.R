@@ -2,10 +2,9 @@
 library(tidyverse)
 sites <- read.csv("Data/sites.csv")
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  select(-X) |>
-  mutate(date = as.Date(date)) |>
- # mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL)) |>
-  left_join(sites)
+  left_join(sites) |>
+  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 # Basic timeries ####
 # not very much TOC data

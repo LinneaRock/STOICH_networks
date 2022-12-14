@@ -11,9 +11,9 @@ library(scales)
 
 sites <- read.csv("Data/sites.csv")
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  select(-X) |>
   left_join(sites) |>
-  mutate(date = as.Date(date))
+  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 discharge_temp <- gl_network |>
   select(date, site, arik_flow_site, network_position, daily_dis_m3, mean_temp_C) |>

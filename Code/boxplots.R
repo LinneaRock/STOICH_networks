@@ -9,41 +9,30 @@ library(tidyverse)
 
 sites <- read.csv("Data/sites.csv")
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  select(-X) |>
   left_join(sites) |>
-  mutate(date = as.Date(date))
+  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
-
-# write plot function ####
-boxplot_fun <- function(x,y,xlab,ylab,name) {
-  # first subset the data
-  data <- data.frame(x,y, gl_network$network_position) |>
-    drop_na() 
-  
-  colnames(data) <- c('xx','yy','network_position')
-  
-  ggplot(data, aes(xx, yy)) +
-    geom_boxplot() +
-    geom_jitter(aes(color = network_position), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
-    theme_bw(base_size = 15) +
-    theme(plot.title = element_text(face='bold', family='serif',
-                                    size=rel(1.2), hjust=0.5),
-          panel.grid.minor=element_blank(),
-          panel.grid.major.x = element_blank(),
-          text=element_text(family='serif'),
-          axis.text=element_text(color='black')) +
-    scale_color_viridis_c('Network\nposition',direction = -1) +
-    labs(x = xlab, y = ylab)
-  
-  ggsave(paste0('Figures/boxplots/',name,'.png'), height = 4.5, width = 6.5, units = 'in', dpi = 1200)
-}
-
-# plot non-nutrients by eco type ####
+# subset and format datasets for plotting ####
 ions <- gl_network |>
-  select(site, network_position, eco_type, date, depth_m, 21:31) |>
-  pivot_longer(6:16, names_to = 'param', values_to = 'result') |>
+  select(site, network_position, eco_type, date, season, depth_m, 21:31) |>
+  pivot_longer(7:17, names_to = 'param', values_to = 'result') |>
   drop_na(network_position)
 
+nuts <- gl_network |>
+  select(site, network_position, eco_type, date, season, depth_m, 2:7, 10:14) |>
+  pivot_longer(7:17, names_to = 'param', values_to = 'result') |>
+  drop_na(network_position)
+
+
+
+
+
+
+
+
+# Plotting by eco type ####
+## plot non-nutrients by eco type ####
 ggplot(ions, aes(eco_type, result)) +
   geom_boxplot() +
   geom_jitter(aes(color = network_position, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
@@ -58,33 +47,107 @@ ggplot(ions, aes(eco_type, result)) +
   facet_wrap(.~param, scales = 'free_y') +
   labs(x = '', y = '')
 
-ggsave('Figures/boxplots/eco_params.png', height = 4.5, width = 6.5, units = 'in', dpi = 1200)
+ggsave('Figures/boxplots/eco_params.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
   
 
-# Nitrogen by eco type ####
-## TN ####
-boxplot_fun(gl_network$eco_type, gl_network$TN_umolL, '', 'Total N '~mu*mol~L^-1, 'eco_TN')
-## TDN ####
-boxplot_fun(gl_network$eco_type, gl_network$TDN_umolL, '', 'Total dissolved N '~mu*mol~L^-1, 'eco_TDN')
-## DON ####
-boxplot_fun(gl_network$eco_type, gl_network$DON_umolL, '', 'Dissolved organic N '~mu*mol~L^-1, 'eco_DON')
-## PN ####
-boxplot_fun(gl_network$eco_type, gl_network$PN_umolL, '', 'Particulate N '~mu*mol~L^-1, 'eco_PN')
-## IN ####
-boxplot_fun(gl_network$eco_type, gl_network$IN_umolL, '', 'Inorganic N '~mu*mol~L^-1, 'eco_IN')
+## plot nutrients by eco type ####
+ggplot(nuts, aes(eco_type, result)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = network_position, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black')) +
+  scale_color_viridis_c('Network\nposition',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = '', y = '')
+
+ggsave('Figures/boxplots/eco_nuts.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
 
 
-# Phosphorus by eco type ####
-## TP ####
-boxplot_fun(gl_network$eco_type, gl_network$TP_umolL, '', 'Total P '~mu*mol~L^-1, 'eco_TP')
-## TDP ####
-boxplot_fun(gl_network$eco_type, gl_network$TDP_umolL, '', 'Total dissolved P '~mu*mol~L^-1, 'eco_TDP')
-## DOP ####
-boxplot_fun(gl_network$eco_type, gl_network$DOP_umolL, '', 'Dissolved organic P '~mu*mol~L^-1, 'eco_DOP')
-## PP ####
-boxplot_fun(gl_network$eco_type, gl_network$PP_umolL, '', 'Particulate P '~mu*mol~L^-1, 'eco_PP')
-## IP ####
-boxplot_fun(gl_network$eco_type, gl_network$IP_umolL, '', 'Inorganic P '~mu*mol~L^-1, 'eco_IP')
 
 
+
+
+
+# plotting by network position ####
+## plot non-nutrients by network position ####
+ggplot(ions, aes(network_position, result, group = network_position)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black')) +
+  scale_color_viridis_d('',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = 'Network position', y = '')
+
+ggsave('Figures/boxplots/position_params.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+## plot nutrients by network position ####
+ggplot(nuts, aes(network_position, result, group = network_position)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black')) +
+  scale_color_viridis_d('',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = 'Network position', y = '')
+
+ggsave('Figures/boxplots/position_nuts.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+
+
+
+
+
+
+# plotting by season ####
+## plot non-nutrients by season ####
+ggplot(ions, aes(season, result, group = season)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black'),
+        axis.text.x = element_text(angle=45, vjust=1,hjust=1)) +
+  scale_color_viridis_d('',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = '', y = '')
+
+ggsave('Figures/boxplots/season_params.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+## plot nutrients by season ####
+ggplot(nuts, aes(season, result, group = season)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black'),
+        axis.text.x = element_text(angle=45, vjust=1,hjust=1)) +
+  scale_color_viridis_d('',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = '', y = '')
+
+ggsave('Figures/boxplots/season_nuts.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
