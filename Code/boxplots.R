@@ -38,6 +38,29 @@ boxplot_fun <- function(x,y,xlab,ylab,name) {
   ggsave(paste0('Figures/boxplots/',name,'.png'), height = 4.5, width = 6.5, units = 'in', dpi = 1200)
 }
 
+# plot non-nutrients by eco type ####
+ions <- gl_network |>
+  select(site, network_position, eco_type, date, depth_m, 21:31) |>
+  pivot_longer(6:16, names_to = 'param', values_to = 'result') |>
+  drop_na(network_position)
+
+ggplot(ions, aes(eco_type, result)) +
+  geom_boxplot() +
+  geom_jitter(aes(color = network_position, shape = depth_m), shape = 16, size =2, alpha = 0.2, position=position_jitter(0.3)) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black')) +
+  scale_color_viridis_c('Network\nposition',direction = -1) +
+  facet_wrap(.~param, scales = 'free_y') +
+  labs(x = '', y = '')
+
+ggsave('Figures/boxplots/eco_params.png', height = 4.5, width = 6.5, units = 'in', dpi = 1200)
+  
+
 # Nitrogen by eco type ####
 ## TN ####
 boxplot_fun(gl_network$eco_type, gl_network$TN_umolL, '', 'Total N '~mu*mol~L^-1, 'eco_TN')
