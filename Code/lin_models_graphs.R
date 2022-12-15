@@ -21,6 +21,8 @@ plot_log <- function(param, name) {
 plot_log(gl_network$TN_umol, 'TN_umolL')
 summary(lm(log10(TN_umolL)~network_position, gl_network |> filter(TN_umolL > 0 & !is.na(TN_umolL))))  
 
+plot_log(gl_network$IN_umol, 'IN_umolL')
+summary(lm(log10(IN_umolL)~network_position, gl_network |> filter(IN_umolL > 0 & !is.na(IN_umolL))))  
 
 
   
