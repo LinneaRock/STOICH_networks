@@ -17,5 +17,8 @@ network <- leaflet() |>
   addMarkers(lng=-105.6367,lat=40.05195303, popup='Navajo outlet') |>
   addMarkers(lng=-105.5578493,lat=40.01368597, popup='Outlfow of Saddle Stream')
 
-network
+network |>
+  addProviderTiles(providers$Esri.WorldImagery) |>
+  addProviderTiles(providers$Stamen.TopOSMFeatures) |>
+  addGraticule()
 
