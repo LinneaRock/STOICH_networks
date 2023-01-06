@@ -5,8 +5,10 @@
 
 # Call in data and libraries ####
 library(tidyverse)
+library(colorblindr)
 
-sites <- read.csv("Data/sites.csv")
+sites <- read.csv("Data/sites.csv") |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   left_join(sites) |>
   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
@@ -80,3 +82,18 @@ stats_nuts <- rbind(tmp, tmp2)
 
 rm(tmp)
 rm(tmp2)
+
+
+ggplot(stats_nuts |> filter(season != 'All data')) +
+  geom_line(aes(network_position, mean, group = season, color = season), alpha = 0.5, linewidth = 1) +
+  geom_point(aes(network_position, mean, group = season, fill = season), 
+             color = "black", pch = 21, size = 2, position=position_dodge(width=0.1)) +
+    geom_errorbar(aes(network_position, mean, ymin = mean-SD, ymax = mean+SD, color = season),
+                  position=position_dodge(width=0.1), linetype = 'dashed')  +
+  scale_color_OkabeIto() +
+  scale_fill_OkabeIto() +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  facet_wrap(~param, ncol=3, scales = 'free_y')
+
