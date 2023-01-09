@@ -22,3 +22,10 @@ network |>
   addProviderTiles(providers$Stamen.TopOSMFeatures) |>
   addGraticule()
 
+
+network2 <- leaflet() |>
+  addTiles() |>
+  addMarkers(lng = sites$long, lat = sites$lat, popup = paste0(sites$site, sites$network_position))
+
+network2 |>
+  addProviderTiles(providers$Stamen.TopOSMFeatures)
