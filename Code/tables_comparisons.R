@@ -7,6 +7,7 @@
 library(tidyverse)
 library(colorblindr)
 library(lme4)
+library(ggpubr)
 
 sites <- read.csv("Data/sites.csv") |>
   mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
@@ -87,6 +88,47 @@ get_stats <- function(data) {
 stats_ions <- get_stats(ions)
 stats_nuts <- get_stats(nuts)
 stats_stoich <- get_stats(stoich)
+
+
+
+# get basic stats for each ecotype, parameter ####
+get_stats_eco <- function(data) {
+  
+  tmp <- data |>
+    group_by(eco_type,param, season) |>
+    summarise(mean = mean(result),
+              median = median(result),
+              min = min(result),
+              max = max(result),
+              SD = sd(result),
+              n = n()) |>
+    ungroup() |>
+    mutate(CV = (SD/mean) * 100) 
+  
+  tmp2 <- data |>
+    group_by(eco_type, param) |>
+    summarise(mean = mean(result),
+              median = median(result),
+              min = min(result),
+              max = max(result),
+              SD = sd(result),
+              n = n()) |>
+    ungroup() |>
+    mutate(CV = (SD/mean) * 100,
+           season = 'All data') 
+  
+  df <- rbind(tmp, tmp2)
+  
+  rm(tmp)
+  rm(tmp2)
+  return(df)
+  
+}
+
+eco_stats_ions <- get_stats_eco(ions)
+eco_stats_nuts <- get_stats_eco(nuts)
+eco_stats_stoich <- get_stats_eco(stoich)
+
 
 
 # plotting by network position and season ####
