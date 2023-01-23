@@ -8,6 +8,7 @@ library(tidyverse)
 library(colorblindr)
 library(lme4)
 library(ggpubr)
+library(plotrix) # gets standard error
 
 sites <- read.csv("Data/sites.csv") |>
   mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
@@ -60,10 +61,10 @@ get_stats <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
-    ungroup() |>
-    mutate(CV = (SD/mean) * 100) 
+    ungroup() #|>
+   # mutate(CV = (SD/mean) * 100) 
   
   tmp2 <- data |>
     group_by(site, eco_type, network_position, param) |>
@@ -71,10 +72,10 @@ get_stats <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
     ungroup() |>
-    mutate(CV = (SD/mean) * 100,
+    mutate(#CV = (SD/mean) * 100,
            season = 'All data') 
   
   df <- rbind(tmp, tmp2)
@@ -100,10 +101,10 @@ get_stats_eco <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
-    ungroup() |>
-    mutate(CV = (SD/mean) * 100) 
+    ungroup() #|>
+    #mutate(CV = (SE/mean) * 100) 
   
   tmp2 <- data |>
     group_by(eco_type, param) |>
@@ -111,10 +112,10 @@ get_stats_eco <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
     ungroup() |>
-    mutate(CV = (SD/mean) * 100,
+    mutate(#CV = (SD/mean) * 100,
            season = 'All data') 
   
   df <- rbind(tmp, tmp2)
@@ -136,7 +137,7 @@ plot_season <- function(data) {
   ggplot(data |> filter(season != 'All data')) +
         geom_point(aes(network_position, mean, group = season, fill = season), 
                color = "black", pch = 21, size = 2, position=position_dodge(width=0.1)) +
-    geom_errorbar(aes(network_position, mean, ymin = mean-SD, ymax = mean+SD, color = season),
+    geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE, color = season),
                   position=position_dodge(width=0.1), linetype = 'dashed')  +
     geom_smooth(aes(network_position, mean, group = season, color = season), alpha = 0.5, linewidth = 1, method = 'glm', se=FALSE) +
     #geom_line(aes(network_position, mean, group = season, color = season), alpha = 0.5, linewidth = 1) +
@@ -168,7 +169,7 @@ plot_alldat <- function(data) {
   ggplot(data |> filter(season == 'All data')) +
     geom_point(aes(network_position, mean), 
                color = "black", pch = 21, size = 2) +
-    geom_errorbar(aes(network_position, mean, ymin = mean-SD, ymax = mean+SD), linetype = 'dashed')  +
+    geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
     geom_smooth(aes(network_position, mean, group = 1), method = 'glm') +
     theme_bw() +
     theme(panel.grid.major = element_blank(), 
@@ -287,10 +288,10 @@ log_transform_stats <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
-    ungroup() |>
-    mutate(CV = (SD/mean) * 100) 
+     ungroup() #|>
+    # mutate(CV = (SD/mean) * 100) 
   
   tmp2 <- data |>
     mutate(result = log10(result)) |>
@@ -301,10 +302,10 @@ log_transform_stats <- function(data) {
               median = median(result),
               min = min(result),
               max = max(result),
-              SD = sd(result),
+              SE = std.error(result),
               n = n()) |>
     ungroup() |>
-    mutate(CV = (SD/mean) * 100,
+    mutate(#CV = (SD/mean) * 100,
            season = 'All data') 
   
   df <- rbind(tmp, tmp2)
