@@ -6,12 +6,13 @@ library(tidyverse)
 library(lubridate)
 
 sites <- read.csv("Data/sites.csv") |>
-  drop_na(long)
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   left_join(sites) |>
   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
-  mutate(network_position = as.factor(network_position))
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))  |>
+  filter(depth_m <=3 | is.na(depth_m),  # just look at photic zone
+         !site %in% c('FLUME', 'GL4_WATERFALL', 'GL4_WATERFALL TOP'))
 
 medians <- gl_network |>
   group_by(site, year(date), season) |>
@@ -30,6 +31,7 @@ medians <- gl_network |>
   ungroup() |>
   select(site, season, eco_type, MEDTP_umolL, MEDTN_umolL, MEDIP_umolL, MEDIN_umolL) |>
   distinct()
+  
   
 
 

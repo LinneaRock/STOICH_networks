@@ -21,8 +21,8 @@ gl_network <- read.csv("Data/greenlakes_network.csv") |>
 
 # subset and format datasets for plotting ####
 ions <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 21:31) |>
-  pivot_longer(9:19, names_to = 'param', values_to = 'result') |>
+  select(site, network_position, eco_type, date, season, depth_m, lat, long, daily_dis_m3, 21:31) |>
+  pivot_longer(9:20, names_to = 'param', values_to = 'result') |>
   drop_na(network_position) |> # get rid of weird sites with no locational information
   drop_na(result) |>
   filter(depth_m <=3 | is.na(depth_m),   # just look at photic zone
