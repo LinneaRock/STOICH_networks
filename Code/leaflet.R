@@ -29,3 +29,9 @@ network2 <- leaflet() |>
 
 network2 |>
   addProviderTiles(providers$Stamen.TopOSMFeatures)
+
+
+network2 |>
+  addProviderTiles(providers$Esri.WorldImagery) |>
+  addProviderTiles(providers$Stamen.TopOSMFeatures) |>
+  addGraticule()
