@@ -1,6 +1,4 @@
 
-library(tidyverse)
-library(leaflet)
 
 
 network <- leaflet() |>

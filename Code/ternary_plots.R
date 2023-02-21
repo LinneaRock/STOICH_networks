@@ -3,9 +3,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # The limitation key ####
-library(tidyverse)
-library(ggtern)
-
 ggtern() +
   theme_bw()+
   theme_showarrows() +
@@ -34,10 +31,6 @@ ggtern() +
 ggsave("Figures/ggterns/ratio_tern.png", height = 4.5, width = 6.5, units = "in", dpi = 500)
 # Save then add lines in PP because I can't figure out how to add lines with two different slopes here :(
 
-
-# call in data and any other libraries ####
-library(lubridate)
-library(biogas)
 
 Cmol <- molMass("C") * 1000 #mg/mol
 

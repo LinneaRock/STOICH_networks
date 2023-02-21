@@ -3,24 +3,18 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-# Call in data and libraries ####
-library(tidyverse)
-library(dataRetrieval) # for water year
-library(lubridate)
-library(scales)
-
-sites <- read.csv("Data/sites.csv")
-gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
-
-discharge_temp <- gl_network |>
-  select(date, site, arik_flow_site, network_position, daily_dis_m3, mean_temp_C) |>
-  mutate(site = ifelse(site == 'ARIKAREE', paste(site, arik_flow_site, sep = '_'), site),
-         network_position = as.factor(network_position)) |>
-  select(-arik_flow_site) |>
-  drop_na(daily_dis_m3)
+# sites <- read.csv("Data/sites.csv")
+# gl_network <- read.csv("Data/greenlakes_network.csv") |>
+#   left_join(sites) |>
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
+# 
+# discharge_temp <- gl_network |>
+#   select(date, site, arik_flow_site, network_position, daily_dis_m3, mean_temp_C) |>
+#   mutate(site = ifelse(site == 'ARIKAREE', paste(site, arik_flow_site, sep = '_'), site),
+#          network_position = as.factor(network_position)) |>
+#   select(-arik_flow_site) |>
+#   drop_na(daily_dis_m3)
 
 # timeseries ####
 ggplot(discharge_temp, aes(date, daily_dis_m3, color = network_position)) +

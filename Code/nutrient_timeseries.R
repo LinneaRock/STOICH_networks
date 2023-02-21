@@ -1,10 +1,9 @@
 
-library(tidyverse)
-sites <- read.csv("Data/sites.csv")
-gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
+# sites <- read.csv("Data/sites.csv")
+# gl_network <- read.csv("Data/greenlakes_network.csv") |>
+#   left_join(sites) |>
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 # Basic timeries ####
 # not very much TOC data
@@ -153,7 +152,7 @@ ggplot(gl_network, aes(network_position, daily_dis_m3, group= site, color = eco_
 
 #:::::::::::::::::
 
-library(GGally)
+
 
 ggcorr(gl_network[2:15], method = c("na.or.complete", "pearson"))
 

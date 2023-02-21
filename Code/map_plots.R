@@ -3,17 +3,13 @@
 #::::::::::::::::::::::::
 
 
-library(tidyverse)
-library(sf)
-library(ggspatial)
-
 sites <- read.csv("Data/sites.csv") |>
   drop_na(long)
-gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
-  mutate(network_position = as.factor(network_position))
+# gl_network <- read.csv("Data/greenlakes_network.csv") |>
+#   left_join(sites) |>
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+#   mutate(network_position = as.factor(network_position))
 
 
 #plots <- st_read('Data/lter_plots_09_05_2022/lter_plots.shp')
@@ -35,7 +31,7 @@ ggplot(sites.sf |> filter(site != 'FLUME')) +
   geom_sf()
 
 
-library(nhdplusTools)
+
 
 
 bbox <- sf::st_bbox(c(xmin = -105.644739, ymin = 40.040162, xmax = -105.588581, ymax = 40.058095),
@@ -53,8 +49,7 @@ plot_nhdplus(bbox = bbox)
 # wsALBCAMP <- delineateWatershed(xlocation = -105.5923, ylocation = 40.04287, crs = 4326, includeparameters = 'true', includeflowtypes = 'true')
 
 
-library(ggmap)
-library(leaflet)
+
 stamen <- leaflet() |> addProviderTiles(providers$Stamen.TopOSMFeatures) 
 
 mymap <- get_map(location=c(-105.644739, 40.040162,-105.588581,40.058095),

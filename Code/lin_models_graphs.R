@@ -3,16 +3,12 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-library(tidyverse)
-library(lme4) 
-library(ggpubr)
-
-sites <- read.csv("Data/sites.csv") |>
-  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
-gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
+# sites <- read.csv("Data/sites.csv") |>
+#   mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
+# gl_network <- read.csv("Data/greenlakes_network.csv") |>
+#   left_join(sites) |>
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 plot_log <- function(param, name) {
   ggplot(gl_network, aes(network_position, param)) +

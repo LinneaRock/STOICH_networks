@@ -1,11 +1,9 @@
-library(tidyverse)
-library(lubridate)
-
-sites <- read.csv("Data/sites.csv")
-gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
+# 
+# sites <- read.csv("Data/sites.csv")
+# gl_network <- read.csv("Data/greenlakes_network.csv") |>
+#   left_join(sites) |>
+#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
+#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 
 subset <- gl_network |>
