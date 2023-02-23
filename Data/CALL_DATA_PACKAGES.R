@@ -19,4 +19,28 @@ library(leaflet)
 library(sf)
 library(ggspatial)
 
-source('Data/distributions_outliers.R')
+ions <- source('Data/ions_outliers_removed.R')
+nuts <- source('Data/nuts_outliers_removed.R')
+stoich <- source('Data/stoich_after_outliers_removed.R')
+
+#### frequency plots outlier removed data ####
+ggplot(ions) +
+  geom_density(aes(result)) +
+  facet_wrap(.~param, scales = 'free') +
+  labs(title = 'outliers removed')
+
+
+ggplot(nuts) +
+  geom_density(aes(result)) +
+  facet_wrap(.~param, scales = 'free')+
+  labs(title = 'outliers removed')
+
+ggplot(discharge) +
+  geom_density(aes(result)) +
+  facet_wrap(.~param, scales = 'free') +
+  labs(title = 'outliers removed')
+
+ggplot(stoich) +
+  geom_density(aes(result)) +
+  facet_wrap(.~param, scales = 'free')+
+  labs(title = 'outliers removed') # question, do I need to delete outliers from the stoich dataset too? 

@@ -190,6 +190,10 @@ N_outliers <- rbind(ions_n_removed, nuts_n_removed, discharge_temp_n_removed) |>
   group_by(var) |>
   mutate(count = sum(length.remove.))
 
+write.csv(ions, "Data/ions_outliers_removed.csv")
+write.csv(nuts, "Data/nuts_outliers_removed.csv")
+write.csv(discharge, "Data/discharge_outliers_removed.csv")
+
 rm(gl_network)
 rm(sites)
 rm(tmp)
@@ -222,6 +226,8 @@ stoich <- nuts |>
   drop_na(result) |>
   filter(is.finite(result))
 
+write.csv(stoich, "Data/stoich_after_outliers_removed.csv")
+
 
 
 #### frequency plots outlier removed data ####
@@ -236,7 +242,7 @@ ggplot(nuts) +
   facet_wrap(.~param, scales = 'free')+
   labs(title = 'outliers removed')
 
-ggplot(discharge_temp) +
+ggplot(discharge) +
   geom_density(aes(result)) +
   facet_wrap(.~param, scales = 'free') +
   labs(title = 'outliers removed')# question, where did temps go? 
