@@ -4,9 +4,6 @@
 
 source('Data/CALL_DATA_PACKAGES.R') 
 
-
-
-
 # Plotting by eco type ####
 
 
@@ -62,7 +59,7 @@ ggplot(nuts, aes(eco_type, result)) +
   stat_compare_means(fontface='bold',label = 'p.signif',comparisons = list(c('glacier','lake'), c('lake','stream'), c('glacier','stream'))) +
   # ^^ Kruskal-Wallis test --- y.label.npc does not work ???!!!!!! 
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
-  guides(color = guide_legend(ncol = 3)) +
+  guides(color = guide_legend(ncol = 4)) +
   theme(legend.position = c(1, 0), legend.justification = c(1, 0),
         legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
@@ -71,6 +68,22 @@ ggplot(nuts, aes(eco_type, result)) +
         legend.text = element_text(size=10)) #change legend text font size
 
 ggsave('Figures/boxplots/eco_nuts.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+### Results from kruskal-wallis tests ####
+
+# DOC varies significantly among all groups
+# DON varies significantly among all groups except between lakes and streams
+# DOP varies significantly among all groups except between lakes and streams
+# IN varies significantly among all groups 
+# IP varies significantly among all groups except between lakes and streams
+# NH4 varies significantly among all groups except between lakes and streams
+# NO3 varies significantly among all groups
+# PN varies significantly among all groups except between lakes and streams
+# PP varies significantly among all groups except between lakes and streams
+# TDN varies significantly among all groups 
+# TDP varies significantly among all groups except between lakes and streams
+# TN varies significantly among all groups except between lakes and streams
+# TP varies significantly among all groups except between glacier and lakes
 
 
 
@@ -93,7 +106,7 @@ ggplot(stoich, aes(eco_type, result)) +
   stat_compare_means(fontface='bold',label = 'p.signif',comparisons = list(c('glacier','lake'), c('lake','stream'), c('glacier','stream'))) +
   # ^^ Kruskal-Wallis test --- y.label.npc does not work ???!!!!!! 
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
-  guides(color = guide_legend(ncol = 3)) +
+  guides(color = guide_legend(ncol = 4)) +
   theme(legend.position = c(1, 0), legend.justification = c(1, 0),
         legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
@@ -103,7 +116,13 @@ ggplot(stoich, aes(eco_type, result)) +
 
 ggsave('Figures/boxplots/eco_stoich.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
+### Results from kruskal-wallis tests ####
 
+# DON:DOP varies significantly among all groups except between lakes  and streams
+# IN:IP varies significantly among all except between glacier and streams
+# PN:PP varies significantly only between glacier and streams
+# TDN:TDP varies significantly among all except between glacier and streams
+# TN:TP varies significantly among all groups 
 
 
 
@@ -371,7 +390,7 @@ ggplot(nuts, aes(season, result, group = season)) +
   geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, 
               position=position_jitter(0.3)) +
   geom_violin(alpha = 0.2) +
-  stat_summary(geom = 'point', fun.y = 'mean', fill = 'black', color = 'white', size = 1.5, shape = 24) +
+  stat_summary(geom = 'point', fun = 'mean', fill = 'black', color = 'white', size = 1.5, shape = 24) +
   theme_bw(base_size = 15) +
   theme(plot.title = element_text(face='bold', family='serif',
                                   size=rel(1.2), hjust=0.5),
@@ -385,7 +404,7 @@ ggplot(nuts, aes(season, result, group = season)) +
   labs(x = '', y = '') +
   geom_text(means, mapping = aes(season, max.result + 1, label = letters), hjust = -0.5) +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
-  theme(legend.position = c(1, 0), legend.justification = c(1, 0),
+  theme(legend.position = c(0.8, 0), legend.justification = c(1, 0),
         legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
         legend.key.width = unit(0.5, 'cm'), #change legend key width
@@ -427,7 +446,8 @@ ggplot(stoich, aes(season, result, group = season)) +
   geom_jitter(aes(color = eco_type, shape = depth_m), shape = 16, size =2, alpha = 0.2, 
               position=position_jitter(0.3)) +
   geom_violin(alpha = 0.2) +
-  stat_summary(geom = 'point', fun.y = 'mean', fill = 'black', color = 'white', size = 1.5, shape = 24) +
+  stat_summary(geom = 'point', fun.y = 'mean', fill = 'black', 
+               color = 'white', size = 1.5, shape = 24) +
   theme_bw(base_size = 15) +
   theme(plot.title = element_text(face='bold', family='serif',
                                   size=rel(1.2), hjust=0.5),
@@ -441,7 +461,7 @@ ggplot(stoich, aes(season, result, group = season)) +
   labs(x = '', y = '') +
   geom_text(means, mapping = aes(season, max.result + 1, label = letters), hjust = -0.5) +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.1)))+
-  theme(legend.position = c(1, 0), legend.justification = c(1, 0),
+  theme(legend.position = c(0.8, 0), legend.justification = c(1, 0),
         legend.key.size = unit(0.5, 'cm'), #change legend key size
         legend.key.height = unit(0.5, 'cm'), #change legend key height
         legend.key.width = unit(0.5, 'cm'), #change legend key width

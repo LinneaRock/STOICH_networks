@@ -238,7 +238,7 @@ stoich <- nuts |>
          tdn.tdp = TDN_umolL/TDP_umolL,
          pn.pp = PN_umolL/PP_umolL,
          in.ip = IN_umolL/IP_umolL) |>
-  select(1:6, 18:22) |>
+  select(1:6, 20:24) |>
   pivot_longer(7:11, names_to = 'param', values_to = 'result') |>
   drop_na(result) |>
   filter(is.finite(result))

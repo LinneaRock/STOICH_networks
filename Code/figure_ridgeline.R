@@ -7,27 +7,26 @@ subset <- nuts |>
   mutate(year = year(date)) |>
   group_by(season, year, site, network_position, eco_type, param) |>
   summarise(meanconc_umolL = mean(result)) |>
-  ungroup() |>
-  mutate(parameter = factor(param, levels = c("TN", "TDN", "IN", "DON", "PN", "TP", "TDP", "IP", "DOP", "PP")))
+  ungroup() 
 
 
 ggplot(subset, aes(year, meanconc_umolL, color = network_position, group = site)) +
   geom_path(aes(group = season)) +
   geom_point() +
-  facet_wrap(~parameter, scales = "free_y",ncol = 3) +
+  facet_wrap(~param, scales = "free_y",ncol = 3) +
   theme_bw()
 
 
 inorganic <- nuts |>
   #select(site, network_position, date, season, eco_type, param) |>
   filter(param %in% c('TP_umolL', 'IP_umolL', 'TN_umolL', 'IN_umolL')) |>
-  pivot_wider(names_from = param, values_from = result) |>
+  pivot_wider(id_cols = c(1:6), names_from = param, values_from = result) |>
   drop_na() |>
   mutate(percentIP = (IP_umolL/TP_umolL) * 100) |>
   mutate(percentIN = (IN_umolL/TN_umolL) * 100) |>
   filter(percentIN < 100,
          percentIP < 100) |>
-  mutate(network_position=as.factor(network_position))  |>
+ #mutate(network_position=as.factor(network_position))  |>
   select(-TP_umolL, - TN_umolL, - IP_umolL, -IN_umolL) |>
   pivot_longer(6:7, names_to = 'param', values_to = 'percentoftot')
 

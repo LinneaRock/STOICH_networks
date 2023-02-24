@@ -17,6 +17,7 @@ ggplot(discharge, aes(date, result, color = as.factor(network_position))) +
         text=element_text(family='serif'),
         axis.text=element_text(color='black')) +
   scale_color_viridis_d('Network\nposition',direction = -1) +
+ # facet_wrap(.~param)+
   labs(x = '', y = 'Daily discharge '~m^3)
 ggsave('Figures/discharge_timeseries.png', width = 6.5, height = 4.5, units = 'in', dpi = 1200)
 

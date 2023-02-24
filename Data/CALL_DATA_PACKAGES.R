@@ -24,18 +24,39 @@ library(ggridges)
 # call in data
 
 ions <- read.csv('Data/ions_outliers_removed.csv') |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
-  filter(site != 'FLUME')
-nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
-  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
-  filter(site != 'FLUME')
-stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
-  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
-  filter(site != 'FLUME')
-discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
-  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
-  filter(site != 'FLUME')
+  mutate(date = as.Date(date)) |>
+  filter(site != 'FLUME') |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+                                                                '7','8','9','10','11','12',
+                                                                '12a','13','14','15','16'))) |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+  select(-X)
 
+nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
+  mutate(date = as.Date(date)) |>
+  filter(site != 'FLUME')|>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+                                                                '7','8','9','10','11','12',
+                                                                '12a','13','14','15','16'))) |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+  select(-X)
+
+stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
+  mutate(date = as.Date(date)) |>
+  filter(site != 'FLUME') |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+                                                                '7','8','9','10','11','12',
+                                                                '12a','13','14','15','16'))) |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+  select(-X)
+
+discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
+  mutate(date = as.Date(date)) |>
+  filter(site != 'FLUME') |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+                                                                '7','8','9','10','11','12',
+                                                                '12a','13','14','15','16'))) |>
+  select(-X)
 
 #### frequency plots outlier removed data ####
 ggplot(ions) +
