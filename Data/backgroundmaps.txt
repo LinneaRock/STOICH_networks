@@ -1,0 +1,6 @@
+# # Background maps 
+esri_land <- paste0('https://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer/tile/${z}/${y}/${x}.jpeg')
+#basemap <- paste0('https://tiles.wmflabs.org/osm-no-labels/${z}/${x}/${y}.png')
+topo_map  <- paste0('https://services.arcgisonline.com/arcgis/rest/services/World_Terrain_Base/MapServer/tile/${z}/${y}/${x}.jpeg')
+world_gray <- paste0('https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}.jpeg')
+stamen <- paste0('https://stamen-tiles.a.ssl.fastly.net/terrain/${z}/${x}/${y}.jpg')

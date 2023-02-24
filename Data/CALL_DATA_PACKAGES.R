@@ -18,10 +18,24 @@ library(leaflet)
 #library(nhdplusTools)
 library(sf)
 library(ggspatial)
+library(ggridges)
 
-ions <- source('Data/ions_outliers_removed.R')
-nuts <- source('Data/nuts_outliers_removed.R')
-stoich <- source('Data/stoich_after_outliers_removed.R')
+
+# call in data
+
+ions <- read.csv('Data/ions_outliers_removed.csv') |>
+  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
+  filter(site != 'FLUME')
+nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
+  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
+  filter(site != 'FLUME')
+stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
+  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
+  filter(site != 'FLUME')
+discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
+  mutate(date = as.Date(date, format = '%m/%d/%Y')) |>
+  filter(site != 'FLUME')
+
 
 #### frequency plots outlier removed data ####
 ggplot(ions) +

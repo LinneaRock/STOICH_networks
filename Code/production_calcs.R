@@ -3,6 +3,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
+source('Data/CALL_DATA_PACKAGES.R') 
+
 ### REDO THIS SCRIPT
 
 # sites <- read.csv("Data/sites.csv") |>
@@ -14,20 +16,17 @@
 
 
 # subset, format datasets, calculate production/consumption ####
-## Note these are done in a lot of steps to allow coder to examine each step if wanted
+## Note these are done in a lot of steps to allow examination at each step 
 
 
 
 ## nutrients ####
 
 ### Lakes - 3 lakes have the data for this ####
-nuts_prod_lakes <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 2:7, 10:14) |>
-  pivot_longer(9:19, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position)  |> # get rid of weird sites with no location information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),  # just look at photic zone
-         site != 'FLUME') |>
+nuts_prod_lakes <- nuts |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9',
+                                                                '10','11','12','12a','13','14','15','16'))) |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
   group_by(site, eco_type, date, season, param) |>
   summarise(result = mean(result)) |>
   ungroup() |>
@@ -63,13 +62,10 @@ nuts_prod_lakes <- gl_network |>
 
 
 ### streams - 4 reaches have the data for this ####
-nuts_prod_streams <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 2:7, 10:14) |>
-  pivot_longer(9:19, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position)  |> # get rid of weird sites with no location information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),  # just look at photic zone
-         site != 'FLUME') |>
+nuts_prod_streams <- nuts |>
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9',
+                                                                '10','11','12','12a','13','14','15','16'))) |>
+  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
   group_by(site, eco_type, date, season, param) |>
   summarise(result = mean(result)) |>
   ungroup() |>
@@ -119,20 +115,7 @@ nuts_prod_streams <- gl_network |>
 ## Stoichiometry ####
 
 ### Lakes ####
-stoich_prod_lakes <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 3:7, 10:14) |>
-  mutate(tn.tp = TN_umolL/TP_umolL,
-         don.dop = DON_umolL/DOP_umolL,
-         tdn.tdp = TDN_umolL/TDP_umolL,
-         pn.pp = PN_umolL/PP_umolL,
-         in.ip = IN_umolL/IP_umolL) |>
-  select(1:8, 19:23) |>
-  pivot_longer(9:13, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position)  |> # get rid of weird sites with no locational information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),  # just look at photic zone
-         site != 'FLUME',
-         is.finite(result)) |>
+stoich_prod_lakes <- stoich |>
   group_by(site, eco_type, date, season, param) |>
   summarise(result = mean(result)) |>
   ungroup() |>
@@ -170,20 +153,7 @@ stoich_prod_lakes <- gl_network |>
 
 
 ### Streams ####
-stoich_prod_streams <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 3:7, 10:14) |>
-  mutate(tn.tp = TN_umolL/TP_umolL,
-         don.dop = DON_umolL/DOP_umolL,
-         tdn.tdp = TDN_umolL/TDP_umolL,
-         pn.pp = PN_umolL/PP_umolL,
-         in.ip = IN_umolL/IP_umolL) |>
-  select(1:8, 19:23) |>
-  pivot_longer(9:13, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position)  |> # get rid of weird sites with no locational information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),  # just look at photic zone
-         site != 'FLUME',
-         is.finite(result)) |>
+stoich_prod_streams <- stoich |>
 group_by(site, eco_type, date, season, param) |>
   summarise(result = mean(result)) |>
   ungroup() |>
@@ -229,13 +199,7 @@ group_by(site, eco_type, date, season, param) |>
 ## Ions ####
 
 ### Lakes ####
-ions_prod_lakes <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 21:31) |>
-  pivot_longer(9:19, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position) |> # get rid of weird sites with no locational information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),   # just look at photic zone
-         site != 'FLUME') |>
+ions_prod_lakes <- ions |>
   group_by(site, eco_type, date, season, param) |>
   summarise(result = mean(result)) |>
   ungroup() |>
@@ -272,16 +236,7 @@ ions_prod_lakes <- gl_network |>
 
 
 ### Streams ####
-ions_prod_streams <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, lat, long, 21:31) |>
-  pivot_longer(9:19, names_to = 'param', values_to = 'result') |>
-  drop_na(network_position) |> # get rid of weird sites with no locational information
-  drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m),   # just look at photic zone
-         site != 'FLUME') |>
-  group_by(site, eco_type, date, season, param) |>
-  summarise(result = mean(result)) |>
-  ungroup() |>
+ions_prod_streams <- ions |>
   pivot_wider(names_from = site, values_from = result) |>
   group_by(eco_type, date, season, param) |>
   # mutate(reach1 = GL5_LAKE - ARIKAREE,

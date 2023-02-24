@@ -3,21 +3,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-# sites <- read.csv("Data/sites.csv")
-# gl_network <- read.csv("Data/greenlakes_network.csv") |>
-#   left_join(sites) |>
-#   mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
-# 
-# discharge_temp <- gl_network |>
-#   select(date, site, arik_flow_site, network_position, daily_dis_m3, mean_temp_C) |>
-#   mutate(site = ifelse(site == 'ARIKAREE', paste(site, arik_flow_site, sep = '_'), site),
-#          network_position = as.factor(network_position)) |>
-#   select(-arik_flow_site) |>
-#   drop_na(daily_dis_m3)
+source('Data/CALL_DATA_PACKAGES.R') 
+
 
 # timeseries ####
-ggplot(discharge_temp, aes(date, daily_dis_m3, color = network_position)) +
+ggplot(discharge, aes(date, result, color = as.factor(network_position))) +
   geom_line() +
   theme_bw(base_size = 15) +
   theme(plot.title = element_text(face='bold', family='serif',
@@ -33,7 +23,7 @@ ggsave('Figures/discharge_timeseries.png', width = 6.5, height = 4.5, units = 'i
 
 
 # average timeseries - water year ####
-wateryear_ave <- discharge_temp |>
+wateryear_ave <- discharge |>
   mutate(x = round((day(date)/5))*5,
          x = ifelse(x == 0, 1, x), 
          date2 = paste(year(date), month(date), x, sep = "-")) |>
@@ -47,7 +37,7 @@ wateryear_ave <- discharge_temp |>
   #        decade = ifelse(between(year(date), 2010, 2019), "2010-2019", decade)) |>
   # mutate(decade = as.factor(decade)) |>
   group_by(site, CDate) |>
-  mutate(ave_weekly_dis = mean(daily_dis_m3)) |>
+  mutate(ave_weekly_dis = mean(result)) |>
   ungroup() |>
   addWaterYear() |>
   select(site, network_position, CDate, ave_weekly_dis) |>
@@ -57,7 +47,7 @@ wateryear_ave <- discharge_temp |>
   mutate(ave_weekly_dis = ifelse(network_position %in% c('1','4') &
                                    year(CDate) == '1900', NA, ave_weekly_dis))
 
-ggplot(wateryear_ave, aes(CDate, ave_weekly_dis, color = network_position)) +
+ggplot(wateryear_ave, aes(CDate, ave_weekly_dis, color = as.factor(network_position))) +
  geom_line() +
   theme_bw(base_size = 15) +
   theme(plot.title = element_text(face='bold', family='serif',

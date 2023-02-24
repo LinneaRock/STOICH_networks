@@ -20,8 +20,8 @@ ions <- gl_network |>
   summarise(result = mean(result))
 
 nuts <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, 2:7, 10:14) |>
-  pivot_longer(7:17, names_to = 'param', values_to = 'result') |>
+  select(site, network_position, eco_type, date, season, depth_m, 2:14) |>
+  pivot_longer(7:19, names_to = 'param', values_to = 'result') |>
   drop_na(network_position)  |>
   drop_na(result) |>
   filter(depth_m <=3 | is.na(depth_m))  |> # just look at photic zone
@@ -78,9 +78,13 @@ for(i in 1:length(ions_param)) {
                                        site==site_n[j]))$result, 
                        plot = FALSE)$out
     
-    tmp <- (ions |> filter(param==ions_param[i],
-                           site==site_n[j]))[-which((ions |> filter(param==ions_param[i],
+    if (length(remove) > 0) {
+      tmp <- (ions |> filter(param==ions_param[i],
+                             site==site_n[j]))[-which((ions |> filter(param==ions_param[i],
                                                                       site==site_n[j]))$result %in% remove), ]
+    } else {
+      tmp <- (ions |> filter(param==ions_param[i], site==site_n[j]))
+    }
     
     ions_rm <- rbind(ions_rm, tmp)
     
@@ -90,17 +94,23 @@ for(i in 1:length(ions_param)) {
     
     ions_n_removed = rbind(ions_n_removed, tmpn)
   }
-  }
+}
 
+
+############################################################################
 for(i in 1:length(nuts_param)) {
   for(j in 1:length(site_n)) {
     remove <-  boxplot((nuts |> filter(param==nuts_param[i],
                                        site==site_n[j]))$result, 
                        plot = FALSE)$out
     
-    tmp <- (nuts |> filter(param==nuts_param[i],
-                           site==site_n[j]))[-which((nuts |> filter(param==nuts_param[i],
-                                                                    site==site_n[j]))$result %in% remove), ]
+    if (length(remove) > 0) {
+      tmp <- (nuts |> filter(param==nuts_param[i],
+                             site==site_n[j]))[-which((nuts |> filter(param==nuts_param[i],
+                                                                      site==site_n[j]))$result %in% remove), ]
+    } else {
+      tmp <- (nuts |> filter(param==nuts_param[i], site==site_n[j]))
+    }
     
     nuts_rm <- rbind(nuts_rm, tmp)
     
@@ -111,6 +121,8 @@ for(i in 1:length(nuts_param)) {
     nuts_n_removed = rbind(nuts_n_removed, tmpn)
   }
 }
+#############################################################################
+
 
 for(i in 1:length(discharge_temp_param)) {
   for(j in 1:length(site_n)) {
@@ -118,9 +130,13 @@ for(i in 1:length(discharge_temp_param)) {
                                        site==site_n[j]))$result, 
                        plot = FALSE)$out
     
-    tmp <- (discharge_temp |> filter(param==discharge_temp_param[i],
-                           site==site_n[j]))[-which((discharge_temp |> filter(param==discharge_temp_param[i],
-                                                                    site==site_n[j]))$result %in% remove), ]
+    if (length(remove) > 0) {
+      tmp <- (discharge_temp |> filter(param==discharge_temp_param[i],
+                             site==site_n[j]))[-which((discharge_temp |> filter(param==discharge_temp_param[i],
+                                                                      site==site_n[j]))$result %in% remove), ]
+    } else {
+      tmp <- (discharge_temp |> filter(param==discharge_temp_param[i], site==site_n[j]))
+    }
     
     discharge_temp_rm <- rbind(discharge_temp_rm, tmp)
     
@@ -186,6 +202,7 @@ ions <- ions_rm
 nuts <- nuts_rm
 discharge <- discharge_temp_rm
 
+# This provides counts of outliers
 N_outliers <- rbind(ions_n_removed, nuts_n_removed, discharge_temp_n_removed) |>
   group_by(var) |>
   mutate(count = sum(length.remove.))
