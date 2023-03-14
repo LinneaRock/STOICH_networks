@@ -469,3 +469,6 @@ ggplot(stoich, aes(season, result, group = season)) +
         legend.text = element_text(size=10)) #change legend text font size
 ggsave('Figures/boxplots/season_stoich.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
+
+
+

@@ -19,6 +19,7 @@ library(leaflet)
 library(sf)
 library(ggspatial)
 library(ggridges)
+library(viridis)
 
 
 
