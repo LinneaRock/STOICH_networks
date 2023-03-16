@@ -3,7 +3,6 @@
 source('Data/CALL_DATA_PACKAGES.R') 
 
 
-
 ggplot(nuts) +
   geom_histogram(aes(result, fill = network_position)) +
   facet_wrap(.~param, scales = 'free')
@@ -89,3 +88,15 @@ ggplot(median_P) +
   facet_grid(.~season)  +
   scale_fill_viridis_d('') +
   theme_classic()
+
+
+
+library(kdensity)
+
+kde <- kdensity((nuts |> filter(param=='IN_umolL'))$result, start='gumbel', kernel='gaussian')
+
+plot(kde) # non-parametric
+lines(kde, plot_start=TRUE, col='red') # parametric
+
+ggplot(nuts|> filter(param=='IN_umolL')) +
+  geom_density(aes(result)) 
