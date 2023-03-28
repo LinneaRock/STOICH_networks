@@ -35,7 +35,7 @@ ggplot() +
                           kde_IN_stream((nuts |> filter(param=='IN_umolL',
                                                         eco_type=='stream'))$result))) +
   geom_density(mapping = aes((nuts |> filter(param=='IN_umolL',
-                                             eco_type=='stream'))$result), color = 'red') # some slight differences. let's use the kdensity function becuase we know it does what we want!
+                                             eco_type=='stream'))$result), color = 'red') # some slight differences. let's use the kdensity function because we know it does what we want!
 
 
 # get non-parametric kernal density estimation for each nutrient - lakes ####
@@ -84,14 +84,14 @@ outlets <- as.vector(unique((nuts |> filter(grepl('OUTLET', site)))$site))
 k_densities <- data.frame()
 
 
-
+# KDEs for lakes vs streams vs glacier
 for(e in 1:length(nuts_eco)) {
   for(p in 1:length(nuts_param)) {
-    tmp_f <- kdensity((nuts |> filter(param==param[p],
+    tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
                                     eco_type==nuts_eco[e]))$result, start='gumbel', kernel='gaussian')
     
     dens_df <- nuts |>
-      filter(param==param[p],
+      filter(param==nuts_param[p],
              eco_type==nuts_eco[e]) |>
       mutate(total_type_density = tmp_f(result))
     
@@ -100,4 +100,42 @@ for(e in 1:length(nuts_eco)) {
 }
 
 
+# confirming that these are the same as when I calculated it individually. 
+ggplot(k_densities |> filter(param=='IN_umolL',
+                             eco_type=='lake')) +
+  geom_line(aes(result ,total_type_density)) 
 
+k_densities_tmp <- data.frame()
+# now add KDEs for inlets 
+  for(p in 1:length(nuts_param)) {
+    tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
+                                      site %in% inlets))$result, 
+                      start='gumbel', kernel='gaussian')
+    
+    dens_df <- nuts |>
+      filter(param==nuts_param[p],
+             site %in% inlets) |>
+      mutate(inlets_density = tmp_f(result))
+    
+    k_densities_tmp <- rbind(k_densities_tmp,dens_df)
+  }
+
+k_densities <- left_join(k_densities, k_densities_tmp)
+
+
+k_densities_tmp <- data.frame()
+# now add KDEs for outlets
+for(p in 1:length(nuts_param)) {
+  tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
+                                    site %in% outlets))$result, 
+                    start='gumbel', kernel='gaussian')
+  
+  dens_df <- nuts |>
+    filter(param==nuts_param[p],
+           site %in% outlets) |>
+    mutate(outlets_density = tmp_f(result))
+  
+  k_densities_tmp <- rbind(k_densities_tmp,dens_df)
+}
+
+k_densities <- left_join(k_densities, k_densities_tmp)
