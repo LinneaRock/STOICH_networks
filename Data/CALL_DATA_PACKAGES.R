@@ -11,7 +11,7 @@ library(biogas)
 library(colorblindr)
 library(lme4)
 library(ggpubr)
-library(plotrix) # gets standard error
+library(plotrix) 
 library(GGally)
 library(ggmap)
 library(leaflet)
@@ -21,6 +21,8 @@ library(ggspatial)
 library(ggridges)
 library(viridis)
 library(kdensity)
+library(confintr)
+
 
 
 

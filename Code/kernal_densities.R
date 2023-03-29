@@ -1,81 +1,10 @@
-# Kernal density estimation (non-parametric) #
+# Non-parametric kernal density estimation ####
 # https://cran.r-project.org/web/packages/kdensity/index.html
 source('Data/CALL_DATA_PACKAGES.R') 
 
 
-# get non-parametric kernal density estimation for each nutrient - streams ####
-kde_IN_stream <- kdensity((nuts |> filter(param=='IN_umolL',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_DON_stream <- kdensity((nuts |> filter(param=='DON_umolL',
-                                    eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_TN_stream <- kdensity((nuts |> filter(param=='TN_umolL',
-                                   eco_type == 'stream',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_TDN_stream <- kdensity((nuts |> filter(param=='TDN_umolL',
-                                    eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_PN_stream <- kdensity((nuts |> filter(param=='PN_umolL',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-
-kde_IP_stream <- kdensity((nuts |> filter(param=='IP_umolL',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_DOP_stream <- kdensity((nuts |> filter(param=='DOP_umolL',
-                                    eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_TP_stream <- kdensity((nuts |> filter(param=='TP_umolL',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_TDP_stream <- kdensity((nuts |> filter(param=='TDP_umolL',
-                                    eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-kde_PP_stream <- kdensity((nuts |> filter(param=='PP_umolL',
-                                   eco_type == 'stream'))$result, start='gumbel', kernel='gaussian')
-
-
-ggplot() +
-  geom_line(mapping = aes((nuts |> 
-                             filter(param=='IN_umolL',
-                                    eco_type=='stream'))$result, 
-                          kde_IN_stream((nuts |> filter(param=='IN_umolL',
-                                                        eco_type=='stream'))$result))) +
-  geom_density(mapping = aes((nuts |> filter(param=='IN_umolL',
-                                             eco_type=='stream'))$result), color = 'red') # some slight differences. let's use the kdensity function because we know it does what we want!
-
-
-# get non-parametric kernal density estimation for each nutrient - lakes ####
-kde_IN_lake <- kdensity((nuts |> filter(param=='IN_umolL',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_DON_lake <- kdensity((nuts |> filter(param=='DON_umolL',
-                                           eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_TN_lake <- kdensity((nuts |> filter(param=='TN_umolL',
-                                          eco_type == 'lake',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_TDN_lake <- kdensity((nuts |> filter(param=='TDN_umolL',
-                                           eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_PN_lake <- kdensity((nuts |> filter(param=='PN_umolL',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-
-kde_IP_lake <- kdensity((nuts |> filter(param=='IP_umolL',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_DOP_lake <- kdensity((nuts |> filter(param=='DOP_umolL',
-                                           eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_TP_lake <- kdensity((nuts |> filter(param=='TP_umolL',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_TDP_lake <- kdensity((nuts |> filter(param=='TDP_umolL',
-                                           eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-kde_PP_lake <- kdensity((nuts |> filter(param=='PP_umolL',
-                                          eco_type == 'lake'))$result, start='gumbel', kernel='gaussian')
-
-
-# plot 
-ggplot() +
-  geom_line(mapping = aes((nuts |> 
-                             filter(param=='IN_umolL',
-                                    eco_type=='lake'))$result, 
-                          kde_IN_lake((nuts |> filter(param=='IN_umolL',
-                                                        eco_type=='lake'))$result))) +
-  geom_density(mapping = aes((nuts |> filter(param=='IN_umolL',
-                                             eco_type=='lake'))$result), color = 'red') 
-
-
-
-# create a kde df to work from ####
+# A. Nutrients ####
+## set-up ####
 
 nuts_param <- as.vector(unique(nuts$param))
 nuts_eco <- as.vector(c('lake', 'stream', 'glacier'))
@@ -84,7 +13,7 @@ outlets <- as.vector(unique((nuts |> filter(grepl('OUTLET', site)))$site))
 k_densities <- data.frame()
 
 
-# KDEs for lakes vs streams vs glacier
+## KDEs for ecotype ####
 for(e in 1:length(nuts_eco)) {
   for(p in 1:length(nuts_param)) {
     tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
@@ -100,13 +29,10 @@ for(e in 1:length(nuts_eco)) {
 }
 
 
-# confirming that these are the same as when I calculated it individually. 
-ggplot(k_densities |> filter(param=='IN_umolL',
-                             eco_type=='lake')) +
-  geom_line(aes(result ,total_type_density)) 
 
-k_densities_tmp <- data.frame()
-# now add KDEs for inlets 
+## inlet KDEs ####
+k_densities_tmp <- data.frame() # create temporary dataframe
+
   for(p in 1:length(nuts_param)) {
     tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
                                       site %in% inlets))$result, 
@@ -120,11 +46,13 @@ k_densities_tmp <- data.frame()
     k_densities_tmp <- rbind(k_densities_tmp,dens_df)
   }
 
+# add input KDEs to dataframe
 k_densities <- left_join(k_densities, k_densities_tmp)
 
 
-k_densities_tmp <- data.frame()
-# now add KDEs for outlets
+## outlet KDEs ####
+k_densities_tmp <- data.frame() # clear temporary dataframe
+
 for(p in 1:length(nuts_param)) {
   tmp_f <- kdensity((nuts |> filter(param==nuts_param[p],
                                     site %in% outlets))$result, 
@@ -138,4 +66,223 @@ for(p in 1:length(nuts_param)) {
   k_densities_tmp <- rbind(k_densities_tmp,dens_df)
 }
 
+
+# final dataset - add outlet KDEs 
+k_densities_NUTS <- left_join(k_densities, k_densities_tmp)
+
+
+
+# B. Stoichiometry ####
+## set-up ####
+
+stoich_param <- as.vector(unique(stoich$param))
+stoich_eco <- as.vector(c('lake', 'stream', 'glacier'))
+inlets <- as.vector(unique((stoich |> filter(grepl('INLET', site)))$site))
+outlets <- as.vector(unique((stoich |> filter(grepl('OUTLET', site)))$site))
+k_densities <- data.frame()
+
+
+## KDEs for ecotype ####
+for(e in 1:length(stoich_eco)) {
+  for(p in 1:length(stoich_param)) {
+    tmp_f <- kdensity((stoich |> filter(param==stoich_param[p],
+                                      eco_type==stoich_eco[e]))$result, start='gumbel', kernel='gaussian')
+    
+    dens_df <- stoich |>
+      filter(param==stoich_param[p],
+             eco_type==stoich_eco[e]) |>
+      mutate(total_type_density = tmp_f(result))
+    
+    k_densities <- rbind(k_densities,dens_df)
+  }
+}
+
+
+
+## inlet KDEs  ####
+k_densities_tmp <- data.frame() # create temporary dataframe
+
+for(p in 1:length(stoich_param)) {
+  tmp_f <- kdensity((stoich |> filter(param==stoich_param[p],
+                                    site %in% inlets))$result, 
+                    start='gumbel', kernel='gaussian')
+  
+  dens_df <- stoich |>
+    filter(param==stoich_param[p],
+           site %in% inlets) |>
+    mutate(inlets_density = tmp_f(result))
+  
+  k_densities_tmp <- rbind(k_densities_tmp,dens_df)
+}
+
+# add input KDEs to dataframe
 k_densities <- left_join(k_densities, k_densities_tmp)
+
+
+## outlet KDEs ####
+k_densities_tmp <- data.frame() # clear temporary dataframe
+
+for(p in 1:length(stoich_param)) {
+  tmp_f <- kdensity((stoich |> filter(param==stoich_param[p],
+                                    site %in% outlets))$result, 
+                    start='gumbel', kernel='gaussian')
+  
+  dens_df <- stoich |>
+    filter(param==stoich_param[p],
+           site %in% outlets) |>
+    mutate(outlets_density = tmp_f(result))
+  
+  k_densities_tmp <- rbind(k_densities_tmp,dens_df)
+}
+
+# final dataset - add outlet KDEs 
+k_densities_STOICH <- left_join(k_densities, k_densities_tmp)
+
+
+rm(dens_df)
+rm(k_densities)
+rm(k_densities_tmp)
+rm(e)
+rm(inlets)
+rm(outlets)
+rm(nuts_eco)
+rm(p)
+rm(stoich_eco)
+rm(tmp_f)
+
+
+# C. Network nutrient distributions ####
+# approach: bootstrap result for lakes and streams 1000x for each parameter and run kde function
+set.seed(1)
+nsim=1000
+sims <- data.frame()
+bootstrap_nut_kde <- data.frame()
+
+for(p in 1:length(nuts_param)) {
+  
+  for(i in 1:nsim) {
+    
+    tmp.a <- k_densities_NUTS |>
+      filter(param == nuts_param[p],
+             eco_type != 'glacier') # we only want the lakes and streams here
+    
+    N <- nrow(tmp.a)
+    
+    tmp <- sample(tmp.a$result, 1, replace=TRUE)
+    
+    tmp1 <- data.frame(tmp) |>
+      rename(bootstrapped_result = tmp) |>
+      mutate(param = nuts_param[p]) 
+    
+    sims <- rbind(sims, tmp1)
+    
+  }
+  
+  kde_fn <- kdensity((sims |> filter(param==nuts_param[p]))$bootstrapped_result, 
+                     start='gumbel', kernel='gaussian')
+  
+  dens_df <- sims |>
+    filter(param==nuts_param[p]) |>
+    mutate(bs_kde = kde_fn(bootstrapped_result)) 
+  
+  bootstrap_nut_kde <- rbind(bootstrap_nut_kde, dens_df)
+  
+}
+
+
+bootstrap_nut <- bootstrap_nut_kde |>
+  group_by(param) |>
+  mutate(SE = std.error(bs_kde),
+         CI_lwr = confintr::ci_sd(bs_kde)[['interval']][1],
+         CI_upr = confintr::ci_sd(bs_kde)[['interval']][2])
+
+
+
+
+
+# D. Network stoichiometry distributions ####
+# approach: bootstrap result for lakes and streams 1000x for each parameter and run kde function
+set.seed(1)
+nsim=1000
+sims <- data.frame()
+bootstrap_stoich_kde <- data.frame()
+
+for(p in 1:length(stoich_param)) {
+  
+  for(i in 1:nsim) {
+    
+    tmp.a <- k_densities_STOICH |>
+      filter(param == stoich_param[p],
+             eco_type != 'glacier') # we only want the lakes and streams here
+    
+    N <- nrow(tmp.a)
+    
+    tmp <- sample(tmp.a$result, 1, replace=TRUE)
+    
+    tmp1 <- data.frame(tmp) |>
+      rename(bootstrapped_result = tmp) |>
+      mutate(param = stoich_param[p]) 
+    
+    sims <- rbind(sims, tmp1)
+    
+  }
+  
+  kde_fn <- kdensity((sims |> filter(param==stoich_param[p]))$bootstrapped_result, 
+                     start='gumbel', kernel='gaussian')
+  
+  dens_df <- sims |>
+    filter(param==stoich_param[p]) |>
+    mutate(bs_kde = kde_fn(bootstrapped_result)) 
+  
+  bootstrap_stoich_kde <- rbind(bootstrap_stoich_kde, dens_df)
+  
+}
+
+
+bootstrap_stoich <- bootstrap_stoich_kde |>
+  group_by(param) |>
+  mutate(SE = std.error(bs_kde),
+         CI_lwr = confintr::ci_sd(bs_kde)[['interval']][1],
+         CI_upr = confintr::ci_sd(bs_kde)[['interval']][2])
+
+
+rm(bootstrap_nut_kde)
+rm(bootstrap_stoich_kde)
+rm(dens_df)
+rm(i)
+rm(kde_fn)
+rm(tmp)
+rm(tmp1)
+rm(tmp2)
+rm(tmp.a)
+rm(N)
+rm(nsim)
+rm(nuts_param)
+rm(p)
+rm(s)
+rm(sims)
+rm(stoich_param)
+
+
+# E. Comparison: nutrients ####
+
+ggplot() +
+  geom_ribbon(bootstrap_nut, mapping=aes(bootstrapped_result, bs_kde, 
+                                         ymin=bs_kde-CI_lwr, ymax=bs_kde+CI_upr), 
+              fill='grey80') +
+  geom_line(k_densities_NUTS |> filter(eco_type != 'glacier'), 
+            mapping=aes(result, total_type_density, linetype=eco_type)) +
+  facet_wrap(.~param, scales='free') +
+  theme_classic()
+
+
+# E. Comparison: stoichiometry ####
+
+ggplot() +
+  geom_ribbon(bootstrap_stoich, mapping=aes(bootstrapped_result, bs_kde, 
+                                         ymin=bs_kde-CI_lwr, ymax=bs_kde+CI_upr), 
+              fill='grey80') +
+  geom_line(k_densities_STOICH |> filter(eco_type != 'glacier'), 
+            mapping=aes(result, total_type_density, linetype=eco_type)) +
+  facet_wrap(.~param, scales='free') +
+  theme_classic() 
