@@ -325,25 +325,31 @@ stoich_param <- as.vector(unique(stoich$param))
 nuts_eco <- as.vector(c('lake', 'stream'))
 KS_tests <- data.frame()
 
+# the loop - wowwwzzzzaaaa
+for(n in 1:length(nuts_param)) {
+  tmp.obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
+                                             eco_type == 'lake'))$result, 
+                 (k_densities_NUTS |> filter(param == nuts_param[n],
+                                             eco_type == 'stream'))$result)
+  
+  tmp <- data.frame(param = nuts_param[n], variables = 'lake-stream', d_stat = as.numeric(tmp.obj[['statistic']]), p_value = as.numeric(tmp.obj[['p.value']]))
+  
+  KS_tests <- rbind(KS_tests, tmp)
+  
+  for(e in 1:length(nuts_eco)) {
+    obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
+                                               eco_type == nuts_eco[e]))$result, 
+                   (bootstrap_nut |> filter(param == nuts_param[n]))$bootstrapped_result)
+    
+    tmp <- data.frame(param = nuts_param[n], variables = paste0(nuts_eco[e], '-network'), d_stat = as.numeric(tmp.obj[['statistic']]), p_value = as.numeric(tmp.obj[['p.value']]))
+    
+    KS_tests <- rbind(KS_tests, tmp)
+    
+  } # end e loop
+} # end n loop
 
 
 
 
 
 
-
-obj <- ks.test((k_densities_NUTS |> filter(param == 'DOC_mgL',
-                                           eco_type == 'lake'))$result, 
-               (k_densities_NUTS |> filter(param == 'DOC_mgL',
-                                           eco_type == 'stream'))$result)
-
-obj[['statistic']]
-obj[['p.value']]
-
-tmp <- data.frame(param = 'DOC_mgL', variables = 'lake-stream', d_stat = as.numeric(obj[['statistic']]), p_value = as.numeric(obj[['p.value']]))
-
-
-
-obj <- ks.test((k_densities_NUTS |> filter(param == 'TP_umolL',
-                                           eco_type == 'stream'))$result, 
-               (bootstrap_nut |> filter(param == 'TP_umolL'))$bootstrapped_result)
