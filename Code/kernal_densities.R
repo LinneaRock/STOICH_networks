@@ -242,8 +242,8 @@ for(p in 1:length(stoich_param)) {
 bootstrap_stoich <- bootstrap_stoich_kde |>
   group_by(param) |>
   mutate(SE = std.error(bs_kde),
-         CI_lwr = confintr::ci_sd(bs_kde)[['interval']][1],
-         CI_upr = confintr::ci_sd(bs_kde)[['interval']][2])
+         CI_lwr = ci_sd(bs_kde)[['interval']][1],
+         CI_upr = ci_sd(bs_kde)[['interval']][2])
 
 
 rm(bootstrap_nut_kde)
@@ -253,7 +253,6 @@ rm(i)
 rm(kde_fn)
 rm(tmp)
 rm(tmp1)
-rm(tmp2)
 rm(tmp.a)
 rm(N)
 rm(nsim)
@@ -265,24 +264,86 @@ rm(stoich_param)
 
 
 # E. Comparison: nutrients ####
-
+## plot lake vs stream distributions ####
 ggplot() +
-  geom_ribbon(bootstrap_nut, mapping=aes(bootstrapped_result, bs_kde, 
-                                         ymin=bs_kde-CI_lwr, ymax=bs_kde+CI_upr), 
-              fill='grey80') +
-  geom_line(k_densities_NUTS |> filter(eco_type != 'glacier'), 
+  geom_ribbon(bootstrap_nut |> filter(!param %in% c('NH4_ueqL','NO3_ueqL')), 
+              mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr, 
+                          ymax=bs_kde+CI_upr),fill='grey80') +
+  geom_line(k_densities_NUTS |> filter(eco_type != 'glacier') |> 
+              filter(!param %in% c('NH4_ueqL','NO3_ueqL')), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
   facet_wrap(.~param, scales='free') +
   theme_classic()
 
 
-# E. Comparison: stoichiometry ####
+## plot inlets vs outlets ####
+invsout_nuts <- k_densities_NUTS |>
+  pivot_longer(cols = c(inlets_density, outlets_density), names_to = 'position', 
+               values_to = 'position_dens') |>
+  drop_na(position_dens)
 
 ggplot() +
-  geom_ribbon(bootstrap_stoich, mapping=aes(bootstrapped_result, bs_kde, 
-                                         ymin=bs_kde-CI_lwr, ymax=bs_kde+CI_upr), 
+  geom_line(invsout_nuts |> 
+              filter(!param %in% c('NH4_ueqL','NO3_ueqL')), 
+            mapping=aes(result, position_dens, linetype=position)) +
+  facet_wrap(.~param, scales='free') +
+  theme_classic()
+
+# E. Comparison: stoichiometry ####
+## plot lake vs stream distributions ####
+ggplot() +
+  geom_ribbon(bootstrap_stoich, mapping=aes(bootstrapped_result, bs_kde,
+                                         ymin=bs_kde-CI_lwr, ymax=bs_kde+CI_upr),
               fill='grey80') +
+  # geom_ribbon(bootstrap_stoich, mapping=aes(bootstrapped_result, bs_kde, 
+  #                                           ymin=bs_kde-SE, ymax=bs_kde+SE), 
+  #             fill='grey80') +
   geom_line(k_densities_STOICH |> filter(eco_type != 'glacier'), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
   facet_wrap(.~param, scales='free') +
   theme_classic() 
+
+## plot inlets vs outlets ####
+invsout_stoich <- k_densities_STOICH |>
+  pivot_longer(cols = c(inlets_density, outlets_density), names_to = 'position', 
+               values_to = 'position_dens') |>
+  drop_na(position_dens)
+
+ggplot() +
+  geom_line(invsout_stoich |> filter(result <1000) |>
+              filter(!param %in% c('NH4_ueqL','NO3_ueqL')), 
+            mapping=aes(result, position_dens, linetype=position)) +
+  facet_wrap(.~param, scales='free') +
+  theme_classic()
+
+# F. Kolmogorov-Smirnov tests ####
+# non-parametric way to test null hypothesis: distributions are the same, alternative hypothesis: distributions are significantly different 
+
+# set up 
+nuts_param <- as.vector(unique(nuts$param))
+stoich_param <- as.vector(unique(stoich$param))
+nuts_eco <- as.vector(c('lake', 'stream'))
+KS_tests <- data.frame()
+
+
+
+
+
+
+
+
+obj <- ks.test((k_densities_NUTS |> filter(param == 'DOC_mgL',
+                                           eco_type == 'lake'))$result, 
+               (k_densities_NUTS |> filter(param == 'DOC_mgL',
+                                           eco_type == 'stream'))$result)
+
+obj[['statistic']]
+obj[['p.value']]
+
+tmp <- data.frame(param = 'DOC_mgL', variables = 'lake-stream', d_stat = as.numeric(obj[['statistic']]), p_value = as.numeric(obj[['p.value']]))
+
+
+
+obj <- ks.test((k_densities_NUTS |> filter(param == 'TP_umolL',
+                                           eco_type == 'stream'))$result, 
+               (bootstrap_nut |> filter(param == 'TP_umolL'))$bootstrapped_result)
