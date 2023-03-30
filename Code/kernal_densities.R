@@ -310,8 +310,7 @@ invsout_stoich <- k_densities_STOICH |>
   drop_na(position_dens)
 
 ggplot() +
-  geom_line(invsout_stoich |> filter(result <1000) |>
-              filter(!param %in% c('NH4_ueqL','NO3_ueqL')), 
+  geom_line(invsout_stoich |> filter(result <1000), 
             mapping=aes(result, position_dens, linetype=position)) +
   facet_wrap(.~param, scales='free') +
   theme_classic()
@@ -376,6 +375,25 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetratio
 
 rm(list=c('tmp', 'tmp2', 'tmp.obj', 'tmp.obj3', 'e', 'n', 'nuts_eco', 'nuts_param', 'stoich_param'))
 
+# G. Make nice plots of everything we are interested in ####
+bootstrap_all <- rbind(bootstrap_nut, bootstrap_stoich) |>
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'))
 
+k_densities_all <- rbind(k_densities_NUTS, k_densities_STOICH) |>
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'),
+         eco_type != 'glacier')
 
+## lake-stream-netwwork ####
+# note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
+ggplot() +
+  geom_ribbon(bootstrap_all |> filter(bootstrapped_result <500),
+              mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr,
+                                         ymax=bs_kde+CI_upr),fill='grey80') +
+  geom_line(k_densities_all |> filter(result < 500), 
+            mapping=aes(result, total_type_density, linetype=eco_type)) +
+  facet_wrap(.~param, scales='free') +
+  theme_classic() +
+  theme(legend.title = element_blank()) 
+
+labeller = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))
 
