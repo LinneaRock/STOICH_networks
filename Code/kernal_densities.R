@@ -384,6 +384,11 @@ k_densities_all <- rbind(k_densities_NUTS, k_densities_STOICH) |>
          eco_type != 'glacier')
 
 ## lake-stream-netwwork ####
+# this madness is just making pretty labels
+bootstrap_all$param <- factor(bootstrap_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+
+k_densities_all$param <- factor(k_densities_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+
 # note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
 ggplot() +
   geom_ribbon(bootstrap_all |> filter(bootstrapped_result <500),
@@ -391,9 +396,12 @@ ggplot() +
                                          ymax=bs_kde+CI_upr),fill='grey80') +
   geom_line(k_densities_all |> filter(result < 500), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
-  facet_wrap(.~param, scales='free') +
+  facet_wrap(.~param, scales='free', labeller=label_parsed) +
   theme_classic() +
-  theme(legend.title = element_blank()) 
+  theme(legend.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  labs(x='', y='')
+ggsave('Figures/k_density_lake-stream-network.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
-labeller = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))
 
