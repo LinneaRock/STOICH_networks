@@ -325,30 +325,56 @@ stoich_param <- as.vector(unique(stoich$param))
 nuts_eco <- as.vector(c('lake', 'stream'))
 KS_tests <- data.frame()
 
+
+
 # the loop - wowwwzzzzaaaa
-for(n in 1:length(nuts_param)) {
+for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetrations
   tmp.obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
                                              eco_type == 'lake'))$result, 
                  (k_densities_NUTS |> filter(param == nuts_param[n],
                                              eco_type == 'stream'))$result)
   
-  tmp <- data.frame(param = nuts_param[n], variables = 'lake-stream', d_stat = as.numeric(tmp.obj[['statistic']]), p_value = as.numeric(tmp.obj[['p.value']]))
+  tmp <- data.frame(param = nuts_param[n], variables = 'lake-stream', d_stat = as.numeric(tmp.obj[['statistic']]), p_value = round(as.numeric(tmp.obj[['p.value']]),5))
   
   KS_tests <- rbind(KS_tests, tmp)
   
-  for(e in 1:length(nuts_eco)) {
-    obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
-                                               eco_type == nuts_eco[e]))$result, 
-                   (bootstrap_nut |> filter(param == nuts_param[n]))$bootstrapped_result)
+  for(s in 1:length(stoich_param)) { # compare lake vs stream stoichiometry
     
-    tmp <- data.frame(param = nuts_param[n], variables = paste0(nuts_eco[e], '-network'), d_stat = as.numeric(tmp.obj[['statistic']]), p_value = as.numeric(tmp.obj[['p.value']]))
+    tmp.obj2 <- ks.test((k_densities_STOICH |> filter(param == stoich_param[s],
+                                                   eco_type == 'lake'))$result, 
+                       (k_densities_STOICH |> filter(param == stoich_param[s],
+                                                   eco_type == 'stream'))$result)
     
-    KS_tests <- rbind(KS_tests, tmp)
+    tmp2 <- data.frame(param = stoich_param[s], variables = 'lake-stream', d_stat = as.numeric(tmp.obj2[['statistic']]), p_value = round(as.numeric(tmp.obj2[['p.value']]),5))
     
-  } # end e loop
+    KS_tests <- rbind(KS_tests, tmp2)
+    
+    
+    for(e in 1:length(nuts_eco)) { 
+      # compare lake/stream vs network nutrients 
+      tmp.obj3 <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
+                                                      eco_type == nuts_eco[e]))$result, 
+                          (bootstrap_nut |> filter(param == nuts_param[n]))$bootstrapped_result)
+      
+      tmp3 <- data.frame(param = nuts_param[n], variables = paste0(nuts_eco[e], '-network'), d_stat = as.numeric(tmp.obj3[['statistic']]), p_value = round(as.numeric(tmp.obj3[['p.value']]),5))
+      
+      KS_tests <- rbind(KS_tests, tmp3)
+      
+      # compare lake/stream vs network stoichiometry
+      
+      tmp.obj4 <- ks.test((k_densities_STOICH |> filter(param == stoich_param[s],
+                                                      eco_type == nuts_eco[e]))$result, 
+                          (bootstrap_stoich |> filter(param == stoich_param[s]))$bootstrapped_result)
+      
+      tmp4 <- data.frame(param = stoich_param[s], variables = paste0(nuts_eco[e], '-network'), d_stat = as.numeric(tmp.obj4[['statistic']]), p_value = round(as.numeric(tmp.obj4[['p.value']]),5))
+      
+      KS_tests <- rbind(KS_tests, tmp4) |> distinct()
+      
+    } # end e loop
+  } #end s loop
 } # end n loop
 
-
+rm(list=c('tmp', 'tmp2', 'tmp.obj', 'tmp.obj3', 'e', 'n', 'nuts_eco', 'nuts_param', 'stoich_param'))
 
 
 
