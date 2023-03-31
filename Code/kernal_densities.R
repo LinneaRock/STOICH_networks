@@ -327,7 +327,7 @@ KS_tests <- data.frame()
 
 
 # the loop - wowwwzzzzaaaa
-for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetrations
+for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentrations 
   tmp.obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
                                              eco_type == 'lake'))$result, 
                  (k_densities_NUTS |> filter(param == nuts_param[n],
@@ -336,6 +336,16 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetratio
   tmp <- data.frame(param = nuts_param[n], variables = 'lake-stream', d_stat = as.numeric(tmp.obj[['statistic']]), p_value = round(as.numeric(tmp.obj[['p.value']]),5))
   
   KS_tests <- rbind(KS_tests, tmp)
+  
+  # inlet vs outlet nutrient concentrations
+  inout.ks <- ks.test((invsout_nuts |> filter(param == nuts_param[n],
+                                                  position == 'inlets_density'))$result, 
+                      (invsout_nuts |> filter(param == nuts_param[n],
+                                              position == 'outlets_density'))$result)
+  
+  inout.tmp <- data.frame(param = nuts_param[n], variables = 'inlet-outlet', d_stat = as.numeric(inout.ks[['statistic']]), p_value = round(as.numeric(inout.ks[['p.value']]),5))
+  
+  KS_tests <- rbind(KS_tests, inout.tmp)
   
   for(s in 1:length(stoich_param)) { # compare lake vs stream stoichiometry
     
@@ -347,6 +357,16 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetratio
     tmp2 <- data.frame(param = stoich_param[s], variables = 'lake-stream', d_stat = as.numeric(tmp.obj2[['statistic']]), p_value = round(as.numeric(tmp.obj2[['p.value']]),5))
     
     KS_tests <- rbind(KS_tests, tmp2)
+    
+    # inlet vs outlet stoichiometry
+    inout.ks2 <- ks.test((invsout_stoich |> filter(param == stoich_param[s],
+                                                position == 'inlets_density'))$result, 
+                        (invsout_stoich |> filter(param == stoich_param[s],
+                                                position == 'outlets_density'))$result)
+    
+    inout.tmp2 <- data.frame(param = stoich_param[s], variables = 'inlet-outlet', d_stat = as.numeric(inout.ks2[['statistic']]), p_value = round(as.numeric(inout.ks2[['p.value']]),5))
+    
+    KS_tests <- rbind(KS_tests, inout.tmp2)
     
     
     for(e in 1:length(nuts_eco)) { 
@@ -373,15 +393,22 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concnetratio
   } #end s loop
 } # end n loop
 
-rm(list=c('tmp', 'tmp2', 'tmp.obj', 'tmp.obj3', 'e', 'n', 'nuts_eco', 'nuts_param', 'stoich_param'))
+rm(list=c('inout.ks', 'inout.ks2', 'inout.tmp', 'inout.tmp2', 'tmp', 'tmp2', 'tmp3', 'tmp4', 'tmp.obj', 'tmp.obj2', 'tmp.obj3', 'tmp.obj4', 'e', 'n', 'nuts_eco', 'nuts_param', 's', 'stoich_param'))
+
+
+write.csv(KS_tests, 'Data/KS_test_results.csv')
 
 # G. Make nice plots of everything we are interested in ####
+# format the datasets
 bootstrap_all <- rbind(bootstrap_nut, bootstrap_stoich) |>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'))
 
 k_densities_all <- rbind(k_densities_NUTS, k_densities_STOICH) |>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'),
          eco_type != 'glacier')
+
+invsout_all <- rbind(invsout_nuts, invsout_stoich) |>
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'))
 
 ## lake-stream-netwwork ####
 # this madness is just making pretty labels
@@ -393,15 +420,36 @@ k_densities_all$param <- factor(k_densities_all$param, labels = c(expression(phi
 ggplot() +
   geom_ribbon(bootstrap_all |> filter(bootstrapped_result <500),
               mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr,
-                                         ymax=bs_kde+CI_upr),fill='grey80') +
+                                         ymax=bs_kde+CI_upr, color='Network - 95% CI'),fill='grey80') +
   geom_line(k_densities_all |> filter(result < 500), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
-  facet_wrap(.~param, scales='free', labeller=label_parsed) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
   theme_classic() +
   theme(legend.title = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
-  labs(x='', y='')
+  labs(x='', y='')  +
+  scale_linetype_discrete(labels = c('Lakes', 'Streams')) +
+  scale_color_manual(values='grey80')
+
 ggsave('Figures/k_density_lake-stream-network.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
 
+## inlets-outlets ####
+# this madness is just making pretty labels
+invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+
+
+# note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has inlet data extending to 1000 and outlet to >3000; TDN:TDP, which has outlet results extending beyond 9000 and inlet results extending beyond 500; and TN:TP, which has outlet results extending beyond 600
+ggplot() +
+  geom_line(invsout_all |> filter(result < 500), 
+            mapping=aes(result, position_dens, linetype=position)) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  labs(x='', y='') +
+  scale_linetype_discrete(labels = c('Inlets', 'Outlets'))
+
+ggsave('Figures/k_density_inlet-outlet.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
