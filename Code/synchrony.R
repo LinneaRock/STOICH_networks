@@ -9,7 +9,8 @@ nuts.setup <- nuts |>
   summarise(med=median(result)) |>
   ungroup() |>
   pivot_wider(names_from='param', values_from='med') |>
-  select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL)
+  select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
+  filter(eco_type != 'glacier')
 
 TN_corr_dat <- nuts.setup |>
   select(1:4, TN_umolL) |>
