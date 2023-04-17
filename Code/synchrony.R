@@ -20,18 +20,6 @@ nuts.setup <- nuts |>
   add_count()|>
   ungroup()
 
-nuts.setup2 <- nuts |>
-  mutate(year=year(date)) |>
-  select(-site, -depth_m) |>
-  group_by(network_position, eco_type, season, date,param) |>
-  summarise(mean=mean(result)) |> 
-  ungroup() |>
-  pivot_wider(names_from='param', values_from='mean') |>
-  select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
-  filter(eco_type != 'glacier') |>
-  group_by(network_position) |>
-  add_count()|>
-  ungroup()
 
 
 stoich.setup <- stoich |>

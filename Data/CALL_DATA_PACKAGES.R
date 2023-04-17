@@ -25,6 +25,10 @@ library(confintr)
 library(randomForest)
 library(ggcorrplot)
 library(matrixStats)
+library(trend)
+library(broom)
+library(mgcv)
+
 
 
 

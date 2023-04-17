@@ -1,3 +1,7 @@
+#~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Comparing distributions
+#~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 # Non-parametric kernal density estimation ####
 # https://cran.r-project.org/web/packages/kdensity/index.html
 source('Data/CALL_DATA_PACKAGES.R') 
