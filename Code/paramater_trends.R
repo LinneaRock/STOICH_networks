@@ -108,6 +108,10 @@ summary(gam0)
 # From the broom package
 glance(gam0)
 tidy(gam0)
+# Create nested list using list()
+my_nested_list1 <- list(list_1,                  
+                        list_2,
+                        list_3)
 
 #### Extract network_positions ####
 networkPos <- with(stoich.gam, data.frame(network_position=seq(min(network_position), max(network_position), length.out=20)))
