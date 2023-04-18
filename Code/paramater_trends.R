@@ -7,7 +7,7 @@ source('Data/CALL_DATA_PACKAGES.R')
 
 ## Prepare data ####
 nuts.lm <- nuts |>
- filter(!param %in% c('NH4_ueqL', 'NO3_ueqL')) |> # I don't want to look at these at the moment
+ filter(!param %in% c('NH4_ueqL', 'NO3_ueqL', 'DOC_mgL')) |> # I don't want to look at these at the moment
   filter(eco_type != 'glacier') |>   # let's skip the glacier becuase I am more interested in the lake-stream part of the network
   mutate(year=year(date)) |>
   group_by(network_position, param) |>
@@ -80,7 +80,7 @@ stoich.gam <- stoich |>
 
 ## Quick plots of all the variables of interest ####  
 ggplot(nuts.gam |>
-         filter(!param %in% c('NH4_ueqL', 'NO3_ueqL')), 
+         filter(!param %in% c('NH4_ueqL', 'NO3_ueqL', 'DOC_mgL')), 
        aes(network_position, result, group=param)) +
   facet_wrap(~param, scales='free_y') +
   geom_point(shape=21)+
