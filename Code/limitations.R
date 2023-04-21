@@ -41,37 +41,55 @@ ggplot() +
   theme_minimal() +
   labs(y = "Log DIN:TP", x = "Log TP") +
   annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
-           x = -1, y = 0.1, hjust = 0, size = 2) +
+           x = -1, y = 0.1, hjust = 0, size = 4) +
   annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
-           x = 0.25, y = 0.5, hjust = 0, size = 2) 
+           x = -1.25, y = 0.75, hjust = 0, size = 4) 
   
 
 # TN:TP limitation ####
-ggplot(nuts_wide) +
-  geom_point(aes(log10(TP_umolL), log10(TN_umolL/TP_umolL), fill = season), size = 2.5, shape = 21, alpha = 0.5) +
+ggplot() +
+  geom_point(nuts_wide, mapping=aes(log10(TP_umolL), log10(TN_umolL/TP_umolL), fill = season), 
+             size = 2.5, shape = 21, alpha = 0.2) +
+  geom_point(medians, mapping = aes(log10(MEDTP_umolL), log10(MEDTN_umolL/MEDTP_umolL), 
+                                    color = season, shape = eco_type), size = 3) +
   geom_abline(slope = 0, intercept = log10(41), linetype = "dashed") + # bergstrom P limitation line
   geom_abline(slope = 0, intercept = log10(19), linetype = "dashed") +  # bergstrom N limitation line
   geom_abline(slope = 0, intercept = log(16, base = 10), color = "red4") + # redfield
+  geom_vline(xintercept = log(30, base = 10)) + # dodds mccauley N limitation P > 30
+  geom_abline(slope = 0, intercept = log(32, base = 10)) + # dodds mccauley N limitation TN:TP < 14
+  geom_abline(slope = 0, intercept = log(38, base = 10), color = '#336a98') + # Sakamoto, 1966; Smith 1982; Rhee 1980, Forsberg 1980  
+  geom_abline(slope = 0, intercept = log(22, base = 10), color = '#336a98') + # Sakamoto, 1966; Smith 1982; Rhee 1980, Forsberg 1980
+  geom_abline(slope = 0, intercept = log(53, base = 10), color = "#ffc857") + # Ptacnik, 2010
   theme_minimal() +
   labs(y = "Log TN:TP", x = "Log TP") +
-  annotate('text', label = 'Redfield 16:1 line', x = 0.5, y = 1.1, hjust = 0, size = 2, color = "red4") +
+  annotate('text', label = 'Redfield 16:1 line', x = 0.5, y = 1.1, hjust = 0, size = 2.5, color = "red4") +
   annotate('text', label = 'Predicted N limitation\n below dashed line \n (Bergström, 2010)', 
-           x = -1, y = 1.0, hjust = 0, size = 2) +
+           x = -0.75, y = 1.0, hjust = 0, size = 2.5) +
   annotate('text', label = 'Predicted P limitation\n above dashed line \n (Bergström, 2010)', 
-           x = 0.25, y = 1.75, hjust = 0, size = 2)
+           x = 0.25, y = 1.75, hjust = 0, size = 2.5) +
+  annotate('text', label = 'Predicted N limitation \n below blue line \n (Forsberg, 1980; Rhee, 1980; \n Sakamoto, 1966; Smith, 1982)', x = -1.5, y = 1, hjust = 0, size = 2.5, color = '#336a98') +
+  annotate('text', label = 'Predicted P limitation \n above blue line \n (Forsberg, 1980; Rhee, 1980; \n Sakamoto, 1966; Smith, 1982)', x = -1.5, y = 3, hjust = 0, size = 2.5, color = '#336a98') + 
+  annotate('text', label = 'Predicted N limitation \n (Dodds & McCauley, 1992)', 
+           x = 1.5, y = 1, hjust = 0, size = 2.5) +
+  annotate('text', label = 'Predicted P limitation \n (Ptacnik et al., 2010)',
+           x = 1, y = 1.76, hjust = 0, size = 2.5, color = "#ffc857")
 
+
+ggsave('lims.png',width=8, height=6, units='in')
 
 # DIN:DIP limitation ####
 ggplot(nuts_wide) +
-  geom_point(aes(log10(IP_umolL), log10((IN_umolL/IP_umolL)), fill = season), size = 2.5, shape = 21, alpha = 0.5) +
+  geom_point(aes(log10(IP_umolL), log10((IN_umolL/IP_umolL)), fill = season), size = 2.5, shape = 21, alpha = 0.2) +
+  geom_point(medians, mapping = aes(log10(MEDIP_umolL), log10(MEDIN_umolL/MEDIP_umolL), 
+                                    color = season, shape = eco_type), size = 3) +
   geom_abline(slope = 0, intercept = log10(100), linetype = "dashed") + # Keck and Lepori P limitation line
   geom_abline(slope = 0, intercept = log10(1), linetype = "dashed") +  # keck and lepori N limitation line
-  geom_abline(slope = 0, intercept = log10(16), color = "red4") + # redfield
+  #geom_abline(slope = 0, intercept = log10(16), color = "red4") + # redfield
   theme_minimal() +
-  labs(y = "Log DIN:DIP", x = "Log TP") +
-  annotate('text', label = 'Redfield 16:1 line', x = -0.5, y = 1.1, hjust = 0, size = 2, color = "red4") +
+  labs(y = "Log DIN:DIP", x = "Log IP") +
+  #annotate('text', label = 'Redfield 16:1 line', x = -0.5, y = 1.1, hjust = 0, size = 2, color = "red4") +
   annotate('text', label = 'Predicted N limitation below dashed line \n (Keck & Lepori, 2012)', x = -2, y = -0.1,
-           hjust = 0, size = 2) +
+           hjust = 0, size = 4) +
   annotate('text', label = 'Predicted P limitation\n above dashed line \n (Keck & Lepori, 2012)', 
-           x = -2.5, y = 2, hjust = 0, size = 2)
+           x = -2.5, y = 2, hjust = 0, size = 4)
 
