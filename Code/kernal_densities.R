@@ -443,9 +443,9 @@ for(n in 1:length(nuts_param)) {
 rm(list=c('inout.ks', 'inout.ks2', 'inout.tmp', 'inout.tmp2', 'tmp', 'tmp2', 'tmp3', 'tmp4', 'tmp.obj', 'tmp.obj2', 'tmp.obj3', 'tmp.obj4', 'e', 'n', 'nuts_eco', 'nuts_param', 's', 'stoich_param'))
 
 KS_tests <- KS_tests |>
-  mutate(significance = ifelse(between(p_value, 0.001, 0.05), 'p < 0.05',
-                               ifelse(between(p_value, 0.0001, 0.001), 'p < 0.001',
-                                      ifelse(p_value < 0.0001, 'p < 0.0001', NA))))
+  mutate(significance = ifelse(between(p_value, 0.001, 0.05), '*',
+                               ifelse(between(p_value, 0.0001, 0.001), '**',
+                                      ifelse(p_value < 0.0001, '***', NA))))
 
 write.csv(KS_tests, 'Data/KS_test_results.csv')
 
@@ -454,7 +454,7 @@ write.csv(KS_tests, 'Data/KS_test_results.csv')
 bootstrap_all <- rbind(bootstrap_nut, bootstrap_stoich) |>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
   left_join(KS_tests |>
-              filter(variables == 'lake-stream') |>
+              filter(variables %in% c('lake-network', 'stream-network')) |>
               select(param, significance))
 
 k_densities_all <- rbind(k_densities_NUTS, k_densities_STOICH) |>
@@ -474,13 +474,11 @@ invsout_all <- rbind(invsout_nuts, invsout_stoich) |>
 
 ## lake-stream-netwwork ####
 # this madness is just making pretty labels
-bootstrap_all$param2 <- factor(bootstrap_all$param, labels = c(paste0(expression(phi*'(DON:DOP )'),(bootstrap_all |> filter(param=='don.dop') |>select(significance))$significance)[1],paste0(expression(phi*'(DON'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='DON_umolL') |>select(significance))$significance)[1],paste0(expression(phi*'(DOP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='DOP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IN:IP) '),(bootstrap_all |> filter(param=='in.ip',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='IN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='IP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PN:PP) '),(bootstrap_all |> filter(param=='pn.pp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='PN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='PP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDN:TDP) '),(bootstrap_all |> filter(param=='tdn.tdp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TDN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TDP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TN:TP) '),(bootstrap_all |> filter(param=='tn.tp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TP_umolL',!is.na(significance)) |>select(significance))$significance)[1]))
-
-bootstrap_all <- bootstrap_all |>
-  mutate(param2 = gsub('NA', '', param2))
+bootstrap_all$param <- factor(bootstrap_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))) 
 
 
-k_densities_all$param2 <- factor(k_densities_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))) 
+
+k_densities_all$param <- factor(k_densities_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))) 
 
 
 
@@ -491,7 +489,8 @@ ggplot() +
                                          ymax=bs_kde+CI_upr, color='Network - 95% CI'),fill='grey80') +
   geom_line(k_densities_all |> filter(result < 500), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
-  facet_wrap(.~param2, scales='free', labeller=label_parsed, nrow=5) +
+  # geom_text(k_densities_all |> filter(result<500), mapping=aes(label=significance, x=min(result), y=total_type_density,), vjust=0.8, nudge_y=0.2) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
   theme_classic() +
   theme(legend.title = element_blank(),
         axis.text.y = element_blank(),
@@ -500,7 +499,7 @@ ggplot() +
   scale_linetype_discrete(labels = c('Lakes', 'Streams')) +
   scale_color_manual(values='grey80')
 
-ggsave('Figures/k_density_lake-stream-network.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+ggsave('Figures/k_density_plots/k_density_lake-stream-network.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
 
 ## inlets-outlets ####
@@ -520,7 +519,7 @@ ggplot() +
   labs(x='', y='') +
   scale_linetype_discrete(labels = c('Inlets', 'Outlets'))
 
-ggsave('Figures/k_density_inlet-outlet.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+ggsave('Figures/k_density_plots/k_density_inlet-outlet.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
 
 
@@ -550,8 +549,5 @@ ggplot() +
   labs(x='', y='') +
   scale_linetype_discrete(labels = c('Lakes', 'Outlets'))
 
-ggsave('Figures/k_density_outlet-lake.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
-
-
-
+ggsave('Figures/k_density_plots/k_density_outlet-lake.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
