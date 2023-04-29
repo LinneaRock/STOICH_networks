@@ -156,19 +156,21 @@ rm(tmp_f)
 
 
 # C. Network nutrient distributions ####
-# approach: bootstrap result for lakes and streams 1000x for each parameter and run kde function
+# approach: bootstrap result for lakes and streams 500x each for each parameter, combine lake and strema bootstrapped data, and run kde function
 set.seed(1)
-nsim=1000
+nsim=500
 sims <- data.frame()
+eco <- as.vector(c('lake', 'stream'))
 bootstrap_nut_kde <- data.frame()
 
-for(p in 1:length(nuts_param)) {
-  
-  for(i in 1:nsim) {
+
+for(p in 1:length(nuts_param)) { # start parameter loop
+  for(e in 1:length(eco)) { # start eco type loop
+  for(i in 1:nsim) { # start bootstrap loop
     
     tmp.a <- k_densities_NUTS |>
       filter(param == nuts_param[p],
-             eco_type != 'glacier') # we only want the lakes and streams here
+             eco_type == eco[e]) # we only want the lakes and streams here
     
     N <- nrow(tmp.a)
     
@@ -180,7 +182,8 @@ for(p in 1:length(nuts_param)) {
     
     sims <- rbind(sims, tmp1)
     
-  }
+  } # close bootstrap loop
+} # close eco type loop
   
   kde_fn <- kdensity((sims |> filter(param==nuts_param[p]))$bootstrapped_result, 
                      start='gumbel', kernel='gaussian')
@@ -191,7 +194,7 @@ for(p in 1:length(nuts_param)) {
   
   bootstrap_nut_kde <- rbind(bootstrap_nut_kde, dens_df)
   
-}
+} # close parameter loop 
 
 
 bootstrap_nut <- bootstrap_nut_kde |>
@@ -205,14 +208,14 @@ bootstrap_nut <- bootstrap_nut_kde |>
 
 
 # D. Network stoichiometry distributions ####
-# approach: bootstrap result for lakes and streams 1000x for each parameter and run kde function
+# approach: bootstrap result for lakes and streams 500x each for each parameter, combine, and and run kde function
 set.seed(1)
-nsim=1000
+nsim=500
 sims <- data.frame()
 bootstrap_stoich_kde <- data.frame()
 
-for(p in 1:length(stoich_param)) {
-  
+for(p in 1:length(stoich_param)) { # start param loop
+  for(e in 1:length(eco)) { # start eco type loop
   for(i in 1:nsim) {
     
     tmp.a <- k_densities_STOICH |>
@@ -229,8 +232,9 @@ for(p in 1:length(stoich_param)) {
     
     sims <- rbind(sims, tmp1)
     
-  }
-  
+  } # end bootstrap loop
+} # end eco type loop
+   
   kde_fn <- kdensity((sims |> filter(param==stoich_param[p]))$bootstrapped_result, 
                      start='gumbel', kernel='gaussian')
   
@@ -240,7 +244,7 @@ for(p in 1:length(stoich_param)) {
   
   bootstrap_stoich_kde <- rbind(bootstrap_stoich_kde, dens_df)
   
-}
+} # end param loop
 
 
 bootstrap_stoich <- bootstrap_stoich_kde |>
@@ -265,6 +269,7 @@ rm(p)
 rm(s)
 rm(sims)
 rm(stoich_param)
+rm(eco)
 
 
 # E. Comparison: nutrients ####
@@ -331,7 +336,9 @@ KS_tests <- data.frame()
 
 
 # the loop - wowwwzzzzaaaa
-for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentrations 
+for(n in 1:length(nuts_param)) { 
+  
+  # compare lakes vs stream nutrient concentrations 
   tmp.obj <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
                                              eco_type == 'lake'))$result, 
                  (k_densities_NUTS |> filter(param == nuts_param[n],
@@ -340,6 +347,8 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
   tmp <- data.frame(param = nuts_param[n], variables = 'lake-stream', d_stat = as.numeric(tmp.obj[['statistic']]), p_value = round(as.numeric(tmp.obj[['p.value']]),5))
   
   KS_tests <- rbind(KS_tests, tmp)
+  
+  
   
   # inlet vs outlet nutrient concentrations
   inout.ks <- ks.test((invsout_nuts |> filter(param == nuts_param[n],
@@ -351,7 +360,22 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
   
   KS_tests <- rbind(KS_tests, inout.tmp)
   
-  for(s in 1:length(stoich_param)) { # compare lake vs stream stoichiometry
+  
+  
+  # outlet vs lake nutrients
+  outlake.ks <- ks.test((invsout_nuts |> filter(param == nuts_param[n],
+                                                   position == 'outlets_density'))$result,
+                         (k_densities_NUTS |> filter(param == nuts_param[n],
+                                                     eco_type == 'lake'))$result)
+  
+  outlake.tmp <- data.frame(param = nuts_param[n], variables = 'outlet-lake', d_stat = as.numeric(outlake.ks[['statistic']]), p_value = round(as.numeric(outlake.ks[['p.value']]),5))
+  
+  KS_tests <- rbind(KS_tests, outlake.tmp)
+  
+  
+  
+  for(s in 1:length(stoich_param)) { 
+      # compare lake vs stream stoichiometry
     
     tmp.obj2 <- ks.test((k_densities_STOICH |> filter(param == stoich_param[s],
                                                    eco_type == 'lake'))$result, 
@@ -361,6 +385,9 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
     tmp2 <- data.frame(param = stoich_param[s], variables = 'lake-stream', d_stat = as.numeric(tmp.obj2[['statistic']]), p_value = round(as.numeric(tmp.obj2[['p.value']]),5))
     
     KS_tests <- rbind(KS_tests, tmp2)
+    
+    
+    
     
     # inlet vs outlet stoichiometry
     inout.ks2 <- ks.test((invsout_stoich |> filter(param == stoich_param[s],
@@ -373,6 +400,19 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
     KS_tests <- rbind(KS_tests, inout.tmp2)
     
     
+    
+    # outlet vs lake stoichiometry
+    outlake.ks2 <- ks.test((invsout_stoich |> filter(param == stoich_param[s],
+                                                   position == 'outlets_density'))$result,
+                         (k_densities_STOICH |> filter(param == stoich_param[s],
+                                                       eco_type == 'lake'))$result)
+
+    outlake.tmp2 <- data.frame(param = stoich_param[s], variables = 'outlet-lake', d_stat = as.numeric(outlake.ks2[['statistic']]), p_value = round(as.numeric(outlake.ks2[['p.value']]),5))
+
+    KS_tests <- rbind(KS_tests, outlake.tmp2)
+    
+    
+    
     for(e in 1:length(nuts_eco)) { 
       # compare lake/stream vs network nutrients 
       tmp.obj3 <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
@@ -382,6 +422,9 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
       tmp3 <- data.frame(param = nuts_param[n], variables = paste0(nuts_eco[e], '-network'), d_stat = as.numeric(tmp.obj3[['statistic']]), p_value = round(as.numeric(tmp.obj3[['p.value']]),5))
       
       KS_tests <- rbind(KS_tests, tmp3)
+      
+      
+      
       
       # compare lake/stream vs network stoichiometry
       
@@ -399,26 +442,47 @@ for(n in 1:length(nuts_param)) { # compare lakes vs stream nutrient concentratio
 
 rm(list=c('inout.ks', 'inout.ks2', 'inout.tmp', 'inout.tmp2', 'tmp', 'tmp2', 'tmp3', 'tmp4', 'tmp.obj', 'tmp.obj2', 'tmp.obj3', 'tmp.obj4', 'e', 'n', 'nuts_eco', 'nuts_param', 's', 'stoich_param'))
 
+KS_tests <- KS_tests |>
+  mutate(significance = ifelse(between(p_value, 0.001, 0.05), 'p < 0.05',
+                               ifelse(between(p_value, 0.0001, 0.001), 'p < 0.001',
+                                      ifelse(p_value < 0.0001, 'p < 0.0001', NA))))
 
 write.csv(KS_tests, 'Data/KS_test_results.csv')
 
 # G. Make nice plots of everything we are interested in ####
 # format the datasets
 bootstrap_all <- rbind(bootstrap_nut, bootstrap_stoich) |>
-  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'))
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
+  left_join(KS_tests |>
+              filter(variables == 'lake-stream') |>
+              select(param, significance))
 
 k_densities_all <- rbind(k_densities_NUTS, k_densities_STOICH) |>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'),
-         eco_type != 'glacier')
+         eco_type != 'glacier') |>
+  left_join(KS_tests |>
+              filter(variables == 'lake-stream') |>
+              select(param, significance))
 
 invsout_all <- rbind(invsout_nuts, invsout_stoich) |>
-  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL'))
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
+  left_join(KS_tests |>
+              filter(variables == 'inlet-outlet') |>
+              select(param, significance))
+
+
 
 ## lake-stream-netwwork ####
 # this madness is just making pretty labels
-bootstrap_all$param <- factor(bootstrap_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+bootstrap_all$param2 <- factor(bootstrap_all$param, labels = c(paste0(expression(phi*'(DON:DOP )'),(bootstrap_all |> filter(param=='don.dop') |>select(significance))$significance)[1],paste0(expression(phi*'(DON'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='DON_umolL') |>select(significance))$significance)[1],paste0(expression(phi*'(DOP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='DOP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IN:IP) '),(bootstrap_all |> filter(param=='in.ip',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='IN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(IP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='IP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PN:PP) '),(bootstrap_all |> filter(param=='pn.pp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='PN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(PP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='PP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDN:TDP) '),(bootstrap_all |> filter(param=='tdn.tdp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TDN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TDP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TDP_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TN:TP) '),(bootstrap_all |> filter(param=='tn.tp',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TN'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TN_umolL',!is.na(significance)) |>select(significance))$significance)[1],paste0(expression(phi*'(TP'~mu*mol*L^-1*') '),(bootstrap_all |> filter(param=='TP_umolL',!is.na(significance)) |>select(significance))$significance)[1]))
 
-k_densities_all$param <- factor(k_densities_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+bootstrap_all <- bootstrap_all |>
+  mutate(param2 = gsub('NA', '', param2))
+
+
+k_densities_all$param2 <- factor(k_densities_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')'))) 
+
+
 
 # note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
 ggplot() +
@@ -427,7 +491,7 @@ ggplot() +
                                          ymax=bs_kde+CI_upr, color='Network - 95% CI'),fill='grey80') +
   geom_line(k_densities_all |> filter(result < 500), 
             mapping=aes(result, total_type_density, linetype=eco_type)) +
-  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
+  facet_wrap(.~param2, scales='free', labeller=label_parsed, nrow=5) +
   theme_classic() +
   theme(legend.title = element_blank(),
         axis.text.y = element_blank(),
@@ -457,3 +521,37 @@ ggplot() +
   scale_linetype_discrete(labels = c('Inlets', 'Outlets'))
 
 ggsave('Figures/k_density_inlet-outlet.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+
+
+## outlets-lakes ####
+outletlake <- k_densities_all |>
+  select(-inlets_density) |>
+  filter(eco_type=='lake' | 
+           !is.na(outlets_density)) |>
+  mutate(eco_type = ifelse(eco_type == 'stream', 'outlet', eco_type)) |>
+  mutate(total_type_density = ifelse(eco_type != 'lake', NA, 
+                                     total_type_density)) |>
+  mutate(dens = ifelse(eco_type == 'lake', total_type_density, outlets_density))
+
+
+# this madness is just making pretty labels
+invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+
+
+ggplot() +
+  geom_line(outletlake |> filter(result < 500), 
+            mapping=aes(result, dens, linetype=eco_type)) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  labs(x='', y='') +
+  scale_linetype_discrete(labels = c('Lakes', 'Outlets'))
+
+ggsave('Figures/k_density_outlet-lake.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+
+
+

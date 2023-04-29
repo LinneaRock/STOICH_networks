@@ -1,73 +1,91 @@
-,param,variables,d_stat,p_value,value
-69,DOC_mgL,lake-stream,0.21122807,0,<0.0001
-70,DOC_mgL,inlet-outlet,0.252461024,0,<0.0001
-71,DOC_mgL,lake-network,0.176912281,0,<0.0001
-72,DOC_mgL,stream-network,0.043350877,0.2194,
-21,don.dop,lake-stream,0.124157426,0.09791,
-22,don.dop,inlet-outlet,0.13841712,0.24872,
-23,don.dop,lake-network,0.11368254,0.11087,
-24,don.dop,stream-network,0.024858447,0.99178,
-61,DON_umolL,lake-stream,0.180608221,3.0E-05,<0.0001
-62,DON_umolL,inlet-outlet,0.225626668,0.00072,<0.001
-63,DON_umolL,lake-network,0.124561404,0.00629,<0.001
-64,DON_umolL,stream-network,0.058743516,0.1183,
-57,DOP_umolL,lake-stream,0.085997575,0.07751,
-58,DOP_umolL,inlet-outlet,0.087012987,0.1416,
-59,DOP_umolL,lake-network,0.096419476,0.03975,<0.05
-60,DOP_umolL,stream-network,0.042152979,0.27856,
-17,in.ip,lake-stream,0.156358548,0.00044,<0.001
-18,in.ip,inlet-outlet,0.313155771,0,<0.0001
-19,in.ip,lake-network,0.104619469,0.03536,<0.05
-20,in.ip,stream-network,0.067167822,0.04564,<0.05
-25,IN_umolL,lake-stream,0.14687668,0,<0.0001
-26,IN_umolL,inlet-outlet,0.234144344,0,<0.0001
-27,IN_umolL,lake-network,0.113277354,0.00143,<0.01
-28,IN_umolL,stream-network,0.042032864,0.18047,
-65,IP_umolL,lake-stream,0.170713726,6.00E-05,<0.0001
-66,IP_umolL,inlet-outlet,0.226333098,0.00053,<0.001
-67,IP_umolL,lake-network,0.135454936,0.00195,<0.001
-68,IP_umolL,stream-network,0.044813582,0.35515,
-29,NH4_ueqL,lake-stream,0.075071225,0.23527,
-30,NH4_ueqL,inlet-outlet,0.266026837,0,<0.0001
-31,NH4_ueqL,lake-network,0.065814815,0.42501,
-32,NH4_ueqL,stream-network,0.028102564,0.72165,
-1,NO3_ueqL,lake-stream,0.138311754,0,<0.0001
-2,NO3_ueqL,inlet-outlet,0.211937349,0,<0.0001
-5,NO3_ueqL,lake-network,0.104460154,0.00443,<0.01
-7,NO3_ueqL,stream-network,0.035278146,0.33196,
-9,pn.pp,lake-stream,0.061418685,0.9355,
-10,pn.pp,inlet-outlet,0.155677419,0.0356,<0.05
-11,pn.pp,lake-network,0.048363636,0.99152,
-12,pn.pp,stream-network,0.035041522,0.75938,
-33,PN_umolL,lake-stream,0.078118851,0.6302,
-34,PN_umolL,inlet-outlet,0.25606469,0,<0.0001
-35,PN_umolL,lake-network,0.09052381,0.41745,
-36,PN_umolL,stream-network,0.025570248,0.94614,
-37,PP_umolL,lake-stream,0.133749675,0.03804,<0.05
-38,PP_umolL,inlet-outlet,0.184754666,2.00E-04,<0.001
-39,PP_umolL,lake-network,0.110301587,0.13134,
-40,PP_umolL,stream-network,0.02473224,0.93193,
-13,tdn.tdp,lake-stream,0.116506808,0.00365,<0.01
-14,tdn.tdp,inlet-outlet,0.210596362,0,<0.0001
-15,tdn.tdp,lake-network,0.105577061,0.01545,<0.05
-16,tdn.tdp,stream-network,0.039095032,0.33657,
-41,TDN_umolL,lake-stream,0.152160561,0,<0.0001
-42,TDN_umolL,inlet-outlet,0.262782564,0,<0.0001
-43,TDN_umolL,lake-network,0.11389071,0.00192,<0.01
-44,TDN_umolL,stream-network,0.050094987,0.07485,
-53,TDP_umolL,lake-stream,0.062855569,0.261,
-54,TDP_umolL,inlet-outlet,0.094193026,0.05692,
-55,TDP_umolL,lake-network,0.049651757,0.59929,
-56,TDP_umolL,stream-network,0.022413793,0.92748,
-3,tn.tp,lake-stream,0.207982371,0.00027,<0.001
-4,tn.tp,inlet-outlet,0.216085169,3.00E-05,<0.0001
-6,tn.tp,lake-network,0.182169492,0.00181,<0.01
-8,tn.tp,stream-network,0.044368165,0.33653,
-45,TN_umolL,lake-stream,0.144126272,0.02117,<0.05
-46,TN_umolL,inlet-outlet,0.222999833,0,<0.0001
-47,TN_umolL,lake-network,0.151612903,0.01254,<0.05
-48,TN_umolL,stream-network,0.049748663,0.18279,
-49,TP_umolL,lake-stream,0.24610232,0,<0.0001
-50,TP_umolL,inlet-outlet,0.072291626,0.40203,
-51,TP_umolL,lake-network,0.216827586,1.00E-05,<0.0001
-52,TP_umolL,stream-network,0.034032706,0.60584,
+"","param","variables","d_stat","p_value","significance"
+"1","NO3_ueqL","lake-stream",0.138311753990484,0,"p < 0.0001"
+"2","NO3_ueqL","inlet-outlet",0.211937348683235,0,"p < 0.0001"
+"3","NO3_ueqL","outlet-lake",0.343280298293152,0,"p < 0.0001"
+"4","tn.tp","lake-stream",0.207982371233808,0.00027,"p < 0.001"
+"5","tn.tp","inlet-outlet",0.216085169178876,3e-05,"p < 0.0001"
+"6","tn.tp","outlet-lake",0.297501027913564,0,"p < 0.0001"
+"7","NO3_ueqL","lake-network",0.0574395886889459,0.31389,NA
+"8","tn.tp","lake-network",0.182169491525424,0.00181,"p < 0.05"
+"9","NO3_ueqL","stream-network",0.0837160109076743,8e-05,"p < 0.0001"
+"10","tn.tp","stream-network",0.0443681652490888,0.33653,NA
+"11","pn.pp","lake-stream",0.0614186851211073,0.9355,NA
+"12","pn.pp","inlet-outlet",0.155677419354839,0.0356,"p < 0.05"
+"13","pn.pp","outlet-lake",0.0846774193548387,0.74023,NA
+"14","pn.pp","lake-network",0.0483636363636364,0.99152,NA
+"15","pn.pp","stream-network",0.0350415224913495,0.75938,NA
+"16","tdn.tdp","lake-stream",0.116506808487579,0.00365,"p < 0.05"
+"17","tdn.tdp","inlet-outlet",0.210596361912151,0,"p < 0.0001"
+"18","tdn.tdp","outlet-lake",0.238175357020858,0,"p < 0.0001"
+"19","tdn.tdp","lake-network",0.1055770609319,0.01545,"p < 0.05"
+"20","tdn.tdp","stream-network",0.0390950323974082,0.33657,NA
+"21","in.ip","lake-stream",0.156358548230702,0.00044,"p < 0.001"
+"22","in.ip","inlet-outlet",0.313155770782889,0,"p < 0.0001"
+"23","in.ip","outlet-lake",0.278900340697251,0,"p < 0.0001"
+"24","in.ip","lake-network",0.104619469026549,0.03536,"p < 0.05"
+"25","in.ip","stream-network",0.0671678224687933,0.04564,"p < 0.05"
+"26","don.dop","lake-stream",0.124157425527289,0.09791,NA
+"27","don.dop","inlet-outlet",0.138417119565217,0.24872,NA
+"28","don.dop","outlet-lake",0.138454861111111,0.07853,NA
+"29","don.dop","lake-network",0.11368253968254,0.11087,NA
+"30","don.dop","stream-network",0.0248584474885844,0.99178,NA
+"31","IN_umolL","lake-stream",0.14687667992689,0,"p < 0.0001"
+"32","IN_umolL","inlet-outlet",0.234144344115682,0,"p < 0.0001"
+"33","IN_umolL","outlet-lake",0.370692504252078,0,"p < 0.0001"
+"34","IN_umolL","lake-network",0.0705063613231553,0.12099,NA
+"35","IN_umolL","stream-network",0.0770140845070423,0.00062,"p < 0.001"
+"36","NH4_ueqL","lake-stream",0.0750712250712251,0.23527,NA
+"37","NH4_ueqL","inlet-outlet",0.266026836571129,0,"p < 0.0001"
+"38","NH4_ueqL","outlet-lake",0.130324729828979,0.00726,"p < 0.05"
+"39","NH4_ueqL","lake-network",0.0517777777777778,0.72767,NA
+"40","NH4_ueqL","stream-network",0.0352564102564102,0.43498,NA
+"41","PN_umolL","lake-stream",0.0781188508461236,0.6302,NA
+"42","PN_umolL","inlet-outlet",0.256064690026954,0,"p < 0.0001"
+"43","PN_umolL","outlet-lake",0.123809523809524,0.17873,NA
+"44","PN_umolL","lake-network",0.0365238095238095,0.99958,NA
+"45","PN_umolL","stream-network",0.0421184573002755,0.44458,NA
+"46","PP_umolL","lake-stream",0.133749674733281,0.03804,"p < 0.05"
+"47","PP_umolL","inlet-outlet",0.184754666368615,2e-04,"p < 0.001"
+"48","PP_umolL","outlet-lake",0.206838862365855,0.00058,"p < 0.001"
+"49","PP_umolL","lake-network",0.0713015873015873,0.62002,NA
+"50","PP_umolL","stream-network",0.0731748633879781,0.01199,"p < 0.05"
+"51","TDN_umolL","lake-stream",0.15216056057788,0,"p < 0.0001"
+"52","TDN_umolL","inlet-outlet",0.26278256446126,0,"p < 0.0001"
+"53","TDN_umolL","outlet-lake",0.365410946230988,0,"p < 0.0001"
+"54","TDN_umolL","lake-network",0.0773661202185792,0.08091,NA
+"55","TDN_umolL","stream-network",0.0825277044854882,0.00027,"p < 0.001"
+"56","TN_umolL","lake-stream",0.144126272209764,0.02117,"p < 0.05"
+"57","TN_umolL","inlet-outlet",0.22299983336904,0,"p < 0.0001"
+"58","TN_umolL","outlet-lake",0.316484025312548,0,"p < 0.0001"
+"59","TN_umolL","lake-network",0.0843548387096774,0.41234,NA
+"60","TN_umolL","stream-network",0.0650106951871658,0.03367,"p < 0.05"
+"61","TP_umolL","lake-stream",0.246102320494857,0,"p < 0.0001"
+"62","TP_umolL","inlet-outlet",0.0722916260003904,0.40203,NA
+"63","TP_umolL","outlet-lake",0.230765580512496,2e-05,"p < 0.0001"
+"64","TP_umolL","lake-network",0.139793103448276,0.01417,"p < 0.05"
+"65","TP_umolL","stream-network",0.115013875123885,0,"p < 0.0001"
+"66","TDP_umolL","lake-stream",0.0628555690206015,0.261,NA
+"67","TDP_umolL","inlet-outlet",0.0941930261027524,0.05692,NA
+"68","TDP_umolL","outlet-lake",0.0670012448746855,0.27816,NA
+"69","TDP_umolL","lake-network",0.0447571884984026,0.7261,NA
+"70","TDP_umolL","stream-network",0.029896551724138,0.66541,NA
+"71","DOP_umolL","lake-stream",0.0859975754944001,0.07751,NA
+"72","DOP_umolL","inlet-outlet",0.087012987012987,0.1416,NA
+"73","DOP_umolL","outlet-lake",0.074139468521491,0.254,NA
+"74","DOP_umolL","lake-network",0.0434194756554307,0.8218,NA
+"75","DOP_umolL","stream-network",0.0425780998389694,0.26771,NA
+"76","DON_umolL","lake-stream",0.180608220840285,3e-05,"p < 0.0001"
+"77","DON_umolL","inlet-outlet",0.22562666806217,0.00072,"p < 0.001"
+"78","DON_umolL","outlet-lake",0.217962418737198,0,"p < 0.0001"
+"79","DON_umolL","lake-network",0.110438596491228,0.02158,"p < 0.05"
+"80","DON_umolL","stream-network",0.0750979827089338,0.01969,"p < 0.05"
+"81","IP_umolL","lake-stream",0.170713726476286,6e-05,"p < 0.0001"
+"82","IP_umolL","inlet-outlet",0.226333098426122,0.00053,"p < 0.001"
+"83","IP_umolL","outlet-lake",0.219742489270386,0,"p < 0.0001"
+"84","IP_umolL","lake-network",0.087450643776824,0.1111,NA
+"85","IP_umolL","stream-network",0.0962636484687084,0.00071,"p < 0.001"
+"86","DOC_mgL","lake-stream",0.211228070175439,0,"p < 0.0001"
+"87","DOC_mgL","inlet-outlet",0.252461023974377,0,"p < 0.0001"
+"88","DOC_mgL","outlet-lake",0.150221250455516,0.00024,"p < 0.001"
+"89","DOC_mgL","lake-network",0.114877192982456,0.00574,"p < 0.05"
+"90","DOC_mgL","stream-network",0.107350877192983,0,"p < 0.0001"
