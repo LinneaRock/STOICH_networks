@@ -391,21 +391,45 @@ write_rds(GL5_ws_LC_raster, 'Data/Spatial_Data/GL5_LC_raster.RDS')
 
 
 
+# read in spatial data
+ALB_flow <- readRDS('Data/Spatial_Data/ALB_flowline.RDS')
+ALB_waterbody <- readRDS('Data/Spatial_Data/ALB_waterbody.RDS')
+ALB_LC <- readRDS('Data/Spatial_Data/ALB_LC.RDS')
+
+GL2_flow <- readRDS('Data/Spatial_Data/GL2_flowline.RDS')
+GL2_waterbody <- readRDS('Data/Spatial_Data/GL2_waterbody.RDS')
+GL2_LC <- readRDS('Data/Spatial_Data/GL2_LC.RDS')
+
+GL3_flow <- readRDS('Data/Spatial_Data/GL3_flowline.RDS')
+GL3_waterbody <- readRDS('Data/Spatial_Data/GL3_waterbody.RDS')
+GL3_LC <- readRDS('Data/Spatial_Data/GL3_LC.RDS')
+
+GL4_flow <- readRDS('Data/Spatial_Data/GL4_flowline.RDS')
+GL4_waterbody <- readRDS('Data/Spatial_Data/GL4_waterbody.RDS')
+GL4_LC <- readRDS('Data/Spatial_Data/GL4_LC.RDS')
+
+
+
+GL5_flow <- readRDS('Data/Spatial_Data/GL5_flowline.RDS') |>
+  mutate(WS_Group = 'GL5') |>
+  dplyr::select(WS_Group, FType, ReachCode, LengthKM, GNIS_Name, Permanent_Identifier, WBArea_Permanent_Identifier, Shape_Length, NHDPlusID, Shape)
+
+GL5_waterbody <- readRDS('Data/Spatial_Data/GL5_waterbody.RDS') |>
+  mutate(WS_Group = 'GL5') |>
+  mutate(Site = ifelse(GNIS_ID == '00202579', 'GL5_LAKE', GNIS_ID)) |>
+  dplyr::select(WS_Group, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+
+GL5_waterFeatures <- bind_rows(GL5_flow, GL5_waterbody)
+write_rds(GL5_waterFeatures, 'Data/Spatial_Data/GL5_waterFeatures.RDS')
+
+GL5_LC <- readRDS('Data/Spatial_Data/GL5_LC.RDS') |>
+  mutate(WS_Group = 'GL5')
 
 
 
 
 
 
-
-str(GL2_ws_LC_raster)
-test <- st_as_sf(GL2_ws_LC, coords=c('x','y'), crs=4269)
-
-
-ggplot() +
-  geom_sf(test, mapping=aes(color= Layer_1))+
-  geom_sf(GL2_ws_flowline, mapping=aes()) +
-  geom_sf(GL2_ws_waterbody, mapping=aes())
 
 
 

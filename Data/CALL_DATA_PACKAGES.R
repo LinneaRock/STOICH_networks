@@ -110,8 +110,7 @@ GL3_LC <- readRDS('Data/Spatial_Data/GL3_LC.RDS')
 GL4_flow <- readRDS('Data/Spatial_Data/GL4_flowline.RDS')
 GL4_waterbody <- readRDS('Data/Spatial_Data/GL4_waterbody.RDS')
 GL4_LC <- readRDS('Data/Spatial_Data/GL4_LC.RDS')
-GL5_flow <- readRDS('Data/Spatial_Data/GL5_flowline.RDS')
-GL5_waterbody <- readRDS('Data/Spatial_Data/GL5_waterbody.RDS')
+GL5_waterFeatures <- readRDS('Data/Spatial_Data/GL5_waterFeatures.RDS')
 GL5_LC <- readRDS('Data/Spatial_Data/GL5_LC.RDS')
 
 # sampling locations
