@@ -48,7 +48,7 @@ LCcolors <- NLCD |>
   dplyr::select(Layer_1) |>
   unique() |>
   drop_na() |>
-  mutate(LCcolors <- case_when(Layer_1=='Open Water'~'#476ba1',
+  mutate(color = case_when(Layer_1=='Open Water'~'#476ba1',
                                Layer_1=='Perennial Ice/Snow'~'#d1defa',
                                Layer_1=='Devleoped, High Intensity'~'#ab0000',
                                Layer_1=='Barren Land (Rock/Sand/Clay)'~'#b3aea3',
