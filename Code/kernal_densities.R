@@ -11,7 +11,7 @@ source('Data/CALL_DATA_PACKAGES.R')
 ## set-up ####
 
 nuts_param <- as.vector(unique(nuts$param))
-nuts_eco <- as.vector(c('lake', 'stream', 'glacier'))
+nuts_eco <- as.vector(c('lake', 'stream'))
 inlets <- as.vector(unique((nuts |> filter(grepl('INLET', site)))$site))
 outlets <- as.vector(unique((nuts |> filter(grepl('OUTLET', site)))$site))
 k_densities <- data.frame()
@@ -80,7 +80,7 @@ k_densities_NUTS <- left_join(k_densities, k_densities_tmp)
 ## set-up ####
 
 stoich_param <- as.vector(unique(stoich$param))
-stoich_eco <- as.vector(c('lake', 'stream', 'glacier'))
+stoich_eco <- as.vector(c('lake', 'stream'))
 inlets <- as.vector(unique((stoich |> filter(grepl('INLET', site)))$site))
 outlets <- as.vector(unique((stoich |> filter(grepl('OUTLET', site)))$site))
 k_densities <- data.frame()
@@ -197,6 +197,7 @@ for(p in 1:length(nuts_param)) { # start parameter loop
 } # close parameter loop 
 
 
+# get confidence interval for each parameter
 bootstrap_nut <- bootstrap_nut_kde |>
   group_by(param) |>
   mutate(SE = std.error(bs_kde),
@@ -247,6 +248,7 @@ for(p in 1:length(stoich_param)) { # start param loop
 } # end param loop
 
 
+# get confidence interval for each parameter
 bootstrap_stoich <- bootstrap_stoich_kde |>
   group_by(param) |>
   mutate(SE = std.error(bs_kde),
@@ -266,7 +268,7 @@ rm(N)
 rm(nsim)
 rm(nuts_param)
 rm(p)
-rm(s)
+rm(e)
 rm(sims)
 rm(stoich_param)
 rm(eco)
