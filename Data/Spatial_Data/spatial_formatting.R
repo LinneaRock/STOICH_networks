@@ -31,6 +31,7 @@ crs(NLCD_raster) # NAD83
 
 NLCD <- as.data.frame(NLCD_raster, xy=TRUE)
 
+
 # Layer number codes can be seen in NLCD Land Cover.gif
 NLCD <- NLCD |>
   mutate(Layer_1 = case_when(Layer_1==11~'Open Water',
@@ -41,7 +42,23 @@ NLCD <- NLCD |>
                              Layer_1==52~'Shrub/Scrub',
                              Layer_1==71~'Grasslands/Herbaceous',
                              Layer_1==90~'Woody Wetlands',
-                             Layer_1==95~'Emergent Herbaceous Wetlands'))
+                             Layer_1==95~'Emergent Herbaceous Wetlands')) 
+
+LCcolors <- NLCD |>
+  dplyr::select(Layer_1) |>
+  unique() |>
+  drop_na() |>
+  mutate(LCcolors <- case_when(Layer_1=='Open Water'~'#476ba1',
+                               Layer_1=='Perennial Ice/Snow'~'#d1defa',
+                               Layer_1=='Devleoped, High Intensity'~'#ab0000',
+                               Layer_1=='Barren Land (Rock/Sand/Clay)'~'#b3aea3',
+                               Layer_1=='Evergreen Forest'~'#1c6330',
+                               Layer_1=='Shrub/Scrub'~'#ccba7d',
+                               Layer_1=='Grasslands/Herbaceous'~'#e3e3c2',
+                               Layer_1=='Woody Wetlands'~'#bad9eb',
+                               Layer_1=='Emergent Herbaceous Wetlands'~'#b5d4e6'))
+
+write_rds(LCcolors, 'Data/Spatial_Data/LCcolors.RDS')
 
 # Check
 ggplot() +
@@ -340,10 +357,10 @@ GL5_ws_LC <- GL5_ws_LC_raster |>
   drop_na() |>
   group_by(Layer_1) |>
   mutate(pixels=n()) |>
-  mutate(LandCoverArea_km2 = round((pixels*30*30)/1e6,3)) |> # multiply by pixel area
+  mutate(LandCoverArea_km2 = round((pixels*30*30)/1e6,3)) |> # multiply by pixel area -- this is the total land cover in the subwatershed -- but will still plot correctly as the raster features are intact.
   ungroup() |>
   mutate(pixels=n()) |>
-  mutate(DrainageArea_km2 = round((pixels*30*30)/1e6,3)) |> # multiply by pixel area
+  mutate(DrainageArea_km2 = round((pixels*30*30)/1e6,3)) |> # multiply by pixel area -- this is the total drainage area
   ungroup() 
 
 
@@ -390,7 +407,7 @@ write_rds(GL5_ws_LC_raster, 'Data/Spatial_Data/GL5_LC_raster.RDS')
 
 
 
-
+# FORMAT DATA for DATA ANALYSIS ####
 # read in spatial data
 ALB_flow <- readRDS('Data/Spatial_Data/ALB_flowline.RDS')
 ALB_waterbody <- readRDS('Data/Spatial_Data/ALB_waterbody.RDS')
@@ -417,26 +434,168 @@ GL5_flow <- readRDS('Data/Spatial_Data/GL5_flowline.RDS') |>
 GL5_waterbody <- readRDS('Data/Spatial_Data/GL5_waterbody.RDS') |>
   mutate(WS_Group = 'GL5') |>
   mutate(Site = ifelse(GNIS_ID == '00202579', 'GL5_LAKE', GNIS_ID)) |>
-  dplyr::select(WS_Group, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+  dplyr::select(WS_Group, Site, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
 
 GL5_waterFeatures <- bind_rows(GL5_flow, GL5_waterbody)
 write_rds(GL5_waterFeatures, 'Data/Spatial_Data/GL5_waterFeatures.RDS')
 
 GL5_LC <- readRDS('Data/Spatial_Data/GL5_LC.RDS') |>
-  mutate(WS_Group = 'GL5')
+  mutate(WS_Group = 'GL5') 
+
+ggplot() +
+  geom_raster(data = GL3_LC, aes(x = x, y=y, fill= Layer_1)) +
+  scale_fill_viridis_d()+
+  coord_quickmap()
+
+# this is a studpid manual workaround :/
+gl5.tmp <-data.frame(WS_Group=c('GL5', 'GL5'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL5_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL5_waterbody |> filter(Site=='GL5_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+
+GL5_landuse <- GL5_LC |>
+  dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
+  distinct() |>
+  rbind(gl5.tmp)
+
+
+
+GL4_flow <- readRDS('Data/Spatial_Data/GL4_flowline.RDS') |>
+  mutate(WS_Group = 'GL4') |>
+  dplyr::select(WS_Group, FType, ReachCode, LengthKM, GNIS_Name, Permanent_Identifier, WBArea_Permanent_Identifier, Shape_Length, NHDPlusID, Shape)
+
+GL4_waterbody <- readRDS('Data/Spatial_Data/GL4_waterbody.RDS') |>
+  mutate(WS_Group = 'GL4') |>
+  mutate(Site = ifelse(ReachCode == '10190005001170', 'GL5_LAKE', 
+                       ifelse(ReachCode== '10190005001171', 'GL4_LAKE', NA))) |>
+  dplyr::select(WS_Group, Site, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+
+GL4_waterFeatures <- bind_rows(GL4_flow, GL4_waterbody)
+write_rds(GL4_waterFeatures, 'Data/Spatial_Data/GL4_waterFeatures.RDS')
+
+GL4_LC <- readRDS('Data/Spatial_Data/GL4_LC.RDS') |>
+  mutate(WS_Group = 'GL4') 
+
+ggplot() +
+  geom_raster(data = GL4_LC, aes(x = x, y=y, fill= Layer_1)) +
+  scale_fill_viridis_d()+
+  coord_quickmap()
+
+# this is a studpid manual workaround :/
+gl4.tmp <-data.frame(WS_Group=c('GL4', 'GL4'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL4_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL4_waterbody |> filter(Site=='GL4_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+
+GL4_landuse <- GL4_LC |>
+  dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
+  distinct() |>
+  rbind(gl4.tmp)
 
 
 
 
 
+GL3_flow <- readRDS('Data/Spatial_Data/GL3_flowline.RDS') |>
+  mutate(WS_Group = 'GL3') |>
+  dplyr::select(WS_Group, FType, ReachCode, LengthKM, GNIS_Name, Permanent_Identifier, WBArea_Permanent_Identifier, Shape_Length, NHDPlusID, Shape)
+
+GL3_waterbody <- readRDS('Data/Spatial_Data/GL3_waterbody.RDS') |>
+  mutate(WS_Group = 'GL3') |>
+  mutate(Site = ifelse(ReachCode == '10190005001170', 'GL5_LAKE', 
+                       ifelse(ReachCode== '10190005001171', 'GL4_LAKE',
+                              ifelse(ReachCode =='10190005001172', 'GL3_LAKE', NA)))) |>
+  dplyr::select(WS_Group, Site, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+
+GL3_waterFeatures <- bind_rows(GL3_flow, GL3_waterbody)
+write_rds(GL3_waterFeatures, 'Data/Spatial_Data/GL3_waterFeatures.RDS')
+
+GL3_LC <- readRDS('Data/Spatial_Data/GL3_LC.RDS') |>
+  mutate(WS_Group = 'GL3') 
+
+ggplot() +
+  geom_raster(data = GL3_LC, aes(x = x, y=y, fill= Layer_1)) +
+  scale_fill_viridis_d()+
+  coord_quickmap()
+
+# this is a studpid manual workaround :/
+GL3.tmp <-data.frame(WS_Group=c('GL3', 'GL3'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL3_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL3_waterbody |> filter(Site=='GL3_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+
+GL3_landuse <- GL3_LC |>
+  dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
+  distinct() |>
+  rbind(GL3.tmp)
+
+
+
+
+GL2_flow <- readRDS('Data/Spatial_Data/GL2_flowline.RDS') |>
+  mutate(WS_Group = 'GL2') |>
+  dplyr::select(WS_Group, FType, ReachCode, LengthKM, GNIS_Name, Permanent_Identifier, WBArea_Permanent_Identifier, Shape_Length, NHDPlusID, Shape)
+
+GL2_waterbody <- readRDS('Data/Spatial_Data/GL2_waterbody.RDS') |>
+  mutate(WS_Group = 'GL2') |>
+  mutate(Site = ifelse(ReachCode == '10190005001170', 'GL5_LAKE', 
+                       ifelse(ReachCode== '10190005001171', 'GL4_LAKE',
+                              ifelse(ReachCode =='10190005001172', 'GL3_LAKE', 
+                                     ifelse(ReachCode == '10190005001175', 'GL2_LAKE', NA))))) |>
+  dplyr::select(WS_Group, Site, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+
+GL2_waterFeatures <- bind_rows(GL2_flow, GL2_waterbody)
+write_rds(GL2_waterFeatures, 'Data/Spatial_Data/GL2_waterFeatures.RDS')
+
+GL2_LC <- readRDS('Data/Spatial_Data/GL2_LC.RDS') |>
+  mutate(WS_Group = 'GL2') 
+
+ggplot() +
+  geom_raster(data = GL2_LC, aes(x = x, y=y, fill= Layer_1)) +
+  scale_fill_viridis_d()+
+  coord_quickmap()
+
+# this is a studpid manual workaround :/
+GL2.tmp <-data.frame(WS_Group=c('GL2', 'GL2'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL2_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL2_waterbody |> filter(Site=='GL2_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+
+GL2_landuse <- GL2_LC |>
+  dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
+  distinct() |>
+  rbind(GL2.tmp)
+
+
+
+ALB_flow <- readRDS('Data/Spatial_Data/ALB_flowline.RDS') |>
+  mutate(WS_Group = 'ALB') |>
+  dplyr::select(WS_Group, FType, ReachCode, LengthKM, GNIS_Name, Permanent_Identifier, WBArea_Permanent_Identifier, Shape_Length, NHDPlusID, Shape)
+
+ALB_waterbody <- readRDS('Data/Spatial_Data/ALB_waterbody.RDS') |>
+  mutate(WS_Group = 'ALB') |>
+  mutate(Site = ifelse(ReachCode == '10190005001170', 'GL5_LAKE', 
+                       ifelse(ReachCode== '10190005001171', 'GL4_LAKE',
+                              ifelse(ReachCode =='10190005001172', 'GL3_LAKE', 
+                                     ifelse(ReachCode == '10190005001175', 'GL2_LAKE',
+                                            ifelse(ReachCode=='10190005001176', 'GL1_LAKE',
+                                                   ifelse(ReachCode =='10190005001181', 'ALB_LAKE', NA))))))) |>
+  dplyr::select(WS_Group, Site, FType, ReachCode, AreaSqKm, GNIS_Name, Permanent_Identifier, Shape_Length, NHDPlusID, Shape) 
+
+ALB_waterFeatures <- bind_rows(ALB_flow, ALB_waterbody)
+write_rds(ALB_waterFeatures, 'Data/Spatial_Data/ALB_waterFeatures.RDS')
+
+ALB_LC <- readRDS('Data/Spatial_Data/ALB_LC.RDS') |>
+  mutate(WS_Group = 'ALB') 
+
+ggplot() +
+  geom_raster(data = ALB_LC, aes(x = x, y=y, fill= Layer_1)) +
+  scale_fill_viridis_d()+
+  coord_quickmap()
+
+# this is a studpid manual workaround :/
+ALB.tmp <-data.frame(WS_Group=c('ALB', 'ALB'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((ALB_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((ALB_waterbody |> filter(Site=='ALB_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+
+ALB_landuse <- ALB_LC |>
+  dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
+  distinct() |>
+  rbind(ALB.tmp)
 
 
 
 
 
+greenlakes_LC <- bind_rows(GL5_landuse, GL4_landuse, GL3_landuse, GL2_landuse, ALB_landuse)
 
-
-
+write_rds(greenlakes_LC, 'Data/Spatial_Data/greenlakes_landcover.RDS')
 
 
 

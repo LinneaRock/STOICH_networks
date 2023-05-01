@@ -98,20 +98,7 @@ ggplot(stoich) +
 
 
 # read in spatial data
-ALB_flow <- readRDS('Data/Spatial_Data/ALB_flowline.RDS')
-ALB_waterbody <- readRDS('Data/Spatial_Data/ALB_waterbody.RDS')
-ALB_LC <- readRDS('Data/Spatial_Data/ALB_LC.RDS')
-GL2_flow <- readRDS('Data/Spatial_Data/GL2_flowline.RDS')
-GL2_waterbody <- readRDS('Data/Spatial_Data/GL2_waterbody.RDS')
-GL2_LC <- readRDS('Data/Spatial_Data/GL2_LC.RDS')
-GL3_flow <- readRDS('Data/Spatial_Data/GL3_flowline.RDS')
-GL3_waterbody <- readRDS('Data/Spatial_Data/GL3_waterbody.RDS')
-GL3_LC <- readRDS('Data/Spatial_Data/GL3_LC.RDS')
-GL4_flow <- readRDS('Data/Spatial_Data/GL4_flowline.RDS')
-GL4_waterbody <- readRDS('Data/Spatial_Data/GL4_waterbody.RDS')
-GL4_LC <- readRDS('Data/Spatial_Data/GL4_LC.RDS')
-GL5_waterFeatures <- readRDS('Data/Spatial_Data/GL5_waterFeatures.RDS')
-GL5_LC <- readRDS('Data/Spatial_Data/GL5_LC.RDS')
+greenlakes_LC <- read_rds('Data/Spatial_Data/greenlakes_landcover.RDS')
 
 # sampling locations
 sites <- read.csv('Data/sites.csv') |>
