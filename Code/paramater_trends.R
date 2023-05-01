@@ -8,7 +8,6 @@ source('Data/CALL_DATA_PACKAGES.R')
 ## Prepare data ####
 nuts.lm <- nuts |>
  filter(!param %in% c('NH4_ueqL', 'NO3_ueqL', 'DOC_mgL')) |> # I don't want to look at these at the moment
-  filter(eco_type != 'glacier') |>   # let's skip the glacier becuase I am more interested in the lake-stream part of the network
   mutate(year=year(date)) |>
   group_by(network_position, param) |>
   add_count() |>
@@ -16,7 +15,6 @@ nuts.lm <- nuts |>
   filter(n>3)
 
 stoich.lm <- stoich |>
-  filter(eco_type != 'glacier') |>   # let's skip the glacier becuase I am more interested in the lake-stream part of the network
   mutate(year=year(date)) |>
   group_by(network_position, param) |>
   add_count() |>
@@ -108,10 +106,8 @@ summary(gam0)
 # From the broom package
 glance(gam0)
 tidy(gam0)
-# Create nested list using list()
-my_nested_list1 <- list(list_1,                  
-                        list_2,
-                        list_3)
+
+
 
 #### Extract network_positions ####
 networkPos <- with(stoich.gam, data.frame(network_position=seq(min(network_position), max(network_position), length.out=20)))
@@ -172,5 +168,4 @@ Pred %>%
   # scale_y_continuous(breaks=seq(22,30,2))+
   theme_pubr(base_size=8, border=TRUE)
 
-ggsave(plot=last_plot(), "Day2/figures/GAM_example.png",
-       dpi=600, width = 6, height = 5, units = 'in')
+
