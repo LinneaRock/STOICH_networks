@@ -448,7 +448,7 @@ ggplot() +
   coord_quickmap()
 
 # this is a studpid manual workaround :/
-gl5.tmp <-data.frame(WS_Group=c('GL5', 'GL5'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL5_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL5_waterbody |> filter(Site=='GL5_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+gl5.tmp <-data.frame(WS_Group=c('GL5', 'GL5'), Layer_1=c('Drainage Area', 'Lake Area'), LandCoverArea_km2=c(as.numeric(unique((GL5_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL5_waterbody |> filter(Site=='GL5_LAKE') |> dplyr::select(AreaSqKm))))[1]))
 
 GL5_landuse <- GL5_LC |>
   dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
@@ -479,7 +479,7 @@ ggplot() +
   coord_quickmap()
 
 # this is a studpid manual workaround :/
-gl4.tmp <-data.frame(WS_Group=c('GL4', 'GL4'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL4_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL4_waterbody |> filter(Site=='GL4_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+gl4.tmp <-data.frame(WS_Group=c('GL4', 'GL4'), Layer_1=c('Drainage Area', 'Lake Area'), LandCoverArea_km2=c(as.numeric(unique((GL4_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL4_waterbody |> filter(Site=='GL4_LAKE') |> dplyr::select(AreaSqKm))))[1]))
 
 GL4_landuse <- GL4_LC |>
   dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
@@ -513,7 +513,7 @@ ggplot() +
   coord_quickmap()
 
 # this is a studpid manual workaround :/
-GL3.tmp <-data.frame(WS_Group=c('GL3', 'GL3'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL3_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL3_waterbody |> filter(Site=='GL3_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+GL3.tmp <-data.frame(WS_Group=c('GL3', 'GL3'), Layer_1=c('Drainage Area', 'Lake Area'), LandCoverArea_km2=c(as.numeric(unique((GL3_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL3_waterbody |> filter(Site=='GL3_LAKE') |> dplyr::select(AreaSqKm))))[1]))
 
 GL3_landuse <- GL3_LC |>
   dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
@@ -547,7 +547,7 @@ ggplot() +
   coord_quickmap()
 
 # this is a studpid manual workaround :/
-GL2.tmp <-data.frame(WS_Group=c('GL2', 'GL2'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((GL2_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL2_waterbody |> filter(Site=='GL2_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+GL2.tmp <-data.frame(WS_Group=c('GL2', 'GL2'), Layer_1=c('Drainage Area', 'Lake Area'), LandCoverArea_km2=c(as.numeric(unique((GL2_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((GL2_waterbody |> filter(Site=='GL2_LAKE') |> dplyr::select(AreaSqKm))))[1]))
 
 GL2_landuse <- GL2_LC |>
   dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>
@@ -582,7 +582,7 @@ ggplot() +
   coord_quickmap()
 
 # this is a studpid manual workaround :/
-ALB.tmp <-data.frame(WS_Group=c('ALB', 'ALB'), Layer_1=c('Drainage Area', 'LAKE Area'), LandCoverArea_km2=c(as.numeric(unique((ALB_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((ALB_waterbody |> filter(Site=='ALB_LAKE') |> dplyr::select(AreaSqKm))))[1]))
+ALB.tmp <-data.frame(WS_Group=c('ALB', 'ALB'), Layer_1=c('Drainage Area', 'Lake Area'), LandCoverArea_km2=c(as.numeric(unique((ALB_LC |> dplyr::select(DrainageArea_km2)))), as.numeric(unique((ALB_waterbody |> filter(Site=='ALB_LAKE') |> dplyr::select(AreaSqKm))))[1]))
 
 ALB_landuse <- ALB_LC |>
   dplyr::select(WS_Group, Layer_1, LandCoverArea_km2) |>

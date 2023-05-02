@@ -1,5 +1,5 @@
 
-sites <- read.csv('Data/sites.csv')
+#sites <- read.csv('Data/sites.csv')
 
 # network <- leaflet() |>
 #   addTiles() |>
@@ -20,10 +20,10 @@ sites <- read.csv('Data/sites.csv')
 #   addProviderTiles(providers$Stamen.TopOSMFeatures) |>
 #   addGraticule()
 
-sites2 <- sites |> filter(site != "FLUME")
+
 network2 <- leaflet() |>
   addTiles() |>
-  addMarkers(lng = sites2$long, lat = sites2$lat, popup = paste0(sites2$site, sites2$network_position))
+  addMarkers(sites$geometry, popup = paste0(sites$site, sites$network_position))
 
 network2 |>
   addProviderTiles(providers$Stamen.TopOSMFeatures)

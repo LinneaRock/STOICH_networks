@@ -47,13 +47,14 @@ library(mgcv)
 #   dplyr::select(-X)
 
 nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
+  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
   mutate(date = as.Date(date)) |>
   filter(site != 'FLUME',
          eco_type != 'glacier',
          site != 'ALB_CAMP') |>
-  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+  mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
-                                                                '12a','13','14','15','16'))) |>
+                                                                '12a','13','14','15'))) |>
   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
   dplyr::select(-X)
 
@@ -62,9 +63,9 @@ stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
   filter(site != 'FLUME',
          eco_type != 'glacier',
          site != 'ALB_CAMP') |>
-  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+  mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
-                                                                '12a','13','14','15','16'))) |>
+                                                                '12a','13','14','15'))) |>
   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
   dplyr::select(-X)
 
@@ -107,5 +108,10 @@ sites <- read.csv('Data/sites.csv') |>
   filter(site != 'FLUME',
          eco_type != 'glacier',
          site != 'ALB_CAMP') |>
+  mutate(WS_Group = ifelse(site %in% c('ALB_INLET', 'ALB_LAKE', 'ALB_OUTLET', 'GL1_LAKE'),'ALB',
+                           ifelse(site %in% c('GL2_LAKE'),'GL2',
+                                  ifelse(site %in% c('GL3_INLET', 'GL3_LAKE', 'GL3_OUTLET'),'GL3',
+                                         ifelse(site %in% c('GL4_INLET','GL4_LAKE', 'GL4_OUTLET'),'GL4',
+                                                ifelse(site %in% c('GL5_INLET', 'GL5_LAKE', 'GL5_OUTLET'),'GL5', NA)))))) |>
   drop_na(lat) |>
   st_as_sf(coords=c('long','lat'),crs=4269)
