@@ -204,7 +204,7 @@ ggplot(testing.dat) +
 
 
 # RF Q?: Can outlet nutrients be predicted from inlets?  ####
-## TP ###
+## TP or TN ####
 ### summarise the data ####
 rf.data <- nuts |>
   left_join(as.data.frame(sites |> select(site,WS_Group) |> mutate(geometry=NULL)))|>
@@ -252,17 +252,12 @@ split <- initial_split(rf.data, prop=0.80)
 training.dat <- training(split) |> mutate_if(is.numeric, round, digits=2)
 testing.dat <- testing(split) |> mutate_if(is.numeric, round, digits=2) 
 
-# rf_fit <- randomForest(WS_Group ~ .,
-#                         data = training.dat,
-#                         importance=TRUE
-#                         #ntree=1000,
-#                         #mtry=10
-# )
+# model with default parameters
 rf_default <- train(outlet ~.,
                 training.dat,
                 metric='RMSE',
                 method='rf',
-                tuneGrid=expand.grid(.mtry=sqrt(ncol(training.dat))),
+                tuneGrid=expand.grid(.mtry=ncol(training.dat)/3),
                 ntree=500,
                 trControl=trainControl(method='cv', number=10))
 
@@ -280,8 +275,11 @@ rf_mtry <- train(outlet~.,
                  trControl = trainControl(method = "cv",
                                           number = 10,
                                           search = "grid"))
+
 print(rf_mtry) 
 plot(rf_mtry) 
+# 4 for TP
+# 10 for TN
 
 
 # find best ntrees
@@ -301,6 +299,7 @@ for (ntree in c(100, 150, 250, 300, 350, 400, 450, 500, 800, 1000, 2000)) {
   store_maxtrees[[key]] <- rf_maxtrees
 }
 results_tree <- resamples(store_maxtrees)
+
 summary(results_tree) # looks like 400 is best
 
 
