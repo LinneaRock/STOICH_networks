@@ -204,7 +204,7 @@ ggplot(testing.dat) +
 
 
 # RF Q?: Can outlet nutrients be predicted from inlets?  ####
-
+## TP ###
 ### summarise the data ####
 rf.data <- nuts |>
   left_join(as.data.frame(sites |> select(site,WS_Group) |> mutate(geometry=NULL)))|>
@@ -258,89 +258,70 @@ testing.dat <- testing(split) |> mutate_if(is.numeric, round, digits=2)
 #                         #ntree=1000,
 #                         #mtry=10
 # )
-rf_fit <- train(outlet ~.,
+rf_default <- train(outlet ~.,
                 training.dat,
-                importance=TRUE,
+                metric='RMSE',
                 method='rf',
-                trControl=trainControl(method='cv', number=5))
-summary(rf_fit)
-plot(rf_fit)
-# varImpPlot(rf_fit, type = 1, scale = FALSE,
-#            n.var = ncol(rf.data) - 1, cex = 0.8,
-#            main = "Variable importance")
+                tuneGrid=expand.grid(.mtry=sqrt(ncol(training.dat))),
+                ntree=500,
+                trControl=trainControl(method='cv', number=10))
 
-rf_fit # mtry=8
-
-
-
-
-
-# Define the control: K-fold cross validation
-trControl <- trainControl(method = "cv",
-                          number = 5,
-                          search = "grid")
+rf_default
 
 
 
 # find best mtry
 set.seed(62693)
-tuneGrid <- expand.grid(.mtry = c(1: 10))
 rf_mtry <- train(outlet~.,
                  data = training.dat,
                  method = "rf",
                  metric = "RMSE",
-                 tuneGrid = tuneGrid,
-                 trControl = trControl,
-                 importance = TRUE,
-                 nodesize = 14,
-                 ntree = 300)
+                 tuneGrid = expand.grid(.mtry = c(1: 10)),
+                 trControl = trainControl(method = "cv",
+                                          number = 10,
+                                          search = "grid"))
 print(rf_mtry) 
-plot(rf_mtry) # 6 best
-best_mtry <- rf_mtry$bestTune$mtry # this says 6is best?
-min(rf_mtry$results$RMSE) # 0.0589 better!
+plot(rf_mtry) 
 
 
-# find best maxnodes
-store_maxnode <- list()
-tuneGrid <- expand.grid(.mtry = best_mtry)
-for (maxnodes in c(5:15)) {
+# find best ntrees
+store_maxtrees <- list()
+for (ntree in c(100, 150, 250, 300, 350, 400, 450, 500, 800, 1000, 2000)) {
   set.seed(62693)
-  rf_maxnode <- train(outlet~.,
-                      data = training.dat,
-                      method = "rf",
-                      metric = "RMSE",
-                      tuneGrid = tuneGrid,
-                      trControl = trControl,
-                      importance = TRUE,
-                      nodesize = 14,
-                      maxnodes = maxnodes,
-                      ntree = 300)
-  current_iteration <- toString(maxnodes)
-  store_maxnode[[current_iteration]] <- rf_maxnode
+  rf_maxtrees <- train(outlet~.,
+                       data = training.dat,
+                       method = "rf",
+                       metric = "RMSE",
+                       tuneGrid = expand.grid(.mtry = c(1: 10)),
+                       trControl = trainControl(method = "cv",
+                                                number = 10,
+                                                search = "grid"),
+                       ntree = ntree)
+  key <- toString(ntree)
+  store_maxtrees[[key]] <- rf_maxtrees
 }
-results_mtry <- resamples(store_maxnode)
-summary(results_mtry)
+results_tree <- resamples(store_maxtrees)
+summary(results_tree) # looks like 400 is best
 
 
 
 
-
-
-# train the model with the hyperparameters
+# fit the model with the best hyperparameters
 fit_rf <- randomForest(outlet~.,
                        training.dat,
                        method = "rf",
                        metric = "RMSE",
-                       tuneGrid = tuneGrid,
-                       trControl = trControl,
+                       tuneGrid = expand.grid(.mtry = c(1: 10)),
+                       trControl = trainControl(method = "cv",
+                                                number = 10),
                        importance = TRUE,
-                       #mtry = 6,
-                       #nodesize = 5,
-                       ntree = 500)
-
+                       mtry = 4,
+                       ntree = 400)
+# get predicted values
 testing.dat$prediction <- predict(fit_rf, testing.dat)
 
-class(fit_rf)
+fit_rf
+
 varImpPlot(fit_rf)
 plot(fit_rf)
 
@@ -357,7 +338,7 @@ ggplot(testing.dat) +
   geom_point(aes(prediction, outlet)) +
   theme_classic() +
   labs(x='Predicted TP concentration', y='Actual Values') +
-  geom_abline(slope=1, intercept=0, color='red4', linetype='dotted')
+  geom_abline(slope=1, intercept=0, color='red4')
 
 
 
