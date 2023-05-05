@@ -28,7 +28,7 @@ nuts_prod_lakes <- nuts |>
          GL2 = ALB_INLET - GL3_OUTLET,
          ALBION = ALB_OUTLET - ALB_INLET) |>
   ungroup() |>
-  select(2:4, 21:25) |>
+  select(2:4, 19:23) |>
   pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result) |>
   group_by(param) |>
@@ -65,16 +65,16 @@ nuts_prod_streams <- nuts |>
   #        reach5 = ALB_LAKE - GL2_LAKE,
   #        reach5a = ALB_LAKE - GL1_LAKE,
   #        reach6 = ALB_CAMP - ALB_LAKE) |>
-  mutate(reach1 = GL5_INLET - ARIKAREE,
-         reach2 = GL4_INLET - GL5_OUTLET,
-         reach3 = GL3_INLET - GL4_OUTLET,
-         reach4 = GL2_LAKE - GL3_OUTLET,
-         reach5 = ALB_INLET - GL2_LAKE,
-         reach5a = ALB_LAKE - GL1_LAKE,
-         reach6 = ALB_CAMP - ALB_OUTLET) |>
+  mutate(#reach1 = GL5_INLET - ARIKAREE,
+         reach1 = GL4_INLET - GL5_OUTLET,
+         reach2 = GL3_INLET - GL4_OUTLET,
+         reach3 = GL2_LAKE - GL3_OUTLET,
+         reach4 = ALB_INLET - GL2_LAKE,
+         reach4a = ALB_LAKE - GL1_LAKE) |>
+         #reach6 = ALB_CAMP - ALB_OUTLET) |>
   ungroup() |>
-  select(2:4, 21:27) |>
-  pivot_longer(4:10, names_to = 'lake_stream', values_to = 'result') |>
+  select(2:4, 19:23) |>
+  pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result)|>
   group_by(param) |>
   # using two-tailed wilcoxon test to test if productivity is different from zero 

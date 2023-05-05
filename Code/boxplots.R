@@ -1,6 +1,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Script to make parameter boxplots and perform the non-parametric :) 
-# Kruskal-Wallis tests -- let's explore seasonaly variation
+# Kruskal-Wallis tests -- let's explore seasonaly variation & MORE
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 source('Data/CALL_DATA_PACKAGES.R') 
 seas <- c('Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec')
