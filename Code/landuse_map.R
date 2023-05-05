@@ -65,6 +65,6 @@ ggplot() +
   theme_bw() +
   labs(x='',y='')
 
-ggsave('Figures/Location_Map.png', height=4.5,width=4.5, units='in',dpi=1200)
+ggsave('Figures/Location_Map.png', height=6.5,width=8.5, units='in',dpi=1200)
 
 

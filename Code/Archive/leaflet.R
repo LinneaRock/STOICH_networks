@@ -1,4 +1,5 @@
 
+library(leaflet)
 #sites <- read.csv('Data/sites.csv')
 
 # network <- leaflet() |>
