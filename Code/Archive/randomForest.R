@@ -65,7 +65,7 @@ rf.data <- stoich |>
          Drainage = 'Drainage Area',
          LakeArea = 'Lake Area',
          DrainageArea = 'drn') |>
-  select(-Drainage, -date, - WS_Group) 
+  select(-Drainage, -date, - WS_Group, -season) 
   
 
 # use 80% data for training, 20% for testing
@@ -173,7 +173,7 @@ rf.data <- nuts |>
   mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
   mutate(position = ifelse(grepl('LAKE', site), 'lake',
                            ifelse(grepl('INLET', site), 'inlet', 'outlet'))) |>
-  filter(param=='TP_umolL') |>
+  filter(param=='TN_umolL') |>
   group_by(WS_Group, date, season, position) |>
   summarise(result=mean(result)) |>
   ungroup() |>
@@ -205,7 +205,7 @@ rf.data <- nuts |>
          Drainage = 'Drainage Area',
          LakeArea = 'Lake Area',
          DrainageArea = 'drn') |>
-  select(-Drainage, -WS_Group, -date) 
+  select(-Drainage, -WS_Group, -date, -season) 
 
 
 # use 80% data for training, 20% for testing - stratified by eco_type
@@ -275,8 +275,8 @@ fit_rf <- randomForest(outlet~.,
                        trControl = trainControl(method = "cv",
                                                 number = 10),
                        importance = TRUE,
-                       mtry = 4,
-                       ntree = 400)
+                       mtry = 10,
+                       ntree = 100)
 # get predicted values
 testing.dat$prediction <- predict(fit_rf, testing.dat)
 
