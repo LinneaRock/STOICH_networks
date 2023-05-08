@@ -29,6 +29,7 @@ library(matrixStats)
 library(trend)
 library(broom)
 library(mgcv)
+library(Matrix)
 
 
 
@@ -114,3 +115,37 @@ sites <- read.csv('Data/sites.csv') |>
                                                 ifelse(site %in% c('GL5_INLET', 'GL5_LAKE', 'GL5_OUTLET'),'GL5', NA)))))) |>
   drop_na(lat) |>
   st_as_sf(coords=c('long','lat'),crs=4269)
+
+
+# read in distances between locations first 
+distances <- read.csv('Data/site_distances_Km.csv', header = TRUE)
+rownames(distances) <- distances$X
+distances[,1] <- NULL
+
+Correct_Colnames <- function(df) {
+  
+  delete.columns <- grep("(^X$)|(^X\\.)(\\d+)($)", colnames(df), perl=T)
+  
+  if (length(delete.columns) > 0) {
+    
+    row.names(df) <- as.character(df[, grep("^X$", colnames(df))])
+    #other data types might apply than character or 
+    #introduction of a new separate column might be suitable
+    
+    df <- df[,-delete.columns]
+    
+    colnames(df) <- gsub("^X", "",  colnames(df))
+    #X might be replaced by different characters, instead of being deleted
+  }
+  
+  return(df)
+}
+
+distances <- as.matrix(Correct_Colnames(distances))
+distances[lower.tri(distances, diag=TRUE)] <- NA
+distances_Km <- as.data.frame(distances) |>
+  select(-1) |>
+  rownames_to_column('site1') |>
+  pivot_longer(2:13, names_to = 'site2', values_to = 'distance_Km') |>
+  drop_na()
+
