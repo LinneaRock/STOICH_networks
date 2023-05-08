@@ -17,4 +17,26 @@ sites <- read.csv('Data/sites.csv') |>
 class(sites) # sf, df
 crs(sites) # NAD83
 
-line2network(nhd)
+
+
+
+
+library(sfnetworks)
+net <- as_sfnetwork(flowlines |> filter(!is.na(GNIS_ID)),directed=TRUE)
+plot(net)
+
+# Find the nearest node on the network for each point
+from_node <- st_nearest_feature((sites |> filter(site=='ALB_INLET')), net)
+to_node <- st_nearest_feature((sites |> filter(site=='ALB_OUTLET')), net)
+
+
+path <- st_network_paths(net, from=from_node, to=to_node)
+library(units)
+path <- path |>
+  select(node_paths) |>
+  unlist()
+distance <- sum(path)/1000 
+
+ggplot() +
+  geom_sf(flowlines |> filter(!is.na(GNIS_ID)), mapping=aes(color=ReachCode))
+
