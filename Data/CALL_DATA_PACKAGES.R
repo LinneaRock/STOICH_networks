@@ -119,8 +119,8 @@ sites <- read.csv('Data/sites.csv') |>
 
 # read in distances between locations first 
 distances <- read.csv('Data/site_distances_Km.csv', header = TRUE)
-rownames(distances) <- distances$X
-distances[,1] <- NULL
+# rownames(distances) <- distances$X
+# distances[,1] <- NULL
 
 Correct_Colnames <- function(df) {
   
@@ -141,11 +141,11 @@ Correct_Colnames <- function(df) {
   return(df)
 }
 
-distances <- as.matrix(Correct_Colnames(distances))
+distances <-as.matrix(Correct_Colnames(distances))
 distances[lower.tri(distances, diag=TRUE)] <- NA
 distances_Km <- as.data.frame(distances) |>
   select(-1) |>
   rownames_to_column('site1') |>
-  pivot_longer(2:13, names_to = 'site2', values_to = 'distance_Km') |>
+  pivot_longer(2:14, names_to = 'site2', values_to = 'distance_Km') |>
   drop_na()
 

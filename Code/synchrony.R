@@ -150,3 +150,16 @@ ggplot(sync_dist_all, aes(distance_Km, correlation)) +
   theme_classic() +
   labs(x='Distance between sites (Km)', y='Correlation coefficient')
 ggsave('Figures/synchrony/synchrony_distance_plot.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+
+
+
+
+
+# plot for class project
+ggplot(sync_dist_all |> filter(param %in% c('TN:TP', 'TN', 'TP')), aes(distance_Km, correlation)) +
+  geom_abline(slope=0, intercept=0, color = 'red4') +
+  geom_point() +
+  geom_smooth(se=FALSE) +
+  facet_wrap(~param, ncol=3) +
+  theme_bw() +
+  labs(x='Distance between sites (Km)', y='Correlation coefficient')
