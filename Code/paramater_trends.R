@@ -7,7 +7,6 @@ source('Data/CALL_DATA_PACKAGES.R')
 
 ## Prepare data ####
 nuts.lm <- nuts |>
- filter(!param %in% c('NH4_ueqL', 'NO3_ueqL', 'DOC_mgL')) |> # I don't want to look at these at the moment
   mutate(year=year(date)) |>
   group_by(network_position, param) |>
   add_count() |>

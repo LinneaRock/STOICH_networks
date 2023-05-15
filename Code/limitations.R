@@ -5,6 +5,7 @@
 
 source('Data/CALL_DATA_PACKAGES.R')
 
+# set up data ####
 medians <- nuts |>
   pivot_wider(names_from = param, values_from = result) |>
   group_by(site, year(date), season) |>
@@ -13,7 +14,7 @@ medians <- nuts |>
          yearlymedTN_umolL = median(TN_umolL, na.rm = TRUE),
          yearlymedIP_umolL = median(IP_umolL, na.rm = TRUE)) |>
   ungroup() |>
-  select(site, season, `year(date)`,eco_type, yearlymedTP_umolL, yearlymedIP_umolL, yearlymedIN_umolL, yearlymedTN_umolL) |>
+  select(site, network_position, season, `year(date)`,eco_type, yearlymedTP_umolL, yearlymedIP_umolL, yearlymedIN_umolL, yearlymedTN_umolL) |>
   distinct() |>
   group_by(site, season) |>
   mutate(MEDTP_umolL = median(yearlymedTP_umolL, na.rm = TRUE),
@@ -21,7 +22,7 @@ medians <- nuts |>
          MEDIN_umolL = median(yearlymedIN_umolL, na.rm = TRUE),
          MEDIP_umolL = median(yearlymedIP_umolL, na.rm = TRUE)) |>
   ungroup() |>
-  select(site, season, eco_type, MEDTP_umolL, MEDTN_umolL, MEDIP_umolL, MEDIN_umolL) |>
+  select(site, network_position, season, eco_type, MEDTP_umolL, MEDTN_umolL, MEDIP_umolL, MEDIN_umolL) |>
   distinct()
 
 nuts_wide <- nuts |>
@@ -46,7 +47,104 @@ ggplot() +
            x = -1.25, y = 0.75, hjust = 0, size = 4) 
   
 
-# TN:TP limitation ####
+
+
+## color by network position ####
+ggplot() +
+  geom_point(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
+                                      fill = network_position), shape = 21, alpha = 0.5) +
+  geom_point(medians, mapping = aes(log10(MEDTP_umolL), log10(MEDIN_umolL/MEDTP_umolL), 
+                                    color = network_position), size = 3) +
+  geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
+  geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
+  theme_classic() +
+  scale_color_viridis_d('Network Position') +
+  scale_fill_viridis_d('Network Position') +
+  labs(y = "Log DIN:TP", x = "Log TP") +
+  guides(fill=guide_legend(ncol=2),
+         color=guide_legend(ncol=2)) +
+  annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
+           x = -1, y = 0.1, hjust = 0, size = 2) +
+  annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
+           x = -1.25, y = 0.65, hjust = 0, size = 2)
+
+ggsave('Figures/Limitation/nutrient_limitation.png',width=6.25, height=4.25, units='in')
+
+
+## test for differences in limitation ####
+### boxplot and kruskal wallis test ####
+#get significance to add to figure using geom_text 
+
+tmp_lim <- nuts_wide |>
+  mutate(lim = log10(IN_umolL/TP_umolL)) |>
+  drop_na(lim) |>
+  filter(is.finite(lim))
+
+  h <- aov(lim~network_position, tmp_lim)
+  tukey <- TukeyHSD(h)
+  cld <- multcompLetters4(h, tukey)
+  cld2 <- data.frame(letters = cld$network_position$Letters) 
+  cld2$network_position <- rownames(cld2)
+  sig.letters <- cld2
+
+
+sig.letters <- sig.letters |>
+  drop_na(letters) 
+
+means <- left_join(tmp_lim, sig.letters) |>
+  group_by(letters, network_position) |>
+  summarise(max.result = max(lim, na.rm = TRUE)) |>
+  distinct()
+
+
+ggplot(nuts_wide, aes(network_position, log10(IN_umolL/TP_umolL), group = network_position)) +
+  geom_jitter(aes(color=eco_type), shape = 16, size =2, alpha = 0.2,
+              position=position_jitter(0.3)) +
+  geom_boxplot(alpha = 0.2) +
+  # stat_summary(geom = 'point', fun = 'mean', fill = 'black', color = 'white', size = 1.5, shape = 24) +
+  theme_bw(base_size = 15) +
+  theme(plot.title = element_text(face='bold', family='serif',
+                                  size=rel(1.2), hjust=0.5),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_blank(),
+        text=element_text(family='serif'),
+        axis.text=element_text(color='black')) +
+  labs(x = 'Network Position', y = '') +
+  geom_text(means, mapping=aes(network_position, 
+                               max.result, label = letters), 
+            color='red4', size=4) +
+  # ^^ Kruskal-Wallis test comparing lakes along network 
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1))) +
+  theme(axis.text.x = element_text(angle=45, vjust=1,hjust=1))
+
+ggsave('Figures/Limitation/limitation_KWtest.png',width=6.25, height=4.25, units='in')
+
+
+### Mann-Kendall/Thiel-Sens (non-parametric) test to see if there is a significant trend along the network ####
+mk_lim_dat <- tmp_lim |>
+  select(network_position, lim) |>
+  arrange(network_position)
+
+sens.slope(mk_lim_dat$lim) # this one line provides all the same information as below
+
+#### Notes from test!! ####
+# The Mann-Kendall test and Thiel-Sen slope tell us that DIN:TP ratio that there is a significant decrease along the network in DIN:TP ratio. So while the entire network is P-limited, it moves closer toward exiting P-limitation as we move further down the network. 
+
+
+# mk_lim <- mk_lim_dat |>
+#   summarise(z.stat = glance(mk.test(lim))$statistic,
+#             p.value = glance(mk.test(lim))$p.value,
+#             n = glance(mk.test(lim))$parameter,
+#             ### Calculate Sen's slope and add to dataframe ####
+#             slope = as.numeric(sens.slope(lim)[[1]])) 
+
+
+
+
+# Other Explorations of nutrient limitation ####
+
+
+## TN:TP limitation ####
 ggplot() +
   geom_point(nuts_wide, mapping=aes(log10(TP_umolL), log10(TN_umolL/TP_umolL), fill = season), 
              size = 2.5, shape = 21, alpha = 0.2) +
@@ -75,9 +173,9 @@ ggplot() +
            x = 1, y = 1.76, hjust = 0, size = 2.5, color = "#ffc857")
 
 
-ggsave('lims.png',width=8, height=6, units='in')
 
-# DIN:DIP limitation ####
+
+## DIN:DIP limitation ####
 ggplot(nuts_wide) +
   geom_point(aes(log10(IP_umolL), log10((IN_umolL/IP_umolL)), fill = season), size = 2.5, shape = 21, alpha = 0.2) +
   geom_point(medians, mapping = aes(log10(MEDIP_umolL), log10(MEDIN_umolL/MEDIP_umolL), 
