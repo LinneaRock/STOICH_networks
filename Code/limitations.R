@@ -141,6 +141,28 @@ sens.slope(mk_lim_dat$lim) # this one line provides all the same information as 
 
 
 
+## Check out DIN:TP inlet vs outlet
+inout <- tmp_lim |>
+  select(site, network_position, lim, date) |>
+  mutate(position = ifelse(grepl("INLET", site), 'inlet', NA)) |>
+  mutate(position = ifelse(grepl("OUTLET", site), 'outlet', position)) |>
+  filter(!is.na(position)) |>
+  left_join(sites) |>
+  left_join(greenlakes_LC) |>
+  select(-Layer_1, -LandCoverArea_km2) |>
+  distinct() |>
+  pivot_wider(id_cols = c('WS_Group', 'date'),names_from = 'position', values_from = 'lim')|>
+  drop_na()
+
+ggplot(inout, aes(inlet, outlet)) +
+  geom_point() +
+  geom_abline(slope=1, intercept=0) +
+  labs(x='Inlet DIN:TP', y='Outlet DIN:TP') +
+  theme_classic()
+ggsave('Figures/Limitation/limitation_inletoutlet.png',width=6.25, height=4.25, units='in')
+
+
+
 # Other Explorations of nutrient limitation ####
 
 
