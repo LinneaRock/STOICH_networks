@@ -143,24 +143,46 @@ sens.slope(mk_lim_dat$lim) # this one line provides all the same information as 
 
 ## Check out DIN:TP inlet vs outlet
 inout <- tmp_lim |>
-  select(site, network_position, lim, date) |>
+  select(site, network_position, lim, date ,eco_type) |>
   mutate(position = ifelse(grepl("INLET", site), 'inlet', NA)) |>
   mutate(position = ifelse(grepl("OUTLET", site), 'outlet', position)) |>
-  filter(!is.na(position)) |>
+  mutate(position = ifelse(eco_type=='lake', 'in-lake', position)) |>
+  mutate(position = ifelse(site=='GL1_LAKE', 'inlet2', position)) |>
   left_join(sites) |>
   left_join(greenlakes_LC) |>
-  select(-Layer_1, -LandCoverArea_km2) |>
+  select(-Layer_1, -LandCoverArea_km2,- arik_flow_site, - notes, - elevation_m, - drainage_area_ha, - geometry) |>
   distinct() |>
-  pivot_wider(id_cols = c('WS_Group', 'date'),names_from = 'position', values_from = 'lim')|>
-  drop_na()
+  group_by(site, date, position, WS_Group) |>
+  summarise(lim=mean(lim)) |> # take mean of depth 0, 3m measures in hte lakes
+  ungroup() |>
+  pivot_wider(id_cols = c('WS_Group', 'date'),names_from = 'position', values_from = 'lim')
 
-ggplot(inout, aes(inlet, outlet)) +
-  geom_point() +
+
+### inlet vs outlet limitation ####
+ggplot(inout) +
+  geom_point(aes(inlet, outlet)) +
+  geom_point(aes(inlet2, outlet)) +
   geom_abline(slope=1, intercept=0) +
   labs(x='Inlet DIN:TP', y='Outlet DIN:TP') +
   theme_classic()
 ggsave('Figures/Limitation/limitation_inletoutlet.png',width=6.25, height=4.25, units='in')
 
+### in-lake vs outlet limitation ####
+ggplot(inout) +
+  geom_point(aes(`in-lake`, outlet)) +
+  geom_abline(slope=1, intercept=0) +
+  labs(x='In-lake DIN:TP', y='Outlet DIN:TP') +
+  theme_classic()
+ggsave('Figures/Limitation/limitation_in-lake_outlet.png',width=6.25, height=4.25, units='in')
+
+### inlet vs in-lake limitation ####
+ggplot(inout) +
+  geom_point(aes(inlet, `in-lake`)) +
+  geom_point(aes(inlet2, `in-lake`)) +
+  geom_abline(slope=1, intercept=0) +
+  labs(x='Inlet DIN:TP', y='In-lake DIN:TP') +
+  theme_classic()
+ggsave('Figures/Limitation/limitation_inlet_in-lake.png',width=6.25, height=4.25, units='in')
 
 
 # Other Explorations of nutrient limitation ####
