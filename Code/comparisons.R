@@ -94,5 +94,5 @@ ggplot(ladder |>filter(result<500)) +
   facet_wrap(~param, scales='free',ncol=3,labeller=label_parsed) +
   theme_classic()
 
-ggsave('Figures/Comparisons/ladder.png', height=10.5, width=8.5, units='in',dpi=1200)
+ggsave('Figures/Comparisons/ladder.png', height=8.5, width=10.5, units='in',dpi=1200)
 
