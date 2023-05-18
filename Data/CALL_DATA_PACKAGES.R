@@ -149,3 +149,5 @@ distances_Km <- as.data.frame(distances) |>
   pivot_longer(2:14, names_to = 'site2', values_to = 'distance_Km') |>
   drop_na()
 
+rm(distances)
+rm(Correct_Colnames)

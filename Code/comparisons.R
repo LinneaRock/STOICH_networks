@@ -18,18 +18,19 @@ setup <- rbind(nuts, stoich) |>
   distinct()
 
 ## Write loop to create plots and dataframe ####
-param <- unique(setup$param) # list of params
+params <- unique(setup$param) # list of params
 comp_data <- data.frame() # create empty dataframe
 
-for(p in 1:length(param)) {
+for(p in 1:length(params)) {
   tmp <- setup |>
-    filter(param==param[p]) |>
-    group_by(site,network_position,eco_type,date,param,position,WS_Group,season) |>
+    filter(param==params[p]) |>
+    group_by(site,date,param,position,WS_Group,season) |>
     summarise(result=mean(result)) |>
-    pivot_wider(id_cols=c('WS_Group', 'date', 'season'), names_from='position',values_from='result') |>
-    mutate(param=param[p])
+    ungroup() |>
+    pivot_wider(id_cols=c('WS_Group', 'date'), names_from='position',values_from='result') |>
+    mutate(param=params[p])
   
-  comp_data <- rbind(comp_data, tmp) 
+  comp_data <- bind_rows(comp_data, tmp) 
 }
 
 # this madness is just making pretty labels
@@ -60,3 +61,38 @@ ggplot(comp_data) +
   geom_abline(slope=1,intercept=0, color= 'red4') +
   facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5)
 ggsave('Figures/Comparisons/in-lake_outlets.png', width=10.5, height=8.5, units='in', dpi=1200)
+
+
+
+# Now, let's create a ladder plot of inlet, in-lake, outlet concentrations ####
+
+ladder <- setup |>
+  filter(site != 'GL2_LAKE') |>
+  mutate(position = ifelse(position=='inlet2','inlet',position))  |>
+  group_by(WS_Group, position, param) |>
+  mutate(median_result = median(result))|>
+  ungroup()
+
+factor(unique(ladder$position)) # checking factor levels
+ladder$position <- factor(ladder$position, levels = c('inlet','in-lake','outlet')) # changing factor levels
+factor(unique(ladder$position)) # checking new factor levels 
+ladder$WS_Group <- factor(ladder$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
+
+# this madness is just making pretty labels
+ladder$param <- factor(ladder$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
+
+
+# note, I am cutting the y-axis to be less than 500. This changes the appearance of IN:IP, which has inlet data extending to 1000 and outlet to >3000; TDN:TDP, which has outlet results extending beyond 9000 and inlet results extending beyond 500; and TN:TP, which has outlet results extending beyond 600
+ggplot(ladder |>filter(result<500)) +
+  geom_violin(aes(position, result)) +
+  geom_jitter(aes(position, result, color=WS_Group), alpha=0.4) +
+  geom_point(aes(position, median_result, fill=WS_Group),color='black', size=4, shape=21) +
+  geom_line(aes(position, median_result, group=WS_Group)) +
+  scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  labs(x='',y='') +
+  facet_wrap(~param, scales='free',ncol=3,labeller=label_parsed) +
+  theme_classic()
+
+ggsave('Figures/Comparisons/ladder.png', height=10.5, width=8.5, units='in',dpi=1200)
+
