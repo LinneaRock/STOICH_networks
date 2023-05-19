@@ -1,61 +1,28 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# Theil-Sens slope for timeseries trends and network trends ####
+# Theil-Sens slope for network trends ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ## Call data and packages ####
 source('Data/CALL_DATA_PACKAGES.R') 
 
-## Prepare data ####
-nuts.lm <- nuts |>
-  mutate(year=year(date)) |>
-  group_by(network_position, param) |>
-  add_count() |>
-  ungroup() |>
-  filter(n>3)
-
-stoich.lm <- stoich |>
-  mutate(year=year(date)) |>
-  group_by(network_position, param) |>
-  add_count() |>
-  ungroup() |>
-  filter(n>3)
-
-## Quick plots of all the variables of interest ####  
-ggplot(nuts.lm, aes(year, result, group=network_position, color=param)) +
-  geom_point(shape=21, alpha=0.5) +
-  #scale_y_log10() +
-  facet_grid(param~network_position, scales="free") +
-  geom_smooth(method="lm", color="black")
-
-ggplot(stoich.lm, aes(year, result, group=network_position, color=param)) +
-  geom_point(shape=21, alpha=0.5) +
-  #scale_y_log10() +
-  facet_grid(param~network_position, scales="free") +
-  geom_smooth(method="lm", color="black")
+all_data_trend <- rbind(nuts, stoich) |>
+  mutate(network_position = ifelse(site=='GL1_LAKE', 10.5, network_position))
 
 ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data ####
-mk_df <- nuts.lm |>
-  group_by(network_position, param) |>
+mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
+  mutate(network_position = ifelse(site=='GL1_LAKE', 10.5, network_position)) |>
+  # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
+  group_by(param) |>
   summarise(z.stat = glance(mk.test(result))$statistic,
          p.value = glance(mk.test(result))$p.value,
          n = glance(mk.test(result))$parameter,
 ## Calculate Sen's slope and add to dataframe ####
          slope = as.numeric(sens.slope(result)[[1]])) |>
   ungroup() |>
-  rbind((stoich.lm |>
-           group_by(network_position, param) |>
-           summarise(z.stat = glance(mk.test(result))$statistic,
-                     p.value = glance(mk.test(result))$p.value,
-                     n = glance(mk.test(result))$parameter,
-                     slope = as.numeric(sens.slope(result)[[1]])) |>
-           ungroup()))
+  mutate(significance = ifelse(between(p.value, 0.001, 0.05), '*',
+                               ifelse(between(p.value, 0.0001, 0.001), '**',
+                                      ifelse(p.value < 0.0001, '***', NA))))
 
-
-ggplot(mk_df |> filter(p.value<=0.05,
-                       n>=10), aes(slope, network_position,color=param)) +
-  geom_jitter() +
-  theme_bw() +
-  geom_vline(xintercept = 0)
 
 
 
@@ -94,7 +61,7 @@ ggplot(stoich.gam, aes(network_position, result, group=param)) +
   scale_y_log10()
 
 ## Identifying and plotting periods of change ####
-### Where along the tnetwork is rate of change in the parameters increasing or decreasing? ####
+### Where along the network is rate of change in the parameters increasing or decreasing? ####
 gam0 <- gam(
   result ~  s(network_position,k=4), #formula, where k is the basis dimension
   data = stoich.gam |> filter(param=='don.dop'), #dataset 
@@ -168,3 +135,57 @@ Pred %>%
   theme_pubr(base_size=8, border=TRUE)
 
 
+
+
+# below was timeseries trends
+# ## Prepare data ####
+# nuts.lm <- nuts |>
+#   mutate(year=year(date)) |>
+#   group_by(network_position, param) |>
+#   add_count() |>
+#   ungroup() |>
+#   filter(n>3)
+# 
+# stoich.lm <- stoich |>
+#   mutate(year=year(date)) |>
+#   group_by(network_position, param) |>
+#   add_count() |>
+#   ungroup() |>
+#   filter(n>3)
+# 
+# ## Quick plots of all the variables of interest ####  
+# ggplot(nuts.lm, aes(year, result, group=network_position, color=param)) +
+#   geom_point(shape=21, alpha=0.5) +
+#   #scale_y_log10() +
+#   facet_grid(param~network_position, scales="free") +
+#   geom_smooth(method="lm", color="black")
+# 
+# ggplot(stoich.lm, aes(year, result, group=network_position, color=param)) +
+#   geom_point(shape=21, alpha=0.5) +
+#   #scale_y_log10() +
+#   facet_grid(param~network_position, scales="free") +
+#   geom_smooth(method="lm", color="black")
+# 
+# ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data ####
+# mk_df <- nuts.lm |>
+#   group_by(network_position, param) |>
+#   summarise(z.stat = glance(mk.test(result))$statistic,
+#          p.value = glance(mk.test(result))$p.value,
+#          n = glance(mk.test(result))$parameter,
+# ## Calculate Sen's slope and add to dataframe ####
+#          slope = as.numeric(sens.slope(result)[[1]])) |>
+#   ungroup() |>
+#   rbind((stoich.lm |>
+#            group_by(network_position, param) |>
+#            summarise(z.stat = glance(mk.test(result))$statistic,
+#                      p.value = glance(mk.test(result))$p.value,
+#                      n = glance(mk.test(result))$parameter,
+#                      slope = as.numeric(sens.slope(result)[[1]])) |>
+#            ungroup()))
+# 
+# 
+# ggplot(mk_df |> filter(p.value<=0.05,
+#                        n>=10), aes(slope, network_position,color=param)) +
+#   geom_jitter() +
+#   theme_bw() +
+#   geom_vline(xintercept = 0)
