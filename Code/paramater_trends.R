@@ -6,11 +6,28 @@
 source('Data/CALL_DATA_PACKAGES.R') 
 
 all_data_trend <- rbind(nuts, stoich) |>
-  mutate(network_position = ifelse(site=='GL1_LAKE', 10.5, network_position))
+  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, 
+                                   ifelse(site=='ALB_OUTLET', 13,
+                                          ifelse(site=='ALB_LAKE', 12, network_position)))) |>
+  mutate(network_position = network_position + 1) |>
+  group_by(network_position, param) |>
+  mutate(mean = mean(result),
+            median = median(result),
+            min = min(result),
+            max = max(result),
+            SE = std.error(result),
+            n = n()) |>
+  ungroup() |>
+  left_join(sites |> select(-network_position)) |>
+  left_join(greenlakes_LC) |>
+  select(-Layer_1, -LandCoverArea_km2, -depth_m, - arik_flow_site, - notes, - elevation_m, - drainage_area_ha, - geometry) |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group))
 
 ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data ####
 mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
-  mutate(network_position = ifelse(site=='GL1_LAKE', 10.5, network_position)) |>
+  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, network_position)) |>
+  mutate(network_position = network_position + 1) |>
   # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
   group_by(param) |>
   summarise(z.stat = glance(mk.test(result))$statistic,
@@ -23,10 +40,28 @@ mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_po
                                ifelse(between(p.value, 0.0001, 0.001), '**',
                                       ifelse(p.value < 0.0001, '***', NA))))
 
+# this madness is just making pretty labels
+all_data_trend$param <- factor(all_data_trend$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
 
+# factor subwatersheds
+all_data_trend$WS_Group <- factor(all_data_trend$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
 
-
-
+ggplot(all_data_trend |>
+         filter(result<500)) +
+  geom_jitter(aes(network_position, result, color=WS_Group), alpha=0.1) +
+  geom_point(aes(network_position, mean, fill=WS_Group), 
+             color = "black", pch = 21, size = 2) +
+  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
+  scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  #scale_y_log10() +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
+  labs(x = 'Lake position along network', y = '') +
+  theme(legend.position = 'bottom')
+ggsave('Figures/Trends/network.png', width=10.5, height=8.5, units='in', dpi=1200)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
