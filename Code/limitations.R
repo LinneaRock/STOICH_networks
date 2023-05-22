@@ -71,6 +71,26 @@ ggplot() +
 ggsave('Figures/Limitation/nutrient_limitation.png',width=6.25, height=4.25, units='in')
 
 
+### dark-theme color by network position ####
+ggplot() +
+  geom_point(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
+                                      fill = as.numeric(network_position)), shape = 21, alpha = 0.5) +
+  geom_point(medians, mapping = aes(log10(MEDTP_umolL), log10(MEDIN_umolL/MEDTP_umolL), 
+                                    color = as.numeric(network_position)), size = 3) +
+  geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
+  geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
+  dark_theme_classic() +
+  scale_color_viridis_c('Network position') +
+  scale_fill_viridis_c('Network position') +
+  labs(y = "Log IN:TP", x = "Log TP") +
+  annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
+           x = -1, y = 0.1, hjust = 0, size = 2) +
+  annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
+           x = -1.25, y = 0.65, hjust = 0, size = 2)
+
+ggsave('Figures/DarkTheme/nutrient_limitation.png',width=6.25, height=4.25, units='in')
+
+
 ## test for differences in limitation ####
 ### boxplot and kruskal wallis test ####
 #get significance to add to figure using geom_text 
@@ -167,6 +187,7 @@ ggplot(inout) +
   theme_classic()
 ggsave('Figures/Limitation/limitation_inletoutlet.png',width=6.25, height=4.25, units='in')
 
+
 ### in-lake vs outlet limitation ####
 ggplot(inout) +
   geom_point(aes(`in-lake`, outlet)) +
@@ -175,15 +196,28 @@ ggplot(inout) +
   theme_classic()
 ggsave('Figures/Limitation/limitation_in-lake_outlet.png',width=6.25, height=4.25, units='in')
 
+
 ### inlet vs in-lake limitation ####
 ggplot(inout) +
   geom_point(aes(inlet, `in-lake`)) +
   geom_point(aes(inlet2, `in-lake`)) +
-  geom_abline(slope=1, intercept=0) +
+  geom_abline(slope=1, intercept=0, color='black') +
   labs(x='Inlet DIN:TP', y='In-lake DIN:TP') +
   theme_classic()
 ggsave('Figures/Limitation/limitation_inlet_in-lake.png',width=6.25, height=4.25, units='in')
 
+#### dark-theme comparisons limitation ####
+ggplot(inout) +
+  geom_point(aes(inlet, `in-lake`, color='x:inlet, y:in-lake')) +
+  geom_point(aes(inlet2, `in-lake`, color='x:inlet, y:in-lake')) +
+  geom_point(aes(`in-lake`, outlet, color='x:in-lake, y:outlet')) +
+  geom_point(aes(inlet, outlet, color='x:inlet, y:outlet')) +
+  geom_point(aes(inlet2, outlet, color='x:inlet, y:outlet')) +
+  geom_abline(slope=1, intercept=0) +
+  scale_color_manual('', values=c('#762A83','#F7F7F7','#1B7837')) +
+  labs(x='X IN:TP', y='Y IN:TP') +
+  dark_theme_classic()
+ggsave('Figures/DarkTheme/limitation_inlet_in-lake.png',width=6.25, height=4.25, units='in')
 
 # Other Explorations of nutrient limitation ####
 

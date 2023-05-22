@@ -162,9 +162,69 @@ ggplot(sync_dist_all, aes(distance_Km, correlation)) +
   labs(x='Distance between sites (Km)', y='Correlation coefficient')
 ggsave('Figures/synchrony/Network/synchrony_distance_plot.png',height=6.5, width=8.5, units = 'in', dpi=1200)
 
+## average synchrony plots ####
+# nitrogen
+sync_dist_mean_N <- distance_synchrony(DON_synchrony, 'DON') |>
+  bind_rows(distance_synchrony(DIN_synchrony, 'DIN')) |>
+  bind_rows(distance_synchrony(PN_synchrony, 'PN')) |>
+  bind_rows(distance_synchrony(TDN_synchrony, 'TDN')) |>
+  bind_rows(distance_synchrony(TN_synchrony, 'TN')) |>
+  group_by(site1,site2, distance_Km) |>
+  summarise(meancorr = mean(correlation)) |>
+  ungroup() 
+
+sens.slope((sync_dist_mean_N |> arrange(distance_Km))$meancorr)
+# pvalue = 0.0275
+# slope = -0.02469231
+
+ggplot(sync_dist_mean_N, aes(distance_Km, meancorr)) +
+  geom_point() +
+  #geom_smooth(se=FALSE) +
+  theme_classic() +
+  labs(x='Distance between sites (Km)', y='Average correlation coefficient for N')
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanN.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+
+# phosphorus
+sync_dist_mean_P <- distance_synchrony(DOP_synchrony, 'DOP') |>
+  bind_rows(distance_synchrony(DIP_synchrony, 'DIP')) |>
+  bind_rows(distance_synchrony(PP_synchrony, 'PP')) |>
+  bind_rows(distance_synchrony(TDP_synchrony, 'TDP')) |>
+  bind_rows(distance_synchrony(TP_synchrony, 'TP')) |>
+  group_by(site1,site2, distance_Km) |>
+  summarise(meancorr = mean(correlation)) |>
+  ungroup() 
+
+sens.slope((sync_dist_mean_P |> arrange(distance_Km))$meancorr)
+# pvalue = 0.9759
 
 
+ggplot(sync_dist_mean_P, aes(distance_Km, meancorr)) +
+  geom_point() +
+  #geom_smooth(se=FALSE) +
+  theme_classic() +
+  labs(x='Distance between sites (Km)', y='Average correlation coefficient for P')
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanP.png',height=6.5, width=8.5, units = 'in', dpi=1200)
 
+# stoichiometry
+sync_dist_mean_stoich <- distance_synchrony(DON_DOP_synchrony, 'DON:DOP') |>
+  bind_rows(distance_synchrony(DIN_DIP_synchrony, 'DIN:DIP')) |>
+  bind_rows(distance_synchrony(PN_PP_synchrony, 'PN:PP')) |>
+  bind_rows(distance_synchrony(TDN_TDP_synchrony, 'TDN:TDP')) |>
+  bind_rows(distance_synchrony(TN_TP_synchrony, 'TN:TP')) |>
+  group_by(site1,site2, distance_Km) |>
+  summarise(meancorr = mean(correlation)) |>
+  ungroup() 
+
+sens.slope((sync_dist_mean_stoich |> arrange(distance_Km))$meancorr)
+# pvalue = 0.5661
+
+
+ggplot(sync_dist_mean_stoich, aes(distance_Km, meancorr)) +
+  geom_point() +
+  #geom_smooth(se=FALSE) +
+  theme_classic() +
+  labs(x='Distance between sites (Km)', y='Average correlation coefficient for N:P')
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanNP.png',height=6.5, width=8.5, units = 'in', dpi=1200)
 
 ###############################################################################
 # LAKES ONLY ####

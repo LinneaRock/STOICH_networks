@@ -40,6 +40,24 @@ mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_po
                                ifelse(between(p.value, 0.0001, 0.001), '**',
                                       ifelse(p.value < 0.0001, '***', NA))))
 
+### Mann-Kendall (non-parametric) test varied by season ####
+mk_df_season <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
+  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, network_position)) |>
+  mutate(network_position = network_position + 1) |>
+  # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
+  mutate(season = ifelse(season %in% c('Oct-Dec', 'Jan-Mar'), 'winter', 
+                         ifelse(season=='Apr-Jun', 'snowmelt runoff', 'summer'))) |>
+  group_by(param, season) |>
+  summarise(z.stat = glance(mk.test(result))$statistic,
+            p.value = glance(mk.test(result))$p.value,
+            n = glance(mk.test(result))$parameter,
+            ### Calculate Sen's slope and add to dataframe ####
+            slope = as.numeric(sens.slope(result)[[1]])) |>
+  ungroup() |>
+  mutate(significance = ifelse(between(p.value, 0.001, 0.05), '*',
+                               ifelse(between(p.value, 0.0001, 0.001), '**',
+                                      ifelse(p.value < 0.0001, '***', NA))))
+
 # this madness is just making pretty labels
 all_data_trend$param <- factor(all_data_trend$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
 
@@ -59,7 +77,7 @@ ggplot(all_data_trend |>
         panel.grid.minor = element_blank()) +
   #scale_y_log10() +
   facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
-  labs(x = 'Lake position along network', y = '') +
+  labs(x = 'Network Position', y = '') +
   theme(legend.position = 'bottom')
 ggsave('Figures/Trends/network.png', width=10.5, height=8.5, units='in', dpi=1200)
 
@@ -173,7 +191,7 @@ Pred %>%
 
 
 # below was timeseries trends
-# ## Prepare data ####
+# ## Prepare data 
 # nuts.lm <- nuts |>
 #   mutate(year=year(date)) |>
 #   group_by(network_position, param) |>
@@ -188,7 +206,7 @@ Pred %>%
 #   ungroup() |>
 #   filter(n>3)
 # 
-# ## Quick plots of all the variables of interest ####  
+# ## Quick plots of all the variables of interest 
 # ggplot(nuts.lm, aes(year, result, group=network_position, color=param)) +
 #   geom_point(shape=21, alpha=0.5) +
 #   #scale_y_log10() +
@@ -201,13 +219,13 @@ Pred %>%
 #   facet_grid(param~network_position, scales="free") +
 #   geom_smooth(method="lm", color="black")
 # 
-# ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data ####
+# ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data 
 # mk_df <- nuts.lm |>
 #   group_by(network_position, param) |>
 #   summarise(z.stat = glance(mk.test(result))$statistic,
 #          p.value = glance(mk.test(result))$p.value,
 #          n = glance(mk.test(result))$parameter,
-# ## Calculate Sen's slope and add to dataframe ####
+# ## Calculate Sen's slope and add to dataframe 
 #          slope = as.numeric(sens.slope(result)[[1]])) |>
 #   ungroup() |>
 #   rbind((stoich.lm |>

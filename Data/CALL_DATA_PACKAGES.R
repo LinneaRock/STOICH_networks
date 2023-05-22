@@ -30,6 +30,7 @@ library(trend)
 library(broom)
 library(mgcv)
 library(Matrix)
+#library(ggdark) # load as needed for presentation dark-theme figures
 
 
 

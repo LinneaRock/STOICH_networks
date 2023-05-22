@@ -39,8 +39,8 @@ nuts_prod_lakes <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  #group_by(lake_stream, param, significance) |> # used to look at trend along network
-  group_by(param, significance) |> # used to look at overall trend in lakes
+  group_by(lake_stream, param, significance) |> # used to look at trend along network
+  #group_by(param, significance) |> # used to look at overall trend in lakes
   summarise(mean = mean(result),
             median = median(result),
             min = min(result),
@@ -84,8 +84,8 @@ nuts_prod_streams <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  #group_by(lake_stream, param, significance) |> # used to look at trend along network
-  group_by(param, significance) |> # used to look at overall trend in streams
+  group_by(lake_stream, param, significance) |> # used to look at trend along network
+  #group_by(param, significance) |> # used to look at overall trend in streams
   summarise(mean = mean(result),
             median = median(result),
             min = min(result),
