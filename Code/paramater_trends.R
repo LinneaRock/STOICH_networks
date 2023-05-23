@@ -22,41 +22,81 @@ all_data_trend <- rbind(nuts, stoich) |>
   left_join(greenlakes_LC) |>
   select(-Layer_1, -LandCoverArea_km2, -depth_m, - arik_flow_site, - notes, - elevation_m, - drainage_area_ha, - geometry) |>
   distinct() |>
-  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group))
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |> mutate(season = ifelse(season %in% c('Oct-Dec', 'Jan-Mar'), 'winter', 
+                                                                                          ifelse(season=='Apr-Jun', 'snowmelt runoff', 'summer')))
+
+
+
+## get sen's slopes and intercepts ####
+params <- unique(all_data_trend$param)
+sens.estimates <- data.frame()
+
+for(p in 1:length(params)) {
+tmp <- all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
+  filter(param == params[p])
+
+ intercept = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[1]])
+ senslope = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[2]])
+
+tmp2 <- data.frame(param = params[p], intercept = intercept, sensslope = senslope)
+
+sens.estimates <- rbind(sens.estimates, tmp2)
+
+}
 
 ## Mann-Kendall (non-parametric) test to see if significant trends exist in our data ####
 mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
-  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, network_position)) |>
-  mutate(network_position = network_position + 1) |>
-  # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
+  # we need to order by network position ^^^ so that the Mann Kendall uses the vector over the network, rather than treat it as timeseries
   group_by(param) |>
   summarise(z.stat = glance(mk.test(result))$statistic,
          p.value = glance(mk.test(result))$p.value,
-         n = glance(mk.test(result))$parameter,
-## Calculate Sen's slope and add to dataframe ####
-         slope = as.numeric(sens.slope(result)[[1]])) |>
+         n = glance(mk.test(result))$parameter) |>
+## Calculate Sen's slope and add to dataframe #### -- OLD -- need to use zyp function
+        # slope = as.numeric(sens.slope(result)[[1]])) |>
   ungroup() |>
   mutate(significance = ifelse(between(p.value, 0.001, 0.05), '*',
                                ifelse(between(p.value, 0.0001, 0.001), '**',
-                                      ifelse(p.value < 0.0001, '***', NA))))
+                                      ifelse(p.value < 0.0001, '***', NA)))) |>
+  left_join(sens.estimates)
+
+
+
+
+
 
 ### Mann-Kendall (non-parametric) test varied by season ####
+## get sen's slopes and intercepts by season ####
+params <- unique(all_data_trend$param)
+seasons <-unique(all_data_trend$season)
+sens.estimates <- data.frame()
+
+for(p in 1:length(params)) {
+  for(s in 1:length(seasons)) {
+  tmp <- all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
+    filter(param == params[p],
+           season == seasons[s])
+  
+  intercept = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[1]])
+  senslope = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[2]])
+  
+  tmp2 <- data.frame(param = params[p],season = seasons[s], intercept = intercept, sensslope = senslope)
+  
+  sens.estimates <- rbind(sens.estimates, tmp2)
+  }
+}
+
+
 mk_df_season <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
-  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, network_position)) |>
-  mutate(network_position = network_position + 1) |>
   # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
-  mutate(season = ifelse(season %in% c('Oct-Dec', 'Jan-Mar'), 'winter', 
-                         ifelse(season=='Apr-Jun', 'snowmelt runoff', 'summer'))) |>
   group_by(param, season) |>
   summarise(z.stat = glance(mk.test(result))$statistic,
             p.value = glance(mk.test(result))$p.value,
-            n = glance(mk.test(result))$parameter,
-            ### Calculate Sen's slope and add to dataframe ####
-            slope = as.numeric(sens.slope(result)[[1]])) |>
+            n = glance(mk.test(result))$parameter) |>
   ungroup() |>
   mutate(significance = ifelse(between(p.value, 0.001, 0.05), '*',
                                ifelse(between(p.value, 0.0001, 0.001), '**',
-                                      ifelse(p.value < 0.0001, '***', NA))))
+                                      ifelse(p.value < 0.0001, '***', NA)))) |>
+  left_join(sens.estimates)
 
 # this madness is just making pretty labels
 all_data_trend$param <- factor(all_data_trend$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
@@ -64,8 +104,7 @@ all_data_trend$param <- factor(all_data_trend$param, labels = c(expression('(DON
 # factor subwatersheds
 all_data_trend$WS_Group <- factor(all_data_trend$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
 
-ggplot(all_data_trend |>
-         filter(result<500)) +
+ggplot(all_data_trend ) +
   geom_jitter(aes(network_position, result, color=WS_Group), alpha=0.1) +
   geom_point(aes(network_position, mean, fill=WS_Group), 
              color = "black", pch = 21, size = 2) +
@@ -75,12 +114,58 @@ ggplot(all_data_trend |>
   theme_bw() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
-  #scale_y_log10() +
+  scale_y_log10() +
   facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
   labs(x = 'Network Position', y = '') +
   theme(legend.position = 'bottom')
-ggsave('Figures/Trends/network.png', width=10.5, height=8.5, units='in', dpi=1200)
+ggsave('Figures/Trends/network_scale_y_log10.png', width=10.5, height=8.5, units='in', dpi=1200)
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# plots for SFS focusing on total and inorganic nutrients ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+sfs_trend <- all_data_trend |> 
+  filter(param %in% c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))
+
+mk_sfs <- mk_df |>
+  filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL')) |>
+  mutate(season = 'global slope') |>
+  rbind(mk_df_season|>
+          filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL'))) |>
+  mutate(significance = ifelse(is.na(significance), 'p > 0.05', 'p < 0.05')) |>
+  mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) |>
+  filter(season != 'global slope')
+
+# annoying workaround to keep NA out of subwatershed for plotting
+mk_sfs_global <- mk_df |>
+  filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL')) |>
+  mutate(season = 'global slope') |>
+  mutate(significance = ifelse(is.na(significance), 'p > 0.05', 'p < 0.05')) |>
+  mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))))
+
+sfs_trend <- full_join(sfs_trend, mk_sfs|> select(-n))
+
+# factor subwatersheds
+sfs_trend$WS_Group <- factor(sfs_trend$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
+
+ggplot(sfs_trend) +
+  geom_jitter(sfs_trend |> filter(result < 500), mapping=aes(network_position, result, fill=WS_Group), pch=21, alpha=0.25) +
+  geom_point(aes(network_position, mean, fill=WS_Group), 
+             color = "black", pch = 21, size = 2) +
+  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
+  scale_color_manual('', values=c('grey80','green4','goldenrod','blue1'), posi) +
+  scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  dark_theme_bw() +
+  geom_abline(aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
+  geom_abline(mk_sfs_global, mapping=aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  #scale_y_log10() +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=2) +
+  labs(x = 'Network Position', y = '') +
+  theme(legend.position = 'bottom') +
+  scale_linetype_manual('', values=c(1,3))
+ggsave('Figures/DarkTheme/network_trend.png', width=10.5, height=8.5, units='in', dpi=1200)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Use gams to assess trends along network ####
@@ -242,3 +327,9 @@ Pred %>%
 #   geom_jitter() +
 #   theme_bw() +
 #   geom_vline(xintercept = 0)
+
+
+
+
+
+
