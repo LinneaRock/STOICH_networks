@@ -149,13 +149,16 @@ sfs_trend <- full_join(sfs_trend, mk_sfs|> select(-n))
 sfs_trend$WS_Group <- factor(sfs_trend$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
 
 ggplot(sfs_trend) +
-  geom_jitter(sfs_trend |> filter(result < 500), mapping=aes(network_position, result, fill=WS_Group), pch=21, alpha=0.25) +
+  geom_jitter(sfs_trend |> filter(result < 500), mapping=aes(network_position, result, color=WS_Group), alpha=0.25) +
   geom_point(aes(network_position, mean, fill=WS_Group), 
              color = "black", pch = 21, size = 2) +
-  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
-  scale_color_manual('', values=c('grey80','green4','goldenrod','blue1'), posi) +
+  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype='dotted')  +
+  #scale_color_manual('', values=c('grey80','green4','goldenrod','blue1')) +
   scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
-  dark_theme_bw() +
+  #scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) + 
+  # more stupid workarounds for a nice presentation plot :( 
+  scale_color_manual('', values=c('#B5DDD8','#81C4E7','#9398D2','#906388','grey80','green4','goldenrod','blue1')) +
+  dark_theme_bw(base_size = 15) +
   geom_abline(aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
   geom_abline(mk_sfs_global, mapping=aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
   theme(panel.grid.major = element_blank(), 
@@ -165,7 +168,7 @@ ggplot(sfs_trend) +
   labs(x = 'Network Position', y = '') +
   theme(legend.position = 'bottom') +
   scale_linetype_manual('', values=c(1,3))
-ggsave('Figures/DarkTheme/network_trend.png', width=10.5, height=8.5, units='in', dpi=1200)
+ggsave('Figures/DarkTheme/network_trend.png', width=12.5, height=10.5, units='in', dpi=1200)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Use gams to assess trends along network ####
