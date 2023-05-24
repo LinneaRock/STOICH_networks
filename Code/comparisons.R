@@ -96,3 +96,77 @@ ggplot(ladder |>filter(result<500)) +
 
 ggsave('Figures/Comparisons/ladder.png', height=8.5, width=10.5, units='in',dpi=1200)
 
+
+
+
+
+### ladder fig for SFS ####
+sfs_ladder <- setup |>
+  filter(site != 'GL2_LAKE',
+         param %in% c('in.ip','IN_umolL','IP_umolL', 'tn.tp','TN_umolL', 'TP_umolL')) |>
+  mutate(position = ifelse(position=='inlet2','inlet',position))  |>
+  group_by(WS_Group, position, param) |>
+  mutate(median_result = median(result))|>
+  ungroup() |>
+  mutate(position = gsub('in-lake','lake',position))
+
+
+factor(unique(sfs_ladder$position)) # checking new factor levels 
+sfs_ladder$WS_Group <- factor(sfs_ladder$WS_Group, levels = c('GL5','GL4','GL3','ALB'))
+
+# this madness is just making pretty labels
+sfs_ladder$param <- factor(sfs_ladder$param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
+
+
+
+
+#get significance to add to figure using geom_text 
+list_params <- unique(sfs_ladder$param)
+
+sig.letters <- data.frame(NA)
+for(i in list_params) {
+  h <- aov(result~position, sfs_ladder|>filter(param==i))
+  tukey <- TukeyHSD(h)
+  cld <- multcompLetters4(h, tukey)
+  cld2 <- data.frame(letters = cld$position$Letters) |>
+    mutate(param = i)
+  cld2$position <- rownames(cld2)
+  sig.letters <- sig.letters |> bind_rows(cld2)
+}
+
+sig.letters <- sig.letters |>
+  drop_na(letters) |>
+  select(-NA.)
+
+means <- left_join(sfs_ladder |>filter(result < 600), sig.letters) |>
+  group_by(letters, param, position) |>
+  summarise(max.result = max(result, na.rm = TRUE)) |>
+  distinct() |> mutate(position = gsub('lake', 'in-lake', position))
+means$position <- factor(means$position, levels = c('inlet', 'in-lake','outlet')) 
+means$param <- factor(means$param, levels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
+
+sfs_ladder <- sfs_ladder |> mutate(position = gsub('lake', 'in-lake', position))
+sfs_ladder$position <- factor(sfs_ladder$position, levels = c('inlet', 'in-lake','outlet')) 
+
+ggplot(sfs_ladder |>filter(result<500)) +
+  geom_violin(aes(position, result)) +
+  geom_jitter(aes(position, result, color=WS_Group), alpha=0.4) +
+  geom_point(aes(position, median_result, fill=WS_Group),color='black', size=4, shape=21) +
+  geom_line(aes(position, median_result, group=WS_Group)) +
+  scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
+  labs(x='',y='') +
+  facet_wrap(~param, scales='free',ncol=3,labeller=label_parsed) +
+  dark_theme_bw()  +
+  geom_text(means, mapping=aes(position, 
+                               max.result, label = letters), 
+           size=4) +
+  # ^^ Kruskal-Wallis test comparing streams along network 
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.1))) +
+  theme(axis.text.x = element_text(angle=45, vjust=1,hjust=1),
+        legend.position = 'bottom')
+
+ggsave('Figures/DarkTheme/ladder.png',height=4.5, width=6.5, units='in',dpi=1200)
+
+invert_geom_defaults()
+
