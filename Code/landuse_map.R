@@ -22,8 +22,10 @@ GL5 <- st_transform(st_read('C:/Users/lrock1/OneDrive - University of Wyoming/Sp
 
 ## NHD lines, waterfeatures ####
 # I just need to read in the Albion one to make a map, since that is representative of everything in the watershed :) 
-waterfeatures <- readRDS('Data/Spatial_Data/ALB_waterFeatures.RDS')
+waterfeatures <- readRDS('Data/Spatial_Data/ALB_waterFeatures.RDS') |>
+  mutate(type = ifelse(Permanent_Identifier == '128059348', 'glacier', 'freshwater'))
 waterfeatures <- st_transform(waterfeatures, crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"))
+
 
 ## NLCD raster and color scheme ####
 # I just need to read in the Albion one to make a map, since that is representative of everything in the watershed :) 
@@ -72,13 +74,16 @@ ggsave('Figures/Location_Map.png', height=6.5,width=8.5, units='in',dpi=1200)
 ggplot() +
   geom_raster(nlcd, mapping=aes(x,y, fill=Layer_1)) +
   scale_fill_manual('', values=as.character(v)) +
-  geom_sf(waterfeatures, mapping=aes(),color='#476ba1', fill='#476ba1') +
+  geom_sf(waterfeatures |> filter(type != 'glacier'), 
+          mapping=aes(),color='#476ba1', fill='#476ba1') +
+  geom_sf(waterfeatures |> filter(type == 'glacier'),
+          mapping=aes(), color='black', fill='#d1defa') +
   geom_sf(ALB, mapping=aes(), color='black', alpha=0) +
   geom_sf(GL5, mapping=aes(), color='black', alpha=0) +
   geom_sf(GL4, mapping=aes(), color='black', alpha=0) +
   geom_sf(GL3, mapping=aes(), color='black', alpha=0) +
   geom_sf(sites, mapping=aes(), color = 'hotpink') +
-  dark_theme_bw() +
+  dark_theme_minimal() +
   labs(x='',y='')
 
 ggsave('Figures/DarkTheme/Location_Map.png', height=6.5,width=8.5, units='in',dpi=1200)

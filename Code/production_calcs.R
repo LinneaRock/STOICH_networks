@@ -187,7 +187,10 @@ group_by(site, eco_type, date, season, param) |>
 ## for SFS presentation ####
 # all_prod <- rbind(nuts_prod_lakes, nuts_prod_streams) |>
 #   filter(param %in% c('IN_umolL', 'IP_umolL','in.ip', 'TN_umolL','TP_umolL', 'tn.tp')) |>
-#   mutate(lake_stream = gsub('ALBION', 'ALB', lake_stream))
+#   mutate(lake_stream = gsub('ALBION', 'ALB', lake_stream)) |>
+#   mutate(lake_stream = ifelse(lake_stream=='ALB', 'ALB_LAKE',
+#                               ifelse(lake_stream=='GL5','GL5_LAKE',
+#                                      ifelse(lake_stream=='GL4','GL4_LAKE', lake_stream))))
 
 library(sf)
 library(raster)
@@ -203,7 +206,7 @@ mapview(waterfeatures)
 # prod_map <- waterfeatures |>
 #   mutate(Site=ifelse(ReachCode=='10190005000121', 'reach1',
 #                      ifelse(ReachCode%in%c('10190005000119', '10190005008027'), 'reach2',
-#                             ifelse(ReachCode=='10190005000117', 'reach3', 
+#                             ifelse(ReachCode=='10190005000117', 'reach3',
 #                                    ifelse(ReachCode=='10190005000115', 'reach4',
 #                                           ifelse(ReachCode=='10190005006165', 'reach4a', Site)))))) |>
 #   left_join(all_prod, by=c('Site' = 'lake_stream'))
@@ -213,56 +216,92 @@ ave_values <- rbind(stats_nuts,stats_stoich) |>
 
 ave_values <- st_as_sf(ave_values)
 
+# arrows_data <- prod_map|>
+#   filter(!is.na(significance),
+#          significance != '-') |>
+#   filter(param %in% c('IN_umolL','IP_umolL'))
+
+# library(png)
+# source <- as.raster(readPNG("source_arrow.png"))
+# sink <- as.raster(readPNG("sink_arrow.png"))
+# https://stackoverflow.com/questions/27637455/display-custom-image-as-geom-point
+
 
 in_m <- ggplot() +
  # annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='IN_umolL',
-                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('IN concentration') + dark_theme_bw()
+                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white', pch=21) +
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(title = 'Inorganic Nitrogen')
 
 ip_m <- ggplot() +
  # annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='IP_umolL',
-                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('IP concentration')  + dark_theme_bw()
+                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21)  +
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank())+
+  labs(title = 'Inorganic Phosphorus')
+
 
 in.ip_m <- ggplot() +
   #annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='in.ip',
-                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('IN:IP') + dark_theme_bw()
+                               season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21)  +
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank())+
+  labs(title = 'IN:IP')
 
-(in_m/ip_m/in.ip_m) 
-ggsave('Figures/DarkTheme/inorganic_map.png', width=6, height=8, units='in',dpi=1200)
 
-
+(in_m/ip_m) 
+ggsave('Figures/DarkTheme/inorganic_map_nuts.png', width=6, height=8, units='in',dpi=1200)
+in.ip_m
+ggsave('Figures/DarkTheme/inorganic_map_stoich.png', width=6, height=4, units='in',dpi=1200)
 
 tn_m <- ggplot() +
  # annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='TN_umolL',
                                season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('TN concentration')+
-  theme(legend.position='bottom') + dark_theme_bw()
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(title = 'Total Nitrogen')
+
 
 tp_m <- ggplot() +
  # annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='TP_umolL',
                                season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('TP concentration')+
-  theme(legend.position='bottom') + dark_theme_bw()
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(title = 'Total Phosphorus')
+
 
 tn.tp_m <- ggplot() +
   #annotation_map_tile(type = world_grey, zoom = 12) + # Esri Basemap (zoom sets level of detail, higher = higherRes)
   geom_sf(waterfeatures, mapping=aes()) +
   geom_sf(ave_values |> filter(param=='tn.tp',
                                season=='All data'), mapping=aes(size=mean), fill='goldenrod',color='white',pch=21) +
-  scale_size_continuous('TN:TP') +
-  theme(legend.position='bottom') + dark_theme_bw()
+  dark_theme_bw() +
+  theme(legend.position = 'none',
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(title = 'TN:TP')
+
 
 (tn_m/tp_m/tn.tp_m) 
 ggsave('Figures/DarkTheme/total_map.png', width=6, height=8, units='in',dpi=1200)

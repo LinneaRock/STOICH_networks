@@ -26,10 +26,11 @@ crs(sites) # NAD83
 
 ### Get the NLCD 2019 data ####
 NLCD_raster <- raster('C:/Users/lrock1/OneDrive - University of Wyoming/Spatial_Data/Niwot/NLCD_2019/NLCD_2019_Land_Cover_L48_20210604_bbxDBdpHfb7O82puKmaF.tiff')
+#NLCD_raster <- raster('C:/Users/lrock1/Downloads/NLCD2019_Linnea.tif')
 class(NLCD_raster)
 crs(NLCD_raster) # NAD83
 
-NLCD <- as.data.frame(NLCD_raster, xy=TRUE)
+NLCD <- as.data.frame(NLCD_raster, xy=TRUE) #|> rename(Layer_1=NLCD2019_Linnea)
 
 
 # Layer number codes can be seen in NLCD Land Cover.gif

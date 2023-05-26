@@ -72,6 +72,28 @@ ggsave('Figures/Limitation/nutrient_limitation.png',width=6.25, height=4.25, uni
 
 
 ### dark-theme color by network position ####
+#plot without data
+ggplot() +
+  geom_point(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
+                                      fill = network_position), shape = 21, alpha = 0.5, color='black') +
+  geom_point(medians, mapping = aes(log10(MEDTP_umolL), log10(MEDIN_umolL/MEDTP_umolL), 
+                                    color = as.numeric(network_position)), size = 3, color='black') +
+  geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
+  geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
+  dark_theme_classic() +
+  scale_color_viridis_c('Network position') +
+  scale_fill_manual('Network position', values=c(rep('black', 14))) +
+  labs(y = "Log IN:TP", x = "Log TP") +
+  annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
+           x = -1, y = 0.1, hjust = 0, size = 2) +
+  annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
+           x = -1.25, y = 0.65, hjust = 0, size = 2)
+
+
+ggsave('Figures/DarkTheme/lim_blank.png',width=6.25, height=4.25, units='in')
+
+
+# plot with data
 ggplot() +
   geom_point(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
                                       fill = as.numeric(network_position)), shape = 21, alpha = 0.5) +
