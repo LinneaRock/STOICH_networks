@@ -108,7 +108,7 @@ ggplot() +
   annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
            x = -1, y = 0.1, hjust = 0, size = 2) +
   annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
-           x = -1.25, y = 0.65, hjust = 0, size = 2)
+           x = -1.25, y = 0.65, hjust = 0, size = 2) 
 
 ggsave('Figures/DarkTheme/nutrient_limitation.png',width=6.25, height=4.25, units='in')
 
