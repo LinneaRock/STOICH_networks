@@ -1,6 +1,5 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Synchrony along the network - script looks at Pearson's correlations 
-# among all network positions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # Call data and packages ####
@@ -479,4 +478,48 @@ ggplot(sync_dist_all_streams, aes(distance_Km, correlation)) +
   theme_classic() +
   labs(x='Distance between sites (Km)', y='Correlation coefficient')
 ggsave('Figures/synchrony/Streams/synchrony_distance_plot.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+
+
+###############################################################################
+# SYNCHRONY OF VARIABLES ####
+###############################################################################
+
+## streams ####
+corr_dat <- nuts.setup |>
+  left_join(stoich.setup) |>
+  filter(eco_type == 'stream') |>
+  select(5:14, 16:20) |>
+  scale()
+
+corr <- cor(corr_dat, use='pairwise')
+p.mat <- cor_pmat(corr)
+p.mat[is.na(corr)] <- corr[is.na(corr)]
+
+
+ggcorrplot(corr,
+           hc.order = FALSE, type = "upper",
+           outline.color = "white", p.mat = p.mat, lab = TRUE,
+           ggtheme=ggplot2::theme_dark())
+ggsave('Figures/synchrony/Streams/all_variates.png', 
+       height=4.25, width=6.25, units = 'in', dpi=1200)
+
+
+## lakes ####
+corr_dat <- nuts.setup |>
+  left_join(stoich.setup) |>
+  filter(eco_type == 'lake') |>
+  select(5:14, 16:20) |>
+  scale()
+
+corr <- cor(corr_dat, use='pairwise')
+p.mat <- cor_pmat(corr)
+p.mat[is.na(corr)] <- corr[is.na(corr)]
+
+
+ggcorrplot(corr,
+           hc.order = FALSE, type = "upper",
+           outline.color = "white", p.mat = p.mat, lab = TRUE,
+           ggtheme=ggplot2::theme_dark())
+ggsave('Figures/synchrony/Lakes/all_variates.png', 
+       height=4.25, width=6.25, units = 'in', dpi=1200)
 
