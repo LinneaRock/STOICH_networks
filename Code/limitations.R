@@ -241,6 +241,17 @@ ggplot(inout) +
   dark_theme_classic()
 ggsave('Figures/DarkTheme/limitation_inlet_in-lake.png',width=6.25, height=4.25, units='in')
 
+
+# are there annual trends in limitation? ####
+limitation_ts <- nuts_wide |>
+  mutate(np = IN_umolL/TP_umolL) |>
+  drop_na(np)
+
+ggplot(limitation_ts) +
+  geom_point(aes(date, np)) +
+  facet_wrap(~site, scales = 'free')
+
+
 # Other Explorations of nutrient limitation ####
 
 
