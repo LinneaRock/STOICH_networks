@@ -245,12 +245,36 @@ ggsave('Figures/DarkTheme/limitation_inlet_in-lake.png',width=6.25, height=4.25,
 # are there annual trends in limitation? ####
 limitation_ts <- nuts_wide |>
   mutate(np = IN_umolL/TP_umolL) |>
-  drop_na(np)
+  drop_na(np) |>
+  mutate(year = year(date)) |>
+  mutate(CDate=as.Date(paste0(ifelse(month(date) < 10, "1901", "1900"),
+                              "-", month(date), "-", day(date)))) 
 
 ggplot(limitation_ts) +
-  geom_point(aes(date, np)) +
-  facet_wrap(~site, scales = 'free')
+  geom_line(aes(CDate, np, color = as.character(year))) +
+  facet_wrap(~site, scales = 'free') +
+  scale_color_viridis_d()
 
+ggplot(limitation_ts) +
+  geom_line(aes(CDate, np, color = as.character(year))) +
+  facet_wrap(~site, scales = 'free') +
+  scale_color_viridis_d()
+
+alb_inlet_ts <- limitation_ts |>
+  filter(site=='ALB_INLET') |>
+  select(date, np) |>
+  mutate(month = month(date),
+         year = year(date)) |>
+  group_by(year, month) |>
+  summarise(mean_NP = mean(np)) |>
+  ungroup()
+
+ggplot(alb_inlet_ts) +
+  geom_line(aes(date, np))
+
+ts <- ts(alb_inlet_ts, frequency=9)
+
+plot(decompose(ts))
 
 # Other Explorations of nutrient limitation ####
 
