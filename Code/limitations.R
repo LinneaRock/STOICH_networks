@@ -242,10 +242,13 @@ ggplot(inout) +
 ggsave('Figures/DarkTheme/limitation_inlet_in-lake.png',width=6.25, height=4.25, units='in')
 
 
-# are there annual trends in limitation? ####
+# are there annual trends in limitation? #### -not really?
 limitation_ts <- nuts_wide |>
+  mutate(CDate=as.Date(paste0(ifelse(month(date) < 10, "1901", "1900"),
+                            "-", month(date), "-", day(date)))) |>
   mutate(np = IN_umolL/TP_umolL) |>
   drop_na(np) |>
+<<<<<<< HEAD
   mutate(year = year(date)) |>
   mutate(CDate=as.Date(paste0(ifelse(month(date) < 10, "1901", "1900"),
                               "-", month(date), "-", day(date)))) 
@@ -254,6 +257,29 @@ ggplot(limitation_ts) +
   geom_line(aes(CDate, np, color = as.character(year))) +
   facet_wrap(~site, scales = 'free') +
   scale_color_viridis_d()
+=======
+  mutate(year = year(date))
+  # select(site, network_position, eco_type, date, season, np) |>
+  # mutate(x = round((day(date)/5))*5,
+  #        x = ifelse(x == 0, 1, x), 
+  #        date2 = paste(year(date), month(date), x, sep = "-")) |>
+  # mutate(Date = as.Date(date2)) |>
+  # #seq along dates starting with the beginning of water year
+  # mutate(date2 = ifelse(is.na(Date), paste0(year(date), '-03-01'), date2)) |>
+  # mutate(Date = as.Date(date2)) |>
+  # mutate(CDate=as.Date(paste0(ifelse(month(Date) < 10, "1901", "1900"),
+  #                             "-", month(Date), "-", day(Date)))) |>
+  # group_by(site, network_position, eco_type, CDate, season) |>
+  # summarise(ave_weekly_NP = mean(np)) |>
+  # ungroup() |>
+  # rename(Date = CDate) 
+
+
+ggplot(limitation_ts) +
+  geom_point(aes(CDate, np, color=year, group=year)) +
+  facet_wrap(~site) +
+  scale_color_viridis()
+>>>>>>> e541af258d9298b5d373a6aae648e48c6a01d481
 
 ggplot(limitation_ts) +
   geom_line(aes(CDate, np, color = as.character(year))) +
