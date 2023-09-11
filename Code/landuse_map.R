@@ -93,3 +93,13 @@ ggplot() +
 
 ggsave('Figures/DarkTheme/Location_Map.png', height=6.5,width=8.5, units='in',dpi=1200)
 invert_geom_defaults()
+
+
+#blank map for conceptual figure
+ggplot() +
+  geom_sf(waterfeatures |> filter(type != 'glacier',
+                                  !is.na(GNIS_Name)), 
+                  mapping=aes(),color='#476ba1', fill='#476ba1') +
+  geom_sf(waterfeatures |> filter(Permanent_Identifier==128055062), 
+          mapping=aes(),color='#476ba1', fill='#476ba1') +
+  theme_classic()
