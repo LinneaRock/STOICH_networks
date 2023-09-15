@@ -9,16 +9,16 @@ library(raster)
 # Read in shapefiles, NLCD, and NHD data ####
 ## shapefiles for subwatersheds ####
 ## Albion (full network watershed)
-ALB <- st_transform(st_read('C:/Users/lrock1/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/Albion/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
+ALB <- st_transform(st_read('C:/Users/linne/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/Albion/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
 
 ## Green Lake 3 
-GL3 <- st_transform(st_read('C:/Users/lrock1/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL3/area-of-interest.shp'),crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
+GL3 <- st_transform(st_read('C:/Users/linne/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL3/area-of-interest.shp'),crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
 
 ## Green Lake 4 
-GL4 <- st_transform(st_read('C:/Users/lrock1/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL4/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
+GL4 <- st_transform(st_read('C:/Users/linne/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL4/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
 
 ## Green Lake 5 
-GL5 <- st_transform(st_read('C:/Users/lrock1/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL5/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
+GL5 <- st_transform(st_read('C:/Users/linne/OneDrive - University of Wyoming/Data/Spatial_Data/Niwot/GL5/area-of-interest.shp'), crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")) # reproject to NAD83
 
 ## NHD lines, waterfeatures ####
 # I just need to read in the Albion one to make a map, since that is representative of everything in the watershed :) 
@@ -96,10 +96,33 @@ invert_geom_defaults()
 
 
 #blank map for conceptual figure
+site_meds <- nuts |>
+  pivot_wider(names_from = param, values_from = result) |>
+  group_by(site) |>
+  mutate(medTP_umolL = median(TP_umolL, na.rm = TRUE),
+         medIN_umolL = median(IN_umolL, na.rm = TRUE)) |>
+  ungroup() |>
+  dplyr::select(site, network_position,medTP_umolL, medIN_umolL) |>
+  distinct() |>
+  mutate(np = medIN_umolL/medTP_umolL)
+
+site_meds <- sites |>
+  left_join(site_meds)
+
 ggplot() +
   geom_sf(waterfeatures |> filter(type != 'glacier',
                                   !is.na(GNIS_Name)), 
-                  mapping=aes(),color='#476ba1', fill='#476ba1') +
+                  mapping=aes(),color='#476ba1', fill='#476ba1', alpha=0.8) +
   geom_sf(waterfeatures |> filter(Permanent_Identifier==128055062), 
-          mapping=aes(),color='#476ba1', fill='#476ba1') +
+          mapping=aes(),color='#476ba1', fill='#476ba1', alpha=0.8) +
+  geom_sf(site_meds, mapping=aes(color=np), size=6) +
+  scale_color_viridis('N:P')+
   theme_classic()
+
+
+mapview::mapview(waterfeatures)
+
+waterfeatures2 <- waterfeatures |>
+  mutate(network_position = ifelse(ReachCode == '10190005006146', 2, 
+                                   ifelse(ReachCode == '10190005001170', 3, 
+                                          NA)))
