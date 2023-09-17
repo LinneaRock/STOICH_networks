@@ -95,7 +95,7 @@ ggsave('Figures/DarkTheme/Location_Map.png', height=6.5,width=8.5, units='in',dp
 invert_geom_defaults()
 
 
-#blank map for conceptual figure
+# blank map for conceptual figure ####
 site_meds <- nuts |>
   pivot_wider(names_from = param, values_from = result) |>
   group_by(site) |>
