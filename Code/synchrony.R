@@ -181,7 +181,7 @@ ggplot(sync_dist_mean_N, aes(distance_Km, meancorr)) +
   #geom_smooth(se=FALSE) +
   theme_classic() +
   labs(x='Distance between sites (Km)', y='Average correlation coefficient for N')
-ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanN.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanN.png',height=4.5, width=4.5, units = 'in', dpi=1200)
 
 # phosphorus
 sync_dist_mean_P <- distance_synchrony(DOP_synchrony, 'DOP') |>
@@ -202,7 +202,7 @@ ggplot(sync_dist_mean_P, aes(distance_Km, meancorr)) +
   #geom_smooth(se=FALSE) +
   theme_classic() +
   labs(x='Distance between sites (Km)', y='Average correlation coefficient for P')
-ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanP.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanP.png',height=4.5, width=4.5, units = 'in', dpi=1200)
 
 # stoichiometry
 sync_dist_mean_stoich <- distance_synchrony(DON_DOP_synchrony, 'DON:DOP') |>
@@ -223,7 +223,7 @@ ggplot(sync_dist_mean_stoich, aes(distance_Km, meancorr)) +
   #geom_smooth(se=FALSE) +
   theme_classic() +
   labs(x='Distance between sites (Km)', y='Average correlation coefficient for N:P')
-ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanNP.png',height=6.5, width=8.5, units = 'in', dpi=1200)
+ggsave('Figures/synchrony/Network/synchrony_distance_plot_meanNP.png',height=4.5, width=4.5, units = 'in', dpi=1200)
 
 ###############################################################################
 # LAKES ONLY ####
