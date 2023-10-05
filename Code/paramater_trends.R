@@ -124,27 +124,28 @@ ggsave('Figures/Trends/network_scale_y_log10.png', width=10.5, height=8.5, units
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # plots for SFS focusing on total and inorganic nutrients #### 
 # changed to look at all nutrients!!
+# and for proposal seminar just inorganics
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 sfs_trend <- all_data_trend |> 
-  filter(param %in% c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))
+  filter(param %in% c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'))) #, expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))
 
 mk_sfs <- mk_df |>
   # filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL')) |>
   mutate(season = 'global slope') |>
   rbind(mk_df_season) |>
-          # filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL'))) |>
+  filter(param %in% c('in.ip','IN_umolL', 'IP_umolL')) |> #, 'tn.tp', 'TN_umolL', 'TP_umolL'))) |>
   mutate(significance = ifelse(is.na(significance), 'p > 0.05', 'p < 0.05')) |>
-  # mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) |>
-  # filter(season != 'global slope')
-  mutate(param = factor(param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) 
+   mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')')))) |> #, expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) |>
+   filter(season != 'global slope')
+
 
 # annoying workaround to keep NA out of subwatershed for plotting
 mk_sfs_global <- mk_df |>
-  # filter(param %in% c('in.ip','IN_umolL', 'IP_umolL', 'tn.tp', 'TN_umolL', 'TP_umolL')) |>
+  filter(param %in% c('in.ip','IN_umolL', 'IP_umolL')) |> #, 'tn.tp', 'TN_umolL', 'TP_umolL')) |>
   mutate(season = 'global slope') |>
   mutate(significance = ifelse(is.na(significance), 'p > 0.05', 'p < 0.05')) |>
-  # mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))))
-  mutate(param = factor(param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) 
+  mutate(param = factor(param, labels = c(expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'))))  #, expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))))
+
 
 
 sfs_trend <- full_join(sfs_trend, mk_sfs|> select(-n))
@@ -162,20 +163,21 @@ ggplot(sfs_trend) +
   #scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) + 
   # more stupid workarounds for a nice presentation plot :( 
   scale_color_manual('', values=c('#B5DDD8','#81C4E7','#9398D2','#906388','grey50','green4','goldenrod','blue1')) +
- theme_bw() +
-  #dark_theme_bw(base_size=15) +
-  geom_abline(aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
-  geom_abline(mk_sfs_global, mapping=aes(intercept=intercept, slope=sensslope, linetype=significance, color=season)) +
+  dark_theme_bw() +
+  geom_abline(aes(intercept=intercept, slope=sensslope, linetype=significance, color=season), lwd=1.5) +
+  geom_abline(mk_sfs_global, mapping=aes(intercept=intercept, slope=sensslope, linetype=significance, color=season), lwd=1.5) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
   #scale_y_log10() +
-  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=1) +
   labs(x = 'Network Position', y = '') +
   theme(legend.position = 'bottom') +
   scale_linetype_manual('', values=c(1,3))
 # ggsave('Figures/DarkTheme/network_trend.png', width=12.5, height=10.5, units='in', dpi=1200)
 
-ggsave('Figures/Trends/log10Scale_MKtests.png', width=10.5, height=8.5, units='in', dpi=1200)
+ggsave('Figures/DarkTheme/MKtests_Inorganic.png', width=10, height=6, units='in', dpi=1200)
+
+invert_geom_defaults()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Use gams to assess trends along network ####
