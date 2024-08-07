@@ -370,7 +370,7 @@ KS_tests <- KS_tests |>
   mutate(significance = ifelse(between(p_value, 0.001, 0.05), '*',
                                ifelse(between(p_value, 0.0001, 0.001), '**',
                                       ifelse(p_value < 0.0001, '***', NA))))
-write.csv(KS_tests, 'Data/KS_test_results.csv')
+write.csv(KS_tests, 'Data/Results/KS_test_results.csv')
 
 
 
