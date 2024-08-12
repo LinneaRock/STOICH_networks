@@ -57,7 +57,11 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+  mutate(mon = month(date)) |> #and add seasons to the dataframe
+  mutate(season = case_when(mon %in% c(12,1,2,3,4,5) ~ "Winter",
+                            mon %in% c(6,7)  ~ "Snowmelt runoff",
+                            mon %in% c(8,9,10,11) ~ "Summer")) |>
+  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
   dplyr::select(-X)
 
 stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
@@ -68,7 +72,11 @@ stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
   mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
+  mutate(mon = month(date)) |> #and add seasons to the dataframe
+  mutate(season = case_when(mon %in% c(12,1,2,3,4,5) ~ "Winter",
+                            mon %in% c(6,7)  ~ "Snowmelt runoff",
+                            mon %in% c(8,9,10,11) ~ "Summer")) |>
+  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
   dplyr::select(-X)
 
 discharge <- read.csv('Data/discharge_outliers_removed.csv')|>

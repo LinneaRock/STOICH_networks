@@ -164,6 +164,10 @@ sigSourceSink <- nuts_prod_lakes |>
   filter(significance != '-') |>
   mutate(param = sub('_.*','',param))|>
   mutate(img = ifelse(mean<0, '\U2193', '\U2191')) |>
+  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
+  mutate(seasoncol=case_when(season=='Winter'~'blue4',
+                              season=='Snowmelt runoff'~'palegreen4',
+                              season=='Summer'~'goldenrod3')) |>
   st_as_sf() 
 
 
@@ -172,11 +176,12 @@ sigSourceSink <- nuts_prod_lakes |>
 plot_list <- lapply(unique(medians$param), function(param_val) {
   ggplot() +
     geom_sf(data = waterfeatures, aes()) +
-    geom_sf(data = subset(medians, param == param_val), aes(size = med, color=pointcolor),alpha=0.75) +
-    scale_color_identity()+
+    geom_sf(data = subset(medians, param == param_val), aes(size = med, fill=pointcolor),alpha=0.5, shape=21) +
+    scale_fill_identity()+
     ggtitle(as.expression(param_val)) +
-    geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img),size=8) +
+    geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=seasoncol),size=8) +
     scale_shape_identity() +
+    scale_color_identity() +
     theme_minimal() +
     theme(axis.text.x=element_blank(),
           axis.text.y=element_blank(),

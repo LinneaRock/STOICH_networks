@@ -1,33 +1,33 @@
 library(tidyverse)
 library(lubridate)
 
-lakes <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.10.3/glvwatsolu.dm.data.csv")
+lakes <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.10.3/glvwatsolu.dm.data.csv")
 
-albdis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.102.17/albdisch.nc.data.csv")
-albwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.103.14/albisolu.nc.data.csv")
+albdis <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.102.17/albdisch.nc.data.csv")
+albwq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.103.14/albisolu.nc.data.csv")
 
-arikwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.104.13/ariksolu.nc.data.csv")
-navdis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.169.1/navdisch.nc.data.csv")
+arikwq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.104.13/ariksolu.nc.data.csv")
+navdis <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.169.1/navdisch.nc.data.csv")
 
-gl4dis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.105.16/gl4disch.nc.data.csv")
-gl4wq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.108.12/gre4solu.nc.data.csv")
+gl4dis <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.105.16/gl4disch.nc.data.csv")
+gl4wq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.108.12/gre4solu.nc.data.csv")
 
-gl5wq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.109.12/gre5solu.nc.data.csv")
-gl5dis <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.170.1/gl5disch.nc.data.csv") 
+gl5wq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.109.12/gre5solu.nc.data.csv")
+gl5dis <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.170.1/gl5disch.nc.data.csv") 
 
-albinwq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.110.7/inlesolu.nc.data.csv")
-flumewq <- read.csv("C:/Users/lrock1/OneDrive/Desktop/Niwot_Data/knb-lter-nwt.162.1/flumesolu.nc.data.csv")
+albinwq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.110.7/inlesolu.nc.data.csv")
+flumewq <- read.csv("C:/Users/linne/OneDrive - University of Wyoming/Data/Niwot_Data/knb-lter-nwt.162.1/flumesolu.nc.data.csv")
 
 
 lakes_format <- lakes |>
-  select(-LTER_site) |>
+  dplyr::select(-LTER_site) |>
   mutate(site = paste0(local_site, "_", location)) |>
   rename(depth_m = depth) |>
   mutate(year = as.factor(year),
          date = as.Date(date)) |>
   #convert all parameters to as.numeric. This will create a lot of NAs where we had "<," but these are below the analytical detection so we should not use them anyway
   mutate(across(7:43, as.numeric)) |>
-  select(-Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -local_site, -location, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -local_site, -location, -cat_sum, -an_sum, -chg_bal) |>
   relocate(site, depth_m) |>
   rename(SpC_uscm = conduct,
          ANC_ueqL = ANC,
@@ -59,7 +59,7 @@ lakes_format <- lakes |>
 lakes_format <- lakes_format |>
   mutate(check = rowSums(lakes_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
  
 alb_camp_format <- left_join(albdis, albwq, by = "date") |>
@@ -71,7 +71,7 @@ alb_camp_format <- left_join(albdis, albwq, by = "date") |>
          year = as.factor(year),
          depth_m = 0) |>
   relocate(site) |>
-  select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(3,4,6:31), as.numeric)) |>
   mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
@@ -104,20 +104,20 @@ alb_camp_format <- left_join(albdis, albwq, by = "date") |>
 alb_camp_format <- alb_camp_format |>
   mutate(check = rowSums(alb_camp_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 nav_format <- navdis |>
   rename(arik_flow_site = local_site,
          daily_dis_m3 = discharge) |>
   mutate(date = as.Date(date)) |>
-  select(-LTER_site, -notes)
+  dplyr::select(-LTER_site, -notes)
 
 arik_format <- left_join(nav_format, arikwq |> mutate(date = as.Date(date)), by = "date") |>
   rename(site = local_site) |>
   relocate(site) |>
   mutate(year = year(date),
          year = as.factor(year)) |>
-  select(-LTER_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-LTER_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(4,6:31), as.numeric)) |>
   rename(SpC_uscm = cond,
          ANC_ueqL = ANC,
@@ -149,7 +149,7 @@ arik_format <- left_join(nav_format, arikwq |> mutate(date = as.Date(date)), by 
 arik_format <- arik_format |>
   mutate(check = rowSums(arik_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 
 
@@ -162,7 +162,7 @@ gl4_format <- left_join(gl4dis, gl4wq, by = "date") |>
          year = as.factor(year),
          depth_m = 0) |>
   relocate(site) |>
-  select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(3,4,6:31), as.numeric)) |>
   mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
@@ -195,7 +195,7 @@ gl4_format <- left_join(gl4dis, gl4wq, by = "date") |>
 gl4_format <- gl4_format |>
   mutate(check = rowSums(gl4_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 
 gl5_format <- left_join(gl5dis, gl5wq, by = "date") |>
@@ -207,7 +207,7 @@ gl5_format <- left_join(gl5dis, gl5wq, by = "date") |>
          year = as.factor(year),
          depth_m = 0) |>
   relocate(site) |>
-  select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-notes, -LTER_site.x, -local_site.x, -LTER_site.y, -local_site.y, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(3,5:30), as.numeric)) |>
   #mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
@@ -240,7 +240,7 @@ gl5_format <- left_join(gl5dis, gl5wq, by = "date") |>
 gl5_format <- gl5_format |>
   mutate(check = rowSums(gl5_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 
 albin_format <- albinwq |>
@@ -250,7 +250,7 @@ albin_format <- albinwq |>
          year = as.factor(year),
          depth_m = 0) |>
   relocate(site) |>
-  select(-LTER_site, -local_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-LTER_site, -local_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(4:29), as.numeric)) |>
   #mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
@@ -283,7 +283,7 @@ albin_format <- albinwq |>
 albin_format <- albin_format |>
   mutate(check = rowSums(albin_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 
 
@@ -294,7 +294,7 @@ flume_format <- flumewq |>
          year = as.factor(year),
          depth_m = 0) |>
   relocate(site) |>
-  select(-LTER_site, -local_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
+  dplyr::select(-LTER_site, -local_site, -time, - acid, - alkal, -Trit, -time, -D_excess, -dD_sdev, -dDeut, -d18O_sdev, -d18O, -T_sdev, -POC, -cat_sum, -an_sum, -chg_bal) |>
   mutate(across(c(4:29), as.numeric)) |>
   #mutate(mean_temp_C = ifelse(is.nan(mean_temp_C), NA, mean_temp_C)) |>
   rename(SpC_uscm = cond,
@@ -327,14 +327,14 @@ flume_format <- flumewq |>
 flume_format <- flume_format |>
   mutate(check = rowSums(flume_format[,c(1:15)], na.rm = TRUE)) |>
   filter(check != 0) |>
-  select(-check)
+  dplyr::select(-check)
 
 greenlakesnetwork <- bind_rows(alb_camp_format, albin_format, arik_format, flume_format, gl4_format, gl5_format, lakes_format) 
 
 write.csv(greenlakesnetwork, "Data/greenlakes_network.csv")
 
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
-  select(-X) |>
+  dplyr::select(-X) |>
   mutate(date = as.Date(date)) |>
   mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL))|>
   mutate(DON_umolL = ifelse(DON_umolL < 0, NA, IP_umolL)) |>
@@ -348,11 +348,12 @@ write.csv(gl_network, "Data/greenlakes_network.csv")
 # Add seasons to dataset ####
 library(lubridate)
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
+  mutate(date = as.Date(date, format='%m/%d/%Y')) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe
-  mutate(season = case_when(mon %in% c(10,11,12) ~ "Oct-Dec",
-                            mon %in% c(1,2,3) ~ "Jan-Mar",
-                            mon %in% c(4,5,6)  ~ "Apr-Jun",
-                            mon %in% c(7,8,9) ~ "Jul-Sep"))
+  mutate(season = case_when(mon %in% c(12,1,2,3,4,5) ~ "Winter",
+                            mon %in% c(6,7)  ~ "Snowmelt runoff",
+                            mon %in% c(8,9,10,11) ~ "Summer")) |>
+  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) 
 write.csv(gl_network, "Data/greenlakes_network.csv")
 
 
@@ -381,7 +382,7 @@ write.csv(gl_network, "Data/greenlakes_network.csv")
 
 # sites ####
 # gl_network_sites <- read.csv("Data/greenlakes_network.csv") |>
-#   select(site, arik_flow_site) |>
+#   dplyr::select(site, arik_flow_site) |>
 #   unique()
 # write.csv(gl_network_sites, "Data/sites.csv")
 # saved and manually added lat long and network position
