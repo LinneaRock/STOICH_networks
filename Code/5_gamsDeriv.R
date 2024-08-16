@@ -110,6 +110,10 @@ plotting_deriv <- plotting_deriv |>
 }
 
 
+
+# this madness is just making pretty labels
+plotting_deriv$param <- factor(plotting_deriv$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
+
 ggplot(plotting_deriv, aes(network_position, deriv)) +
   geom_line() +
   geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.25) +
@@ -117,7 +121,7 @@ ggplot(plotting_deriv, aes(network_position, deriv)) +
   theme_bw() +
   labs(x='Network position',
        y='First derivative of GAM') +
-  facet_wrap(~param, scales = 'free_y', ncol=3)
+  facet_wrap(~param, scales = 'free_y', ncol=3, labeller = label_parsed)
 # To interpret these first derivative plots– if the confidence intervals DO NOT overlap 0, it means that the trend is either increasing or decreasing.
 
 ggsave('Figures/derivative_plot.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
