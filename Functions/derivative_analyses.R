@@ -1,6 +1,6 @@
 #Identifying & plotting "periods of change"####
 
-# GAM-guru Gavin Simpson and will walk you through how you can go about doing this with our climate dataset. [https://www.fromthebottomoftheheap.net/2014/05/15/identifying-periods-of-change-with-gams/]
+# GAM-guru Gavin Simpson and will walk you through how you can go about doing this with a climate dataset. [https://www.fromthebottomoftheheap.net/2014/05/15/identifying-periods-of-change-with-gams/]
 
 ## custom functions that Gavin wrote ####
 

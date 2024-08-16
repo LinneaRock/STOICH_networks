@@ -252,6 +252,16 @@ rm(bootstrap_nut_kde, bootstrap_stoich_kde, dens_df, i, kde_fn, tmp, tmp1, tmp.a
 # non-parametric way to test null hypothesis: distributions are the same, alternative hypothesis: distributions are significantly different 
 
 # set up 
+invsout_nuts <- k_densities_NUTS |>
+  pivot_longer(cols = c(inlets_density, outlets_density), names_to = 'position', 
+               values_to = 'position_dens') |>
+  drop_na(position_dens)
+
+invsout_stoich <- k_densities_STOICH |>
+  pivot_longer(cols = c(inlets_density, outlets_density), names_to = 'position', 
+               values_to = 'position_dens') |>
+  drop_na(position_dens)
+
 nuts_param <- as.vector(unique(nuts$param))
 stoich_param <- as.vector(unique(stoich$param))
 nuts_eco <- as.vector(c('lake', 'stream'))
@@ -296,6 +306,19 @@ for(n in 1:length(nuts_param)) {
   KS_tests <- rbind(KS_tests, outlake.tmp)
   
   
+  # inlet vs lake nutrients
+  inlake.ks <- ks.test((invsout_nuts |> filter(param == nuts_param[n],
+                                                position == 'inlets_density'))$result,
+                        (k_densities_NUTS |> filter(param == nuts_param[n],
+                                                    eco_type == 'lake'))$result)
+  
+  inlake.tmp <- data.frame(param = nuts_param[n], variables = 'inlet-lake', d_stat = as.numeric(inlake.ks[['statistic']]), p_value = round(as.numeric(inlake.ks[['p.value']]),5))
+  
+  KS_tests <- rbind(KS_tests, inlake.tmp)
+
+
+  
+  
   
   for(s in 1:length(stoich_param)) { 
     # compare lake vs stream stoichiometry
@@ -336,6 +359,18 @@ for(n in 1:length(nuts_param)) {
     
     
     
+    # inlet vs lake stoichiometry
+    inlake.ks2 <- ks.test((invsout_stoich |> filter(param == stoich_param[s],
+                                                     position == 'inlets_density'))$result,
+                           (k_densities_STOICH |> filter(param == stoich_param[s],
+                                                         eco_type == 'lake'))$result)
+    
+    inlake.tmp2 <- data.frame(param = stoich_param[s], variables = 'inlet-lake', d_stat = as.numeric(inlake.ks2[['statistic']]), p_value = round(as.numeric(inlake.ks2[['p.value']]),5))
+    
+    KS_tests <- rbind(KS_tests, inlake.tmp2)
+    
+    
+    
     for(e in 1:length(nuts_eco)) { 
       # compare lake/stream vs network nutrients 
       tmp.obj3 <- ks.test((k_densities_NUTS |> filter(param == nuts_param[n],
@@ -363,7 +398,7 @@ for(n in 1:length(nuts_param)) {
   } #end s loop
 } # end n loop
 
-rm(list=c('inout.ks', 'inout.ks2', 'inout.tmp', 'inout.tmp2', 'tmp', 'tmp2', 'tmp3', 'tmp4', 'tmp.obj', 'tmp.obj2', 'tmp.obj3', 'tmp.obj4', 'e', 'n', 'nuts_eco', 'nuts_param', 's', 'stoich_param'))
+rm(list=c('inout.ks', 'inout.ks2', 'inout.tmp', 'inout.tmp2', 'tmp', 'tmp2', 'tmp3', 'tmp4', 'tmp.obj', 'tmp.obj2', 'tmp.obj3', 'tmp.obj4', 'e', 'n', 'nuts_eco', 'nuts_param', 's', 'stoich_param', 'outlake.ks','outlake.ks2', 'outlake.tmp','outlake.tmp2','inlake.ks','inlake.ks2', 'inlake.tmp','inlake.tmp2'))
 
 ## make a nice dataframe of results and save it ####
 KS_tests <- KS_tests |>
