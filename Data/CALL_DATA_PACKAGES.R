@@ -52,9 +52,9 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
   mutate(date = as.Date(date)) |>
   filter(site != 'FLUME',
-         eco_type != 'glacier',
+         #eco_type != 'glacier',
          site != 'ALB_CAMP') |>
-  mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
+  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe
@@ -67,9 +67,9 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
 stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
   mutate(date = as.Date(date)) |>
   filter(site != 'FLUME',
-         eco_type != 'glacier',
+        # eco_type != 'glacier',
          site != 'ALB_CAMP') |>
-  mutate(network_position = factor(network_position, levels = c('2','3','4', '5', '6', 
+  mutate(network_position = factor(network_position, levels = c('1', '2','3','4', '5', '6', 
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe

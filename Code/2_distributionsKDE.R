@@ -407,6 +407,9 @@ KS_tests <- KS_tests |>
                                       ifelse(p_value < 0.0001, '***', NA))))
 write.csv(KS_tests, 'Data/Results/KS_test_results.csv')
 
+### 5a. Manually add dummy variable to distinguish differences and read in KS_test_results.csv for plotting ####
+
+KS_test_results <- read.csv('Data/Results/KS_test_results_SIG.csv')
 
 
 # 6. Make a nice plot ####

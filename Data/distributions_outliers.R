@@ -6,8 +6,8 @@ sites <- read.csv("Data/sites.csv") |>
 
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y'))  |>
-  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
+  mutate(date = as.Date(date, format = '%m/%d/%Y')) # |>
+#  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 # subset and format datasets for plotting ####
 ions <- gl_network |>
@@ -57,7 +57,7 @@ ggplot(discharge_temp) +
 
 
 #### loops to get rid of outliers ####
-## we are determining outliers 
+
 
 ## loop through parameters 
 ions_param <- as.vector(unique(ions$param))
