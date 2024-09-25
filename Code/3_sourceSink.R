@@ -11,31 +11,32 @@ library(grid)
 
 
 # normalize source/sinks by distances between points. Unfortunately we don't have good estimates for volume or discharge here so distance is a proxy. 
+# distances were calculated manually in ArcGIS
 distances <- readxl::read_xlsx('Data/Results/site_distances_km.xlsx') |>
-  pivot_longer(cols=c(2:15), names_to = 'site2', values_to = 'distance_km') |>
+  pivot_longer(cols=c(2:16), names_to = 'site2', values_to = 'distance_km') |>
   drop_na() |>
   rename('site1'=1) |>
   filter(distance_km >0)
 
 # read in gis data for plotting
-waterfeatures <- st_transform(readRDS('Data/Spatial_Data/ALB_waterFeatures.RDS', crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")))
+waterfeatures <- st_transform(readRDS('Data/Spatial_Data/ALB_waterFeatures.RDS', st_crs("+proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")))
 
 # 2. Calculating source/sink ####
 
 ## lakes ####
 nuts_prod_lakes <- nuts |>
-  group_by(site, eco_type, date, season, param) |>
-  summarise(result = mean(result)) |>
+  group_by(site, date, season, param) |>
+  summarise(averesult = mean(result)) |>
   ungroup() |>
-  pivot_wider(names_from = site, values_from = result) |>
-  group_by(eco_type, date, season, param) |>
+  pivot_wider(names_from = site, values_from = averesult) |>
+ # group_by(eco_type, date, season, param) |>
   mutate(GL5 = GL5_OUTLET - GL5_INLET,
          GL4 = GL4_OUTLET - GL4_INLET,
          GL3 = GL3_OUTLET - GL3_INLET,
          GL2 = ALB_INLET - GL3_OUTLET,
          ALBION = ALB_OUTLET - ALB_INLET) |>
-  ungroup() |>
-  dplyr::select(2:4, 19:23) |>
+ # ungroup() |>
+  dplyr::select(1:3, 19:23) |>
   pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result)  |>
   # add in distance data - we only have GL5, GL4, and Albion here - all others did not have enough data
@@ -66,27 +67,28 @@ nuts_prod_lakes <- nuts |>
 
 ## streams ####
 nuts_prod_streams <- nuts |>
-  group_by(site, eco_type, date, season, param) |>
-  summarise(result = mean(result)) |>
+  group_by(site, date, season, param) |>
+  summarise(averesult = mean(result)) |>
   ungroup() |>
-  pivot_wider(names_from = site, values_from = result) |>
-  group_by(eco_type, date, season, param) |>
-  mutate(#reach1 = GL5_INLET - ARIKAREE,
-    reach1 = GL4_INLET - GL5_OUTLET,
-    reach2 = GL3_INLET - GL4_OUTLET,
-    reach3 = GL2_LAKE - GL3_OUTLET,
-    reach4 = ALB_INLET - GL2_LAKE,
-    reach4a = ALB_LAKE - GL1_LAKE) |>
+  pivot_wider(names_from = site, values_from = averesult) |>
+ # group_by(eco_type, date, season, param) |>
+  mutate(reach1 = GL5_INLET - ARIKAREE,
+    reach2 = GL4_INLET - GL5_OUTLET,
+    reach3 = GL3_INLET - GL4_OUTLET,
+    reach4 = GL2_LAKE - GL3_OUTLET,
+    reach5 = ALB_INLET - GL2_LAKE,
+    reach5a = ALB_LAKE - GL1_LAKE) |>
   #reach6 = ALB_CAMP - ALB_OUTLET) |>
   ungroup() |>
-  dplyr::select(2:4, 19:23) |>
-  pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
+  dplyr::select(1:3, 19:24) |>
+  pivot_longer(4:9, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result) |>
-  # add in distance data - we only have reach1, reach2, and Reach4a here - all others did not have enough data
+  # add in distance data - we only have reach1, reach2, reach3 and Reach5a here - all others did not have enough data
   left_join(distances |>
-              mutate(lake_stream = case_when(site1=='GL5_OUTLET' & site2=='GL4_INLET'~'reach1',
-                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach2',
-                                             site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach4a')) |>
+              mutate(lake_stream = case_when(site1=='Arikaree_GLACIER' & site2=='GL5_INLET'~'reach1',
+                                             site1=='GL5_OUTLET' & site2=='GL4_INLET'~'reach2',
+                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach3',
+                                             site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach5a')) |>
               drop_na()) |>
   mutate(normalized_result = result/distance_km) |>
   group_by(param) |>
@@ -137,17 +139,19 @@ centroids <- net |>
 ggplot() +
   geom_sf(data = waterfeatures, mapping=aes()) +
   geom_sf(data = flowlines |> filter(!is.na(GNIS_ID)), mapping = aes()) +
-  geom_sf(data = centroids|> filter(from==50), mapping=aes(color=as.character(from)), size = 3, shape = 21)
+  geom_sf(data = centroids|> filter(from==25), mapping=aes(color=as.character(from)), size = 3, shape = 21)
 
-# from=50 is center reach1 = GL4_INLET - GL5_OUTLET,
-# from=40 reach2 = GL3_INLET - GL4_OUTLET,
-# from=46 reach4a = ALB_LAKE - GL1_LAKE
+# from=25 is center reach1 = GL5_INLET - Arikaree
+# from=50 is center reach2 = GL4_INLET - GL5_OUTLET,
+# from=40 reach3 = GL3_INLET - GL4_OUTLET,
+# from=46 reach5a = ALB_LAKE - GL1_LAKE
 
 reach_centroids <- centroids |>
-  filter(from %in% c(50, 40, 46)) |>
-  mutate(lake_stream=case_when(from==50~'reach1',
-                               from==40~'reach2',
-                               from==46~'reach4a')) |>
+  filter(from %in% c(25, 50, 40, 46)) |>
+  mutate(lake_stream=case_when(from==25~'reach1',
+                               from==50~'reach2',
+                               from==40~'reach3',
+                               from==46~'reach5a')) |>
   dplyr::select(lake_stream, Shape) |>
   rename(geometry=Shape)
 
@@ -193,7 +197,7 @@ plot_list <- lapply(unique(medians$param), function(param_val) {
 })
 
 ## Combine all plots ####
-combined_plot <- wrap_plots(plot_list, ncol = 2)
+combined_plot <- patchwork::wrap_plots(plot_list, ncol = 2)
 combined_plot
 
 # save plot ####
