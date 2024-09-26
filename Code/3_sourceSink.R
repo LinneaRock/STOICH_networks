@@ -174,7 +174,9 @@ sigSourceSink <- nuts_prod_lakes |>
                               season=='Summer'~'goldenrod3')) |>
   st_as_sf() 
 
-
+data_with_coords <- st_coordinates(sigSourceSink) |>
+  as.data.frame() |>
+  bind_cols(sigSourceSink)
 
 ## Create individual plots for each parameter ####
 plot_list <- lapply(unique(medians$param), function(param_val) {
@@ -183,7 +185,8 @@ plot_list <- lapply(unique(medians$param), function(param_val) {
     geom_sf(data = subset(medians, param == param_val), aes(size = med, fill=pointcolor),alpha=0.5, shape=21) +
     scale_fill_identity()+
     ggtitle(as.expression(param_val)) +
-    geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=seasoncol),size=8) +
+   # geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=seasoncol),size=8) +
+    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=seasoncol), size=8, width=0.002) +
     scale_shape_identity() +
     scale_color_identity() +
     theme_minimal() +
