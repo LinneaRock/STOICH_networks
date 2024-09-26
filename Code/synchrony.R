@@ -8,31 +8,40 @@ source('Data/CALL_DATA_PACKAGES.R')
 # prepare data ####
 nuts.setup <- nuts |>
   mutate(year=year(date)) |>
-  select(-site, -depth_m, -date) |>
-  group_by(network_position, eco_type, season, year,param) |>
-  summarise(med=median(result)) |> # get median value per year and season at each site
+  select(-depth_m, -date) |>
+  group_by(site, network_position, eco_type, season, year,param) |>
+  summarise(med=median(result, na.rm=TRUE)) |> # get median value per year and season at each site
   ungroup() |>
   pivot_wider(names_from='param', values_from='med') |>
   #select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
-  filter(eco_type != 'glacier') |>
+ # filter(eco_type != 'glacier') |>
   group_by(network_position) |>
   add_count()|>
-  ungroup()
+  ungroup() |>
+  mutate(fakemonth=case_when(season=='Winter'~2,
+                             season=='Snowmelt runoff'~6,
+                             season=='Summer'~9)) |>
+  mutate(fakedate=as.Date(paste(year,fakemonth,'01',sep='-')))
 
 
 
 stoich.setup <- stoich |>
   mutate(year=year(date)) |>
-  select(-site, -depth_m, -date) |>
-  group_by(network_position, eco_type, season, year, param) |>
-  summarise(med=median(result)) |> # get median value per year and season at each site
+  select(-depth_m, -date) |>
+  group_by(site,network_position, eco_type, season, year, param) |>
+  summarise(med=median(result, na.rm=TRUE)) |> # get median value per year and season at each site
   ungroup() |>
   pivot_wider(names_from='param', values_from='med') |>
   #select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
-  filter(eco_type != 'glacier') |>
+  #filter(eco_type != 'glacier') |>
   group_by(network_position) |>
   add_count()|>
   ungroup()
+
+
+ggplot(nuts.setup, aes(fakedate, DON_umolL, color=site)) +
+  geom_line() +
+  scale_y_log10()
 
 
 # Write function to pull correlation values and p-values of corr into lists ####
