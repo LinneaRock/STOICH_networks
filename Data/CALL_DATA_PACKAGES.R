@@ -128,7 +128,7 @@ sites <- read.csv('Data/sites.csv') |>
 
 
 # read in distances between locations first 
-distances <- read.csv('Data/site_distances_Km.csv', header = TRUE)
+distances <- readxl::read_xlsx('Data/Results/site_distances_Km.xlsx')
 # rownames(distances) <- distances$X
 # distances[,1] <- NULL
 

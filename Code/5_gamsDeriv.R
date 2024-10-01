@@ -13,9 +13,7 @@ source('Functions/derivative_analyses.R')
 # 2. Format data ####
 nuts.gam <- nuts |>
   mutate(network_position = ifelse(network_position=='12a', '12.5', network_position)) |>
-  mutate(network_position = as.numeric(network_position)) |>
-  filter(!param %in% c('NH4_ueqL', 'NO3_ueqL', 'DOC_mgL'))
-
+  mutate(network_position = as.numeric(network_position))
 stoich.gam <- stoich |>
   mutate(network_position = ifelse(network_position=='12a', '12.5', network_position)) |>
   mutate(network_position = as.numeric(network_position))
@@ -41,6 +39,7 @@ ggplot(gams, aes(network_position, result, group=param)) +
 # set up
 plotting_deriv <- data.frame()
 params <- as.vector(unique(gams$param))
+Term <- 'network_position'
 
 for(p in seq_along(params)) {
   
@@ -93,7 +92,7 @@ m1.dsig <- signifD(Pred$fit,
                    m1.dci[[Term]]$lower)
 
 # Plot the first derivative 
-#plot.Deriv(m1.d)
+plot.Deriv(m1.d)
 
 
 # Append the results to the plotting_deriv dataframe
