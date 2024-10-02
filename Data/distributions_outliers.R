@@ -1,8 +1,7 @@
 
 
 # read in data
-sites <- read.csv("Data/sites.csv") |>
-  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', '7','8','9','10','11','12','12a','13','14','15','16')))
+sites <- read.csv("Data/sites.csv") 
 
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   left_join(sites) |>
@@ -245,7 +244,43 @@ stoich <- nuts |>
 
 write.csv(stoich, "Data/stoich_after_outliers_removed.csv")
 
+## remove stoich outliers now ####
+## loop through parameters 
+stoich_param <- as.vector(unique(stoich$param))
+site_n <- as.vector(unique(sites$site))
+stoich_rm <- data.frame()
+stoich_n_removed <- data.frame()
 
+for(i in 1:length(stoich)) {
+  for(j in 1:length(site_n)) {
+    remove <-  boxplot((stoich |> filter(param==stoich_param[i],
+                                       site==site_n[j]))$result, 
+                       plot = FALSE)$out
+    
+    if (length(remove) > 0) {
+      tmp <- (stoich |> filter(param==stoich_param[i],
+                             site==site_n[j]))[-which((stoich |> filter(param==stoich_param[i],
+                                                                      site==site_n[j]))$result %in% remove), ]
+    } else {
+      tmp <- (stoich |> filter(param==stoich_param[i], site==site_n[j]))
+    }
+    
+    stoich_rm <- rbind(stoich_rm, tmp)
+    
+    tmpn = data.frame(length(remove)) |>
+      mutate(var = stoich_param[i],
+             site = site_n[j])
+    
+    stoich_n_removed = rbind(stoich_n_removed, tmpn)
+  }
+}
+
+# This provides counts of outliers
+n_stoich_outliers <- stoich_n_removed |>
+  group_by(var) |>
+  mutate(count = sum(length.remove.))
+
+write.csv(stoich_rm, 'Data/stoich_outliers_removed.csv')
 
 #### frequency plots outlier removed data ####
 ggplot(ions) +
@@ -264,7 +299,7 @@ ggplot(discharge) +
   facet_wrap(.~param, scales = 'free') +
   labs(title = 'outliers removed')# question, where did temps go? 
 
-ggplot(stoich) +
+ggplot(stoich_rm) +
   geom_density(aes(result)) +
   facet_wrap(.~param, scales = 'free')+
-  labs(title = 'outliers removed') # question, do I need to delete outliers from the stoich dataset too? 
+  labs(title = 'outliers removed') # too? 

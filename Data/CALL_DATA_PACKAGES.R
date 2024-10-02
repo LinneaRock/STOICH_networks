@@ -64,7 +64,7 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
   dplyr::select(-X)
 
-stoich <- read.csv('Data/stoich_after_outliers_removed.csv')|>
+stoich <- read.csv('Data/stoich_outliers_removed.csv')|>
   mutate(date = as.Date(date)) |>
   filter(site != 'FLUME',
         # eco_type != 'glacier',
@@ -116,15 +116,16 @@ greenlakes_LC <- read_rds('Data/Spatial_Data/greenlakes_landcover.RDS')
 # sampling locations
 sites <- read.csv('Data/sites.csv') |>
   filter(site != 'FLUME',
-         eco_type != 'glacier',
+         #eco_type != 'glacier',
          site != 'ALB_CAMP') |>
   mutate(WS_Group = ifelse(site %in% c('ALB_INLET', 'ALB_LAKE', 'ALB_OUTLET', 'GL1_LAKE'),'ALB',
                            ifelse(site %in% c('GL2_LAKE'),'GL2',
                                   ifelse(site %in% c('GL3_INLET', 'GL3_LAKE', 'GL3_OUTLET'),'GL3',
                                          ifelse(site %in% c('GL4_INLET','GL4_LAKE', 'GL4_OUTLET'),'GL4',
-                                                ifelse(site %in% c('GL5_INLET', 'GL5_LAKE', 'GL5_OUTLET'),'GL5', NA)))))) |>
+                                                ifelse(site %in% c('ARIKAREE', 'GL5_INLET', 'GL5_LAKE', 'GL5_OUTLET'),'GL5', NA)))))) |>
   drop_na(lat) |>
-  st_as_sf(coords=c('long','lat'),crs=4269)
+  st_as_sf(coords=c('long','lat'),crs=4269) |>
+  drop_na(upstream_network_lakes)
 
 
 # read in distances between locations first 
@@ -152,11 +153,10 @@ Correct_Colnames <- function(df) {
 }
 
 distances <-as.matrix(Correct_Colnames(distances))
-distances[lower.tri(distances, diag=TRUE)] <- NA
+#distances[lower.tri(distances, diag=TRUE)] <- NA
 distances_Km <- as.data.frame(distances) |>
-  select(-1) |>
-  rownames_to_column('site1') |>
-  pivot_longer(2:14, names_to = 'site2', values_to = 'distance_Km') |>
+  rename(site1=1) |>
+  pivot_longer(2:16, names_to = 'site2', values_to = 'distance_Km') |>
   drop_na()
 
 rm(distances)
