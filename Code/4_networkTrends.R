@@ -6,10 +6,10 @@
 source('Data/CALL_DATA_PACKAGES.R') 
 
 all_data_trend <- rbind(nuts, stoich) |>
-  mutate(network_position = ifelse(site=='GL1_LAKE', 11.5, 
-                                   ifelse(site=='ALB_OUTLET', 13,
-                                          ifelse(site=='ALB_LAKE', 12, network_position)))) |>
-  mutate(network_position = network_position + 1) |>
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
   group_by(network_position, param) |>
   mutate(mean = mean(result),
          median = median(result),
@@ -18,11 +18,11 @@ all_data_trend <- rbind(nuts, stoich) |>
          SE = std.error(result),
          n = n()) |>
   ungroup() |>
-  left_join(sites |> select(-network_position)) |>
-  left_join(greenlakes_LC) |>
-  select(-Layer_1, -LandCoverArea_km2, -depth_m, - arik_flow_site, - notes, - elevation_m, - drainage_area_ha, - geometry) |>
   distinct() |>
-  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) 
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
+  # remove GL1 from these analyses
+  filter(site != 'GL1_LAKE') |>
+  mutate(network_position = network_position+1)
 
 
 # 2. get sen's slopes and intercepts ####
@@ -122,7 +122,7 @@ plot_trend$WS_Group <- factor(all_data_trend$WS_Group, levels = c('GL5','GL4','G
 
 # for better plot viewing
 # Calculate the range for network_position
-network_range <- range(plot_trend$network_position, na.rm = TRUE)
+network_range <- range(as.numeric(plot_trend$network_position), na.rm = TRUE)
 # Calculate points for lines
 mk_plot_global <- mk_plot_global |>
   mutate(y_start = intercept + sensslope * network_range[1],
@@ -136,24 +136,21 @@ ggplot(plot_trend) +
   geom_jitter(aes(network_position, result, color=WS_Group), alpha=0.1) +
   geom_point(aes(network_position, mean, fill=WS_Group), 
              color = "black", pch = 21, size = 2) +
-  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
-  # geom_abline(mk_plot_global, mapping=aes(intercept=intercept, slope=sensslope, linetype=significance, color=season), lwd=1.5) +
-  # geom_abline(aes(intercept=intercept, slope=sensslope, linetype=significance, color=season), lwd=1.5) +
+#  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
   # Manually plot the line with geom_segment
   geom_segment(data = mk_plot_global, 
                aes(x = network_range[1], xend = network_range[2],
                    y = y_start, yend = y_end,
-                   color = season),
-               lwd = 1.5) +
+                   color = season)) +
+               #lwd = 1.5) +
   # Manually plot the line with geom_segment
   geom_segment( # using plot_trend for seasonal data
                aes(x = network_range[1], xend = network_range[2],
                    y = y_start, yend = y_end,
-                   color = season),
-               lwd = 1.5) +
+                   color = season)) +
+               #lwd = 1.5) +
   scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8','grey50','blue4','palegreen4','goldenrod3')) +
   scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
-  # scale_linetype_manual('Significance', values=c(1,3)) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +

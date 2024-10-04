@@ -442,7 +442,7 @@ invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:D
 ## plotting ####
 # note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
 ggplot() +
-  geom_ribbon(bootstrap_all |> filter(bootstrapped_result <500),
+  geom_ribbon(bootstrap_all,
               mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr,
                           ymax=bs_kde+CI_upr, color='Network - 95% CI'),fill='grey80') +
   geom_line(k_densities_all |> filter(eco_type=='lake'),#filter(result < 500), 

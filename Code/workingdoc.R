@@ -16,16 +16,26 @@ data <- rbind(nuts,stoich) |>
   select(-depth_m,-elevation_m,-drainage_area_ha) |>
   left_join(greenlakes_LC)
 
+# count of each variable in the dataset
+count <- data |>
+  group_by(param, site) |>
+  summarise(n=n())
+  
 
 
-# Boxplot comparing nutrient concentrations and stoichiometry across positions ####
+
+# 2. Boxplot comparing nutrient concentrations and stoichiometry across positions ####
 #making pretty labels
-data$param <- factor(data$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
+data$param <- factor(data$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))
 
+library(colorblindr)
 ggplot(data) +
-  geom_boxplot(aes(x = factor(network_position), y = result)) +
-  geom_jitter(aes(factor(network_position), result, color=eco_type), shape=21,alpha=0.5) +
-  theme_minimal() +
+  #geom_jitter(aes(factor(network_position), result, color=eco_type), shape=21,alpha=0.01) +
+  geom_boxplot(aes(x = factor(network_position), y = result, group=site, color=eco_type)) +
+  scale_color_viridis_d('') +
+  theme_bw() +
   labs(x = "Network position", y = "") +
   facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
   theme_classic()
+
+ggsave('Figures/boxplots.png',height = 6.5, width = 8.5, units = 'in', dpi = 1200)
