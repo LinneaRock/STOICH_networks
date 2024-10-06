@@ -11,15 +11,24 @@ source('Functions/derivative_analyses.R')
 
 
 # 2. Format data ####
-nuts.gam <- nuts |>
-  mutate(network_position = ifelse(network_position=='12a', '12.5', network_position)) |>
-  mutate(network_position = as.numeric(network_position))
-stoich.gam <- stoich |>
-  mutate(network_position = ifelse(network_position=='12a', '12.5', network_position)) |>
-  mutate(network_position = as.numeric(network_position))
-
-gams <- nuts.gam |>
-  rbind(stoich.gam)
+gams <- rbind(nuts, stoich) |>
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  group_by(network_position, param) |>
+  mutate(mean = mean(result),
+         median = median(result),
+         min = min(result),
+         max = max(result),
+         SE = std.error(result),
+         n = n()) |>
+  ungroup() |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
+  # remove GL1 from these analyses
+  filter(site != 'GL1_LAKE') |>
+  mutate(network_position = network_position+1)
 
 ## 2a. Quick plots of all the variables of interest ####  
 
@@ -29,8 +38,8 @@ ggplot(gams, aes(network_position, result, group=param)) +
   geom_point(shape=21)+
   geom_smooth(method = "gam", se = TRUE, color="black") + #fit a gam
   labs(y='', x="Network position") +
-  theme_pubr() +
-  scale_y_log10()
+  theme_pubr() 
+ggsave('Figures/GAMS.png', width=10.5, height=8.5, units='in', dpi=1200)
 
 
 # 3. Identifying and plotting periods of change ####

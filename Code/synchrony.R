@@ -7,21 +7,29 @@ source('Data/CALL_DATA_PACKAGES.R')
 
 # prepare data ####
 nuts.setup <- nuts |>
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
   mutate(year=year(date)) |>
   select(-depth_m, -date) |>
-  group_by(site, network_position, eco_type, season, year,param) |>
-  summarise(med=median(result, na.rm=TRUE)) |> # get median value per year and season at each site
-  ungroup() |>
-  pivot_wider(names_from='param', values_from='med') |>
-  #select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
- # filter(eco_type != 'glacier') |>
-  group_by(network_position) |>
-  add_count()|>
-  ungroup() |>
-  mutate(fakemonth=case_when(season=='Winter'~2,
-                             season=='Snowmelt runoff'~6,
-                             season=='Summer'~9)) |>
-  mutate(fakedate=as.Date(paste(year,fakemonth,'01',sep='-')))
+  # group_by(site, network_position, eco_type, season, year, mon, param) |>
+  # summarise(med=median(result, na.rm=TRUE)) |> # get median value per year and month at each site
+  # ungroup() |>
+ #  pivot_wider(names_from='param', values_from='med') |>
+ #  #select(-NH4_ueqL, - NO3_ueqL, -DOC_mgL) |>
+ # # filter(eco_type != 'glacier') |>
+ #  group_by(network_position) |>
+ #  add_count()|>
+ #  ungroup() |>
+  mutate(fakedate=as.Date(paste(year,mon,'01',sep='-')))
+
+ggplot(nuts.setup) +
+  geom_line(aes(fakedate, result, color=network_position, group=site)) +
+  scale_color_viridis_c()+
+  facet_wrap(~param, scales='free_y')
 
 
 
@@ -39,36 +47,35 @@ stoich.setup <- stoich |>
   ungroup()
 
 
-ggplot(nuts.setup, aes(fakedate, DON_umolL, color=site)) +
-  geom_line() +
-  scale_y_log10()
+
 
 
 # Write function to pull correlation values and p-values of corr into lists ####
 synchrony_fun <- function(setup.dat, variable) {
 
 corr_dat <- setup.dat |>
-  select(1:4, variable) |>
+  select(1:6, variable) |>
   drop_na() |>
   group_by(network_position) |>
   add_count() |>
   ungroup() |>
-  filter(n>3) |>
+ # filter(n>3) |>
   unite(col = position, network_position, eco_type, sep = "_") |>
   select(-n) |>
-  pivot_wider(id_cols = c('season', 'year'), 
+  pivot_wider(id_cols = c('season', 'year','mon'), 
               names_from = 'position', values_from = variable)  |>
-  select(-season, - year) |>
+  select(-season, - year, -mon) |>
   scale()
 # 
-# ggcorr(corr_dat, method=c('pairwise.complete.obs','pearson'))
-# check <- as.data.frame(cor(corr_dat, use='pairwise')) |>
-#   rownames_to_column() |>
-#   mutate(param = quoVariable)
+ggcorr(corr_dat, method=c('pairwise.complete.obs','spearman'))
+check <- as.data.frame(cor(corr_dat, use='pairwise')) |>
+  rownames_to_column() |>
+  mutate(param = variable)
 
 
-corr <- cor(corr_dat, use='pairwise')
-p.mat <- cor_pmat(corr)
+
+corr <- cor(corr_dat, use='pairwise.complete.obs', method='spearman')
+p.mat <- cor_pmat(corr, method='spearman')
 p.mat[is.na(corr)] <- corr[is.na(corr)]
 
 
@@ -82,6 +89,21 @@ ggsave(paste0('Figures/synchrony/Network/', variable, '.png'),
 return(list(corr, p.mat))
 
 }
+
+
+# # Pearson's correlation with pairwise complete observations
+# cor_matrix_pearson <- cor(corr_dat, 
+#                           method = "pearson", 
+#                           use = "pairwise.complete.obs")
+# 
+# # Spearman's correlation with pairwise complete observations
+# cor_matrix_spearman <- cor(corr_dat, 
+#                            method = "spearman", 
+#                            use = "pairwise.complete.obs")
+# 
+# # Compare the results -- Yes, they are indeed different.
+# cor_matrix_pearson
+# cor_matrix_spearman
 
 # Run synchrony function for nutrients ####
 TN_synchrony <- synchrony_fun(nuts.setup, 'TN_umolL')
@@ -531,4 +553,44 @@ ggcorrplot(corr,
            ggtheme=ggplot2::theme_dark())
 ggsave('Figures/synchrony/Lakes/all_variates.png', 
        height=4.25, width=6.25, units = 'in', dpi=1200)
+
+#############################################
+
+library(dataRetrieval)
+
+wtryraves <- rbind(nuts, stoich) |>
+  select(-network_position) |>
+  rename(Date=date) |>
+  addWaterYear() |>
+  # create a weekly timestep to average on
+  mutate(x = round((day(Date)/5))*5,
+         x = ifelse(x == 0, 1, x), 
+         Date2 = paste(year(Date), month(Date), x, sep = "-")) |>
+  # can't round to Feb. 30 - change to Mar. 1
+  mutate(Date2 = ifelse(is.na(Date2), paste0(year(Date), '-03-01'), Date2)) |>
+  mutate(Date = as.Date(Date2)) |>
+  #seq along dates starting with the beginning of your water year
+  mutate(CDate=as.Date(paste0(ifelse(month(Date) < 10, "1901", "1900"),
+                              "-", month(Date), "-", day(Date)))) |>
+  # add in site metadata
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  # average by CDate
+  group_by(CDate, site, network_position, param, mon, WS_Group, eco_type, season) |>
+  summarise(mean = mean(result),
+         median = median(result),
+         min = min(result),
+         max = max(result),
+         SE = std.error(result),
+         n = n()) |>
+  ungroup() |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) 
+
+ggplot(wtryraves) +
+  geom_line(aes(CDate, mean, color=network_position, group=site)) +
+  scale_color_viridis_c() +
+  facet_wrap(~param, scales='free_y')
+  
 

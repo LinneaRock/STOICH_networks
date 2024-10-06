@@ -8,6 +8,20 @@ source('Data/CALL_DATA_PACKAGES.R')
 # 2. Format data ####
 
 medians <- nuts |>
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  group_by(network_position, param) |>
+  mutate(mean = mean(result),
+         median = median(result),
+         min = min(result),
+         max = max(result),
+         SE = std.error(result),
+         n = n()) |>
+  ungroup() |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
   pivot_wider(names_from = param, values_from = result) |>
   group_by(site, year(date), season) |>
   mutate(yearlymedTP_umolL = median(TP_umolL, na.rm = TRUE),
@@ -24,15 +38,14 @@ medians <- nuts |>
          MEDIP_umolL = median(yearlymedIP_umolL, na.rm = TRUE)) |>
   ungroup() |>
   select(site, network_position, season, eco_type, MEDTP_umolL, MEDTN_umolL, MEDIP_umolL, MEDIN_umolL) |>
-  distinct() |>
-  mutate(network_position=ifelse(network_position=='12a','12.5',network_position),
-         network_position=as.numeric(network_position))
+  distinct()
 
 nuts_wide <- nuts |>
-  pivot_wider(names_from = param, values_from = result) |>
-  mutate(network_position=ifelse(network_position=='12a','12.5',network_position),
-         network_position=as.numeric(network_position))
-
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  pivot_wider(names_from = param, values_from = result)
 
 # 3. Nutrient limitation using DIN:TP from Bergstrom ####
 ggplot() +
@@ -74,11 +87,11 @@ sens.slope(mk_lim_dat$lim) # this one line provides all the same information as 
 
 
 # data:  mk_lim_dat$lim
-# z = -3.9451, n = 804, p-value = 7.977e-05
+# z = -5.6482, n = 987, p-value = 1.622e-08
 # alternative hypothesis: true z is not equal to 0
 # 95 percent confidence interval:
-#   -0.0003189885 -0.0001070293
+#   -0.0002830802 -0.0001366088
 # sample estimates:
 #   Sen's slope 
-#-0.000211746 
+# -0.0002086658 
 
