@@ -47,24 +47,46 @@ stoich.setup <- stoich |>
   ungroup()
 
 
+nuts.setup <- nuts |>
+  select(-network_position) |>
+  left_join(sites |>
+              as.data.frame() |>
+              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
+  left_join(distances_Km |>
+              filter(site1=='Arikaree_GLACIER') |>
+              select(-site1) |>
+              rename(site=site2,
+                     distancefromglacier_Km=distance_Km)
+  ) |>
+  mutate(distancefromglacier_Km = ifelse(is.na(distancefromglacier_Km), 0, distancefromglacier_Km)) |>
+  distinct() |>
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
+  mutate(nutrient = case_when(grepl('N', param)~'Nitrogen',
+                              grepl('P', param)~'Phosphorus')) |>
+  mutate(distancefromglacier_Km=as.numeric(distancefromglacier_Km)) #|>
+  # group_by(site, distancefromglacier_Km, network_position, season, param,nutrient) |>
+  # summarise(med = median(result)) |>
+  # ungroup() 
 
-
+setup.dat <- nuts.setup
 
 # Write function to pull correlation values and p-values of corr into lists ####
 synchrony_fun <- function(setup.dat, variable) {
 
 corr_dat <- setup.dat |>
-  select(1:6, variable) |>
-  drop_na() |>
-  group_by(network_position) |>
-  add_count() |>
-  ungroup() |>
+  #select(1:6, variable) |>
+  filter(nutrient=="Nitrogen") |>
+  pivot_wider(names_from = param, values_from = result) |>
+  #drop_na() |>
+ # group_by(network_position) |>
+ # add_count() |>
+ # ungroup() |>
  # filter(n>3) |>
-  unite(col = position, network_position, eco_type, sep = "_") |>
-  select(-n) |>
-  pivot_wider(id_cols = c('season', 'year','mon'), 
-              names_from = 'position', values_from = variable)  |>
-  select(-season, - year, -mon) |>
+ # unite(col = position, network_position, eco_type, sep = "_") |>
+ # select(-n) |>
+ # pivot_wider(id_cols = c('season', 'year'), 
+ #             names_from = 'position', values_from = variable)  |>
+  select(-c(1:13)) |>
   scale()
 # 
 ggcorr(corr_dat, method=c('pairwise.complete.obs','spearman'))
