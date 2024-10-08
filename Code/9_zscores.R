@@ -56,7 +56,8 @@ scored_data <- data |>
 
 scores <- scored_data |>
   select(site,eco_type,nutrient,param,network_position,upstream_network_lakes,WS_Group,distancefromglacier_Km,ave_z,CIup,CIdown) |>
-  distinct()
+  distinct()  |>
+  mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
 
 
 # 3. Plot ####
@@ -71,11 +72,13 @@ ggplot(scores, aes(upstream_network_lakes, ave_z, shape=eco_type, fill=WS_Group)
 ggsave('Figures/zscore_upstreamlakes.png',width=8.5,height=4.5,units='in',dpi=1200)
   
 
-ggplot(scores, aes(param, ave_z, shape=eco_type, color=network_position)) +
+ggplot(scores, aes(param, ave_z, shape=eco_type, fill=network_position)) +
   geom_jitter(size=2) +
   facet_wrap(~nutrient, scales='free') +
   labs(x='', y='Average Zscore of each parameter and \nsite within subwatersheds') +
-  scale_color_viridis_c()+
+  scale_fill_viridis_c()+
+  scale_shape_manual('',values=c(21,22,25)) +
   theme_bw() +
-  theme(legend.title=element_blank())
+  theme(legend.title=element_blank(),
+        axis.text.x = element_text(angle = 45))
 ggsave('Figures/zscore_params.png',width=8.5,height=4.5,units='in',dpi=1200)
