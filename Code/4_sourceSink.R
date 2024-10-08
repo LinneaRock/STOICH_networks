@@ -189,6 +189,7 @@ plot_list <- lapply(unique(medians$param), function(param_val) {
     geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=seasoncol), size=8, width=0.002) +
     scale_shape_identity() +
     scale_color_identity() +
+    labs(x='',y='') +
     theme_bw() +
     theme(axis.text.x=element_blank(),
           axis.text.y=element_blank(),
