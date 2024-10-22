@@ -444,19 +444,20 @@ invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:D
 ggplot() +
   geom_ribbon(bootstrap_all,
               mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr,
-                          ymax=bs_kde+CI_upr, color='Network - 95% CI'),fill='grey80') +
+                          ymax=bs_kde+CI_upr, fill='Network - 95% CI')) +
   geom_line(k_densities_all |> filter(eco_type=='lake'),#filter(result < 500), 
-            mapping=aes(result, total_type_density, linetype=eco_type)) +
-  geom_line(invsout_all |> filter(result < 500), 
-            mapping=aes(result, position_dens, linetype=position)) +
+            mapping=aes(result, total_type_density, color=eco_type)) +
+  geom_line(invsout_all, #|> filter(result < 500), 
+            mapping=aes(result, position_dens, color=position)) +
   facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
   theme_classic() +
   theme(legend.title = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
   labs(x='', y='') +
-  scale_color_manual(values='grey80') +
-  scale_linetype_manual(values=c('dotted', 'solid', 'longdash'), labels = c('Inlets', 'Lakes', 'Outlets'))
+  scale_color_viridis_d(labels=c('inlets','lakes','outlets')) +
+  scale_fill_manual(values='grey80') #+
+  # scale_linetype_manual(values=c('dotted', 'solid', 'longdash'), labels = c('Inlets', 'Lakes', 'Outlets'))
 
-ggsave('Figures/k_densities_all.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+ggsave('Figures/k_densities_all_colors.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
