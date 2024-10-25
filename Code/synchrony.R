@@ -61,7 +61,7 @@ corr_dat <- setup.dat |>
  group_by(network_position) |>
  add_count() |>
  ungroup() |>
- filter(n>3) |>
+ filter(n>4) |>
  #unite(col = position, network_position, eco_type, sep = "_") |>
  select(-n) |>
   drop_na() |>
@@ -91,7 +91,7 @@ ggcorrplot(corr,
 ggsave(paste0('Figures/synchrony/Network/', variable, '.png'), 
        height=4.25, width=6.25, units = 'in', dpi=1200)
 
-return(list(corr, p.mat))
+return(list(corr))
 
 }
 
@@ -146,14 +146,14 @@ sync_dist <- sync_dist |>
   drop_na()
 
 # p-values of correlation stats 
-sync_p <- round(synchrony_data[[2]], 3)
-sync_p [lower.tri(sync_p, diag=TRUE)] <- NA
-sync_p <- as.data.frame(sync_p) |>
-  #select(-1) |>
-  rownames_to_column('site1')
-sync_p <- sync_p |>
-  pivot_longer(2:ncol(sync_p), names_to = 'site2', values_to = 'p.value') |>
-  drop_na()
+# sync_p <- round(synchrony_data[[2]], 3)
+# sync_p [lower.tri(sync_p, diag=TRUE)] <- NA
+# sync_p <- as.data.frame(sync_p) |>
+#   #select(-1) |>
+#   rownames_to_column('site1')
+# sync_p <- sync_p |>
+#   pivot_longer(2:ncol(sync_p), names_to = 'site2', values_to = 'p.value') |>
+#   drop_na()
 
 distance_rev <- distances_Km |>
   rename(site1=site2,
@@ -163,7 +163,8 @@ distanceallcombo <- distances_Km |>
   rbind(distance_rev)
 
 # combine data
-sync_dist <- left_join(sync_dist, sync_p) |>
+#sync_dist <- left_join(sync_dist, sync_p) |>
+sync_dist <- sync_dist |>
   left_join(distanceallcombo) |>
   mutate(param=param_name) |>
   # mutate(distance_Km = ifelse(site1=='12_stream' & site2=='0_lake', 

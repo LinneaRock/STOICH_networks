@@ -43,8 +43,8 @@ data <- nuts |>
 # get zscores for each site and param within it's subwatershed
 scored_data <- data |>
   group_by(WS_Group, param) |>
-  mutate(mean=as.numeric(mean(testdat$result)),
-         std=as.numeric(sd(testdat$result))) |>
+  mutate(mean=as.numeric(mean(result)),
+         std=as.numeric(sd(result))) |>
   ungroup() |>
   group_by(param,site) |>
   add_count() |>
