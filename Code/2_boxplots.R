@@ -14,7 +14,10 @@ data <- rbind(nuts,stoich) |>
               as.data.frame() |>
               select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
   select(-depth_m,-elevation_m,-drainage_area_ha) |>
-  left_join(greenlakes_LC)
+  left_join(greenlakes_LC) |>
+  mutate(position = ifelse(grepl('INLET', site), 'inlets', NA),
+         position = ifelse(grepl('OUTLET', site), 'outlets', position),
+         position = ifelse(eco_type == 'lake', 'lakes', position))
 
 # count of each variable in the dataset
 count <- data |>
@@ -39,3 +42,14 @@ ggplot(data) +
   theme_classic()
 
 ggsave('Figures/boxplots.png',height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+
+# 3. Making a violin plot to compare viz with the k densities plot! ####
+violin_data <- data |>
+  filter(!is.na(position))
+
+ggplot(violin_data, aes(x=position, y=result)) +
+  geom_violin(aes(color=position)) +
+  #geom_jitter(aes(color=WS_Group)) +
+  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5)
+# not a great visualization of these data
