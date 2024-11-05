@@ -64,17 +64,21 @@ nuts_wide <- nuts |>
 IN <- ggplot() +
   geom_jitter(nuts_wide, mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
                                       fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
+  # geom_jitter(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
+  #                                      fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
   geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
   geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
   theme_classic() +
-  scale_color_viridis_c('Distance from glacier (km)') +
-  scale_fill_viridis_c('Distance from glacier (km)') +
+  scale_color_viridis_c('Distance from  glacier (km)') +
+  scale_fill_viridis_c('Distance from \nglacier (km)') +
   labs(y = "log(IN:TP)", x = "log(IN)") +
-  annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
-           x = 1, y = 0.1, hjust = 0, size = 2) +
-  annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
-           x = 1, y = 0.65, hjust = 0, size = 2)
+  annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.05, hjust = 0, size = 3) +
+  annotate('text', label = 'Predicted P limitation above \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.65, hjust = 0, size = 3) +
+  theme(legend.position='left') 
 
+IN
 
 TP <- ggplot() +
   geom_jitter(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
@@ -85,10 +89,10 @@ TP <- ggplot() +
   scale_color_viridis_c('Distance from glacier (km)') +
   scale_fill_viridis_c('Distance from glacier (km)') +
   labs(y = "log(IN:TP)", x = "log(TP)") +
-  annotate('text', label = 'Predicted N limitation below dashed line \n (Bergström, 2010)', 
-           x = -1.25, y = 0.1, hjust = 0, size = 2) +
-  annotate('text', label = 'Predicted P limitation above dashed line \n (Bergström, 2010)', 
-           x = -1.25, y = 0.65, hjust = 0, size = 2)
+  annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
+           x = -1.25, y = 0.1, hjust = 0, size = 5) +
+  annotate('text', label = 'Predicted P limitation above \mdashed line (Bergström, 2010)', 
+           x = -1.25, y = 0.65, hjust = 0, size = 5)
 
 
 violin <- nuts_wide|>
@@ -98,6 +102,11 @@ violin <- nuts_wide|>
          position = ifelse(eco_type == 'glacier', 'glacier', position)) |>
   mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
 
+TP
+
+# 4. Compare inlets, lakes, outlets #### 
+
+
 #get significance to add to figure using geom_text 
 
 
@@ -105,45 +114,75 @@ sig.letters <- data.frame(NA)
 
   h <- aov(lim~position, violin|>mutate(lim = log10(IN_umolL/TP_umolL)) |>
              drop_na(lim) |>
-             filter(is.finite(lim)))
+             filter(is.finite(lim)) |> 
+             filter(position!='glacier') |>
+             mutate(position = factor(position, levels=c('inlets','lakes','outlets'))))
   tukey <- TukeyHSD(h)
   cld <- multcompLetters4(h, tukey)
-  cld2 <- data.frame(letters = cld$position$Letters) |>
-    mutate(param = i)
+  cld2 <- data.frame(letters = cld$position$Letters)
   cld2$position <- rownames(cld2)
 
 
-sig.letters <- sig.letters |>
-  drop_na(letters) |>
-  select(-NA.)
-
-means <- left_join(violin, cld2) |>
+means <- left_join(violin |> filter(position!='glacier'), cld2) |>
   mutate(lim = log10(IN_umolL/TP_umolL)) |>
   drop_na(lim) |>
   filter(is.finite(lim)) |>
   group_by(letters, position) |>
-  summarise(max.result = max(lim, na.rm = TRUE)) |>
-  distinct()
+  summarise(max.result = max(lim, na.rm = TRUE),
+            mean = mean(lim, na.rm=TRUE)) |>
+  distinct() |>
+  # changing the order of letters (which were reversed) for attractiveness of figure
+  mutate(letters=ifelse(position=='inlets','a',
+                        ifelse(position=='lakes', 'b', 
+                               ifelse(position=='outlets','c', letters))))
 
 
 
-ggplot(violin) +
+compare <- ggplot(violin |> filter(position!='glacier')) +
   geom_violin(aes(position, log10(IN_umolL/TP_umolL))) +
   geom_jitter(aes(position, log10(IN_umolL/TP_umolL), color=WS_Group)) +
+  geom_point(means, mapping=aes(position, mean)) +
   scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
   geom_text(means, mapping=aes(position, 
-                               max.result, label = letters), 
-            color='red4', size=4) 
+                               max.result+0.5, label = letters), 
+            color='red4', size=4) +
+  theme_classic() +
+  labs(x='', y='log(IN:TP)') 
+  
   # ^^ Kruskal-Wallis test comparing lakeout along network 
 
 
+IN + compare +
+  plot_layout(guides='collect') &
+  theme(legend.position='none') &
+  ylim(min(0), max(3.5)) 
+
+ggsave('Figures/nutrient_limitation.png',width=8.5, height=5.5, units='in')
 
 
-ggsave('Figures/Limitation/nutrient_limitation.png',width=6.25, height=4.25, units='in')
+compare_lims <- violin |>
+  mutate(lim=IN_umolL/TP_umolL) |>
+  select(-eco_type) |>
+  group_by(date, position) |>
+  summarise(lim=mean(lim)) |> # take mean of depth 0, 3m measures in hte lakes
+  ungroup() |>
+  pivot_wider(names_from = 'position', values_from = 'lim')
+
+  
+ggplot(compare_lims) +
+  geom_point(aes(inlets, outlets)) +
+  geom_abline(slope=1, intercept = 0)
+
+ggplot(compare_lims) +
+  geom_point(aes(inlets, lakes)) +
+  geom_abline(slope=1, intercept = 0)
+
+ggplot(compare_lims) +
+  geom_point(aes(lakes,outlets)) +
+  geom_abline(slope=1, intercept = 0)
 
 
-
-# 4. Is there any trend in IN:TP ratio? ####
+# 5. Are there trends in IN:TP ratio? ####
 # Mann-Kendall/Thiel-Sens (non-parametric) test to see if there is a significant trend along the network 
 
 mk_lim_dat <- nuts_wide|>
