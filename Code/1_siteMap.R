@@ -87,3 +87,32 @@ ainsert <- plot_usmap(exclude = c("AK","HI"), color='gray50') +
 
 ainsert
 ggsave('Figures/Map/countryinsert.png', width=4.5,height=6.5,units='in',dpi=1200)
+
+
+# 4. count of observations ####
+count_szn <- nuts |>
+  group_by(season) |>
+  summarise(n=n())
+
+count_szn <- stoich |>
+  group_by(season) |>
+  summarise(n=n())
+
+
+count_params <- nuts |>
+  group_by(param) |>
+  summarise(n=n())
+
+count_params <- stoich |>
+  group_by(param) |>
+  summarise(n=n())
+
+
+count_params_szn <- nuts |>
+  group_by(param, season) |>
+  summarise(n=n())
+
+count_params_szn <- stoich |>
+  group_by(param, season) |>
+  summarise(n=n())
+

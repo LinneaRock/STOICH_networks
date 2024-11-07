@@ -441,6 +441,13 @@ invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:D
 
 ## plotting ####
 # note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
+library(colorblindr)
+# Get the full Okabe-Ito palette
+library(scales)
+show_col(colorblindr::palette_OkabeIto_black)
+okabe_ito_colors <- palette_OkabeIto_black
+
+
 ggplot() +
   geom_ribbon(bootstrap_all,
               mapping=aes(bootstrapped_result, bs_kde, ymin=bs_kde-CI_lwr,
@@ -455,7 +462,7 @@ ggplot() +
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank()) +
   labs(x='', y='') +
-  scale_color_viridis_d(labels=c('inlets','lakes','outlets')) +
+  scale_color_manual(values=c(okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('inlets','lakes','outlets')) +
   scale_fill_manual(values='grey80') #+
   # scale_linetype_manual(values=c('dotted', 'solid', 'longdash'), labels = c('Inlets', 'Lakes', 'Outlets'))
 
