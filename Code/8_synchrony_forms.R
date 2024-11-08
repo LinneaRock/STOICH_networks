@@ -51,8 +51,10 @@ cor_matrix_spearman <- cor(corr_dat,
 
 cor_matrix_spearman
 ggcorrplot(cor_matrix_spearman, hc.order = TRUE, type = "lower",
-           lab = TRUE)
-ggsave('Figures/synchrony/N_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
+           lab = TRUE,
+           colors = c("#336a98", "white", "red4"),
+           ggtheme=ggplot2::theme_classic)
+ggsave('Figures/Nforms_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
 
 ## Phosphorus ####
 corr_dat <- sync |>
@@ -69,8 +71,10 @@ cor_matrix_spearman <- cor(corr_dat,
 
 cor_matrix_spearman
 ggcorrplot(cor_matrix_spearman, hc.order = TRUE, type = "lower",
-           lab = TRUE)
-ggsave('Figures/synchrony/P_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
+           lab = TRUE,
+           colors = c("#336a98", "white", "red4"),
+           ggtheme=ggplot2::theme_classic)
+ggsave('Figures/Pforms_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
 
 ## Ratios ####
 corr_dat <- sync |>
@@ -87,7 +91,9 @@ cor_matrix_spearman <- cor(corr_dat,
 
 cor_matrix_spearman
 ggcorrplot(cor_matrix_spearman, hc.order = TRUE, type = "lower",
-           lab = TRUE)
-ggsave('Figures/synchrony/ratio_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
+           lab = TRUE,
+           colors = c("#336a98", "white", "red4"),
+           ggtheme=ggplot2::theme_classic)
+ggsave('Figures/Ratioforms_sync.png',width=6.5,height=4.5,units='in',dpi=1200)
 
 

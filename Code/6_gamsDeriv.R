@@ -6,30 +6,12 @@
 
 # 1. Call data and packages ####
 source('Data/CALL_DATA_PACKAGES.R') 
-## call in functions
-source('Functions/derivative_analyses.R')
+library(colorblindr)
+library(scales)
+
 
 
 # 2. Format data ####
-# gams <- rbind(nuts, stoich) |>
-#   select(-network_position) |>
-#   left_join(sites |>
-#               as.data.frame() |>
-#               select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
-#   group_by(network_position, param) |>
-#   mutate(mean = mean(result),
-#          median = median(result),
-#          min = min(result),
-#          max = max(result),
-#          SE = std.error(result),
-#          n = n()) |>
-#   ungroup() |>
-#   distinct() |>
-#   mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
-#   # remove GL1 from these analyses
-#   filter(site != 'GL1_LAKE') |>
-#   mutate(network_position = network_position+1)
-
 gams <- nuts |>
   mutate(nutrient = case_when(grepl('N', param)~'Nitrogen',
                               grepl('P', param)~'Phosphorus')) |>
@@ -55,32 +37,44 @@ gams <- nuts |>
                       ifelse(param=='tdn.tdp','TDN:TDP',
                              ifelse(param=='pn.pp','PN:PP',
                                     ifelse(param=='in.ip','IN:IP',
-                                           ifelse(param=='don.dop','DON:DOP', param))))))
+                                           ifelse(param=='don.dop','DON:DOP', param)))))) |>
+  mutate(nut_type = case_when(param %in% c('TN','TP','TN:TP')~'total',
+                              param %in% c('TDN','TDP','TDN:TDP')~'total dissolved',
+                              param %in% c('PN','PP','PN:PP')~'particulate',
+                              param %in% c('IN','IP','IN:IP')~'inorganic',
+                              param %in% c('DON','DOP','DON:DOP')~'dissolved organic'),
+         nut_type = factor(nut_type, levels = c('dissolved organic', 'inorganic', 'particulate', 'total dissolved', 'total')))
 
 
-## 2a. Quick plots of all the variables of interest ####  
+# for pretty labels
+gams$nutrient <- factor(gams$nutrient, labels=c(expression('N concentrations'~(mu*mol~L^-1)), expression('P concentrations'~(mu*mol~L^-1)), expression('Molar~ratio')))
 
-ggplot(gams |> filter(nutrient != 'Ratio'), aes(distancefromglacier_Km, result, color=param)) +
-  facet_wrap(~nutrient, scales='free_y') +
-  geom_jitter(shape=21)+
+
+
+# 3. Plot GAMs ####  
+
+# Get the full Okabe-Ito palette
+show_col(colorblindr::palette_OkabeIto_black)
+okabe_ito_colors <- palette_OkabeIto_black
+
+ggplot(gams, aes(distancefromglacier_Km, result, color=nut_type)) +
+  facet_wrap(~nutrient, scales='free_y', labeller=label_parsed) +
+  geom_jitter(aes(shape=eco_type))+
   geom_smooth(method = "gam", se = TRUE) + #fit a gam
-  labs(y='Concentration'~(mu*mol~L^-1), x="Distance from glacier (km)") +
+  labs(y='', x="Distance from glacier (km)") +
   theme_bw() +
-  theme(legend.title = element_blank())
-ggsave('Figures/GAMs/GAMS.png', width=10.5, height=8.5, units='in', dpi=1200)
+  scale_color_manual('',values=c(okabe_ito_colors[1:5])) +
+  scale_shape_manual('', values=c(21,22,23)) 
 
-ggplot(gams |> filter(nutrient == 'Ratio'), aes(distancefromglacier_Km, result, color=param)) +
-  facet_wrap(~nutrient, scales='free_y') +
-  geom_jitter(shape=21)+
-  geom_smooth(method = "gam", se = TRUE) + #fit a gam
-  labs(y='Molar ratio', x="Distance from glacier (km)") +
-  theme_bw() +
-  theme(legend.title = element_blank())
-ggsave('Figures/GAMs/GAMS_stoich.png', width=10.5, height=8.5, units='in', dpi=1200)
+ggsave('Figures/F_GAMS.png', width=8.5, height=4.5, units='in', dpi=1200)
 
 
-# 3. Identifying and plotting periods of change ####
+
+
+# 4. Identifying and plotting periods of change ####
 ## Where along the network is rate of change in the parameters increasing or decreasing? 
+## call in functions
+source('Functions/derivative_analyses.R')
 
 # set up
 plotting_deriv <- data.frame()
