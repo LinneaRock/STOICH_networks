@@ -295,16 +295,16 @@ all_sync <- sync_dist_mean_stoich |>
   rbind(sync_dist_mean_N) |>
   rbind(sync_dist_mean_P)
 
-ggplot(all_sync, aes(distance_Km, meancorr, fill=meancorr, shape=nutrient)) +
+ggplot(all_sync, aes(distance_Km, meancorr, color=meancorr, shape=nutrient)) +
   geom_point() +
-  #geom_smooth(se=FALSE) +
   theme_classic() +
-  scale_shape_manual('', values=c(23,24,25)) +
- # geom_abline(slope=senslope, intercept=intercept) +
-  scale_fill_gradient2(~rho,low="#336a98", high='red4') +
-#  annotate('text', x=0.5, y=-0.75, label=paste0('p=',round(p.value, 5))) +
-  labs(x='Distance between sites (km)', y='Average correlation coefficient for N:P')
-
+ # theme(legend.title = element_blank()) +
+  geom_abline(slope=senslopeN, intercept=interceptN, linetype=1) +
+  geom_abline(slope=senslopeP, intercept=interceptP, linetype=2) +
+  geom_abline(slope=senslopeNP, intercept=interceptNP, linetype=3) +
+  scale_color_gradient2(~rho,low="#336a98", high='red4') +
+  labs(x='Distance between sites (km)', y='Average correlation coefficient')
+ggsave('Figures/network_synchrony.png',height=4.5, width=6.5, units = 'in', dpi=1200)
 
 # ###############################################################################
 # # LAKES ONLY ####
