@@ -53,13 +53,6 @@ nuts_wide <- nuts |>
   # select(site, network_position, season, eco_type, MEDTP_umolL, MEDTN_umolL, MEDIP_umolL, MEDIN_umolL) |>
   # distinct()
 
-nuts_wide <- nuts |>
-  select(-network_position) |>
-  left_join(sites |>
-              as.data.frame() |>
-              select(site, network_position, eco_type, elevation_m, drainage_area_ha, upstream_network_lakes, WS_Group)) |>
-  pivot_wider(names_from = param, values_from = result)
-
 # 3. Nutrient limitation using DIN:TP from Bergstrom ####
 IN <- ggplot() +
   geom_jitter(nuts_wide, mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
