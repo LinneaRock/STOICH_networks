@@ -388,9 +388,10 @@ dat_test <- sigSourceSink |>
   mutate(nut_type=ifelse(grepl('N',param),'nitrogen', 'phosphorus'))
 
 
-ggplot(dat_test,aes(no_upstream_lakes, abs(mean), color=ecotype)) +
+ggplot(dat_test,aes(no_upstream_lakes, abs(mean))) +
   geom_point() +
-  geom_smooth()
+  geom_smooth() +
+  facet_wrap(~nut_type, scales='free')
 
 
 m0<-lm(abs(mean)~no_upstream_lakes, dat_test)
