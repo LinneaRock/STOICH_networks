@@ -373,7 +373,7 @@ ggsave('Figures/sourcesink_P.png', height = 4.5, width = 6.5, units = 'in', dpi 
 
 
 # 4. Test #upstream lakes has influence ####
-tests <- sigSourceSink |>
+dat_test <- sigSourceSink |>
   mutate(no_upstream_lakes = case_when(lake_stream=='ALBION'~5,
                                        lake_stream=='GL4'~1,
                                        lake_stream=='GL5'~0,
@@ -384,26 +384,43 @@ tests <- sigSourceSink |>
          ecotype = ifelse(grepl('reach', lake_stream), 'stream', 'lake')) |>
   # use absolute value of mean source/sink
   #mutate(mean = ifelse(mean<0, mean*-1, mean)) |>
-  mutate(scaled_nolakes = scale(no_upstream_lakes))
+  mutate(scaled_nolakes = scale(no_upstream_lakes)) |>
+  mutate(nut_type=ifelse(grepl('N',param),'nitrogen', 'phosphorus'))
 
-library(lme4)
-library(lmerTest)
 
-m0<-lm(mean~no_upstream_lakes, tests)
-summary(m0)
-plot(mean~scaled_nolakes, tests)
+ggplot(dat_test,aes(no_upstream_lakes, abs(mean), color=ecotype)) +
+  geom_point() +
+  geom_smooth()
 
-m1<-lm(mean~no_upstream_lakes*param, tests)
-summary(m1)
-anova(m1,m0)
 
-m2<-lm(mean~no_upstream_lakes*ecotype, tests)
-summary(m2)
-anova(m2,m1)
+m0<-lm(abs(mean)~no_upstream_lakes, dat_test)
+summary(m0) #Adjusted R-squared:  0.00589 
 
-m1 <- lmer(mean~scaled_nolakes*param + (1|ecotype), tests)
-summary(m1)
-performance::r2(m1)
+# add nutrient type (N or P)
+m1<-lm(abs(mean)~no_upstream_lakes*nut_type, dat_test)
+summary(m1) #Adjusted R-squared:  0.2312 
+anova(m1,m0) # interaction provides better fit
 
-ggplot(tests, aes(no_upstream_lakes, mean, color=ecotype)) +
-  geom_point()
+# try stream vs lake
+m2<-lm(abs(mean)~no_upstream_lakes*ecotype, dat_test)
+summary(m2) #Adjusted R-squared:  0.02011 
+anova(m2,m1) #no evidence of stream/lake making diff
+
+
+m3 <-lm(abs(mean)~no_upstream_lakes*nut_type*ecotype, dat_test)
+summary(m3) #Adjusted R-squared:  0.3028 
+anova(m3,m1) # technically better, but just nutrient type should suffice, evidence is weak (p=0.07)
+
+m4 <-lmer(abs(mean)~no_upstream_lakes + (1|param), dat_test)
+summary(m4)
+performance::r2(m4) #0.310
+anova(m4,m1) # model 1 is a better fit
+
+m5<-lm(abs(mean)~no_upstream_lakes*param, dat_test)
+summary(m5) #Adjusted R-squared:  0.1626 
+anova(m5,m1) # not better than m1
+
+anova(m1)
+
+visreg::visreg(m1, xvar="no_upstream_lakes", by="nut_type", data=dat_test, overlay = TRUE)
+
