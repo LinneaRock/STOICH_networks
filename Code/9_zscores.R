@@ -34,12 +34,16 @@ data <- nuts |>
               mutate(`Evergreen Forest` = ifelse(is.na(`Evergreen Forest`), 0, `Evergreen Forest`),
                      `Woody Wetlands` = ifelse(is.na(`Woody Wetlands`), 0, `Woody Wetlands`))) |>
   select(-depth_m) |>
-  distinct() 
+  distinct() |>
+  mutate(position = ifelse(grepl('INLET', site), 'inlets', NA),
+         position = ifelse(grepl('OUTLET', site), 'outlets', position),
+         position = ifelse(eco_type == 'lake', 'lakes', position),
+         position = ifelse(eco_type == 'glacier', 'glacier', position)) 
 
 
 
 
-# 2. Zscore ####
+# 2. Zscore subwatershed  ####
 # get zscores for each site and param within it's subwatershed
 scored_data <- data |>
   group_by(WS_Group, param) |>
@@ -60,7 +64,7 @@ scores <- scored_data |>
   mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
 
 
-# 3. Plot ####
+## 2a. Plot ####
 ggplot(scores, aes(upstream_network_lakes, ave_z, shape=eco_type, fill=WS_Group)) +
   geom_jitter(size=2) +
  # geom_errorbar(aes(ymin=CIdown,ymax=CIup))
@@ -82,3 +86,90 @@ ggplot(scores, aes(param, ave_z, shape=eco_type, fill=network_position)) +
   theme(legend.title=element_blank(),
         axis.text.x = element_text(angle = 45))
 ggsave('Figures/zscore_params.png',width=8.5,height=4.5,units='in',dpi=1200)
+
+
+
+
+
+
+
+
+# 3. Zscore full watershed  ####
+# get zscores for each site and param within it's subwatershed
+scored_data_fullwat <- data |>
+  group_by(param) |>
+  mutate(mean=as.numeric(mean(result)),
+         std=as.numeric(sd(result))) |>
+  ungroup() |>
+  group_by(param, site) |>
+  add_count() |>
+  mutate(zscore=(result-mean)/std) |>
+  mutate(ave_z = mean(zscore)) |>
+  mutate(CIup = ifelse(n>1, (t.test(zscore))$conf.int[2], NA)) |>
+  mutate(CIdown = ifelse(n>1, (t.test(zscore))$conf.int[1], NA)) |>
+  ungroup()
+
+scores_fullwat <- scored_data_fullwat |>
+  select(site,eco_type,nutrient,param,network_position,upstream_network_lakes,position,WS_Group,distancefromglacier_Km,ave_z,CIup,CIdown) |>
+  distinct()  |>
+  mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
+
+
+## 3a. Plot ####
+library(colorblindr)
+# Get the full Okabe-Ito palette
+library(scales)
+show_col(colorblindr::palette_OkabeIto_black)
+okabe_ito_colors <- palette_OkabeIto_black
+
+ggplot(scores_fullwat, aes(distancefromglacier_Km, ave_z,color=position)) +
+  geom_jitter(size=2) +
+  facet_wrap(~nutrient, scales='free_y') +
+  scale_color_manual('',values=c('grey50', okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('glacier','inlets','lakes','outlets')) +
+  labs(x='Distance from glacier (km)', y='Average Zscore of each parameter and site') +
+  theme_bw()
+ggsave('Figures/zscore_allWatershed.png',width=8.5,height=4.5,units='in',dpi=1200)
+
+
+
+
+
+
+
+
+# 4. Zscore full watershed  ####
+# get zscores for each site and param within it's subwatershed
+# scored_data_lakes <- data |>
+#   group_by(param,subwatershed,) |>
+#   mutate(mean=as.numeric(mean(result)),
+#          std=as.numeric(sd(result))) |>
+#   ungroup() |>
+#   group_by(param, site) |>
+#   add_count() |>
+#   mutate(zscore=(result-mean)/std) |>
+#   mutate(ave_z = mean(zscore)) |>
+#   mutate(CIup = ifelse(n>1, (t.test(zscore))$conf.int[2], NA)) |>
+#   mutate(CIdown = ifelse(n>1, (t.test(zscore))$conf.int[1], NA)) |>
+#   ungroup()
+# 
+# scores_fullwat <- scored_data_fullwat |>
+#   select(site,eco_type,nutrient,param,network_position,upstream_network_lakes,position,WS_Group,distancefromglacier_Km,ave_z,CIup,CIdown) |>
+#   distinct()  |>
+#   mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
+# 
+# 
+# ## 3a. Plot ####
+# library(colorblindr)
+# # Get the full Okabe-Ito palette
+# library(scales)
+# show_col(colorblindr::palette_OkabeIto_black)
+# okabe_ito_colors <- palette_OkabeIto_black
+# 
+# ggplot(scores_fullwat, aes(distancefromglacier_Km, ave_z, color=position)) +
+#   geom_jitter(size=2) +
+#   facet_wrap(~nutrient, scales='free_y') +
+#   scale_color_manual('',values=c('grey50', okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('glacier','inlets','lakes','outlets')) +
+#   labs(x='Distance from glacier (km)', y='Average Zscore of each parameter and site') +
+#   theme_bw()
+# ggsave('Figures/zscore_allWatershed.png',width=8.5,height=4.5,units='in',dpi=1200)
+# 

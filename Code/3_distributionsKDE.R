@@ -440,7 +440,7 @@ k_densities_all$param <- factor(k_densities_all$param, labels = c(expression(phi
 invsout_all$param <- factor(invsout_all$param, labels = c(expression(phi*'(DON:DOP)'), expression(phi*'(DON'~mu*mol*L^-1*')'), expression(phi*'(DOP'~mu*mol*L^-1*')'), expression(phi*'(IN:IP)'), expression(phi*'(IN'~mu*mol*L^-1*')'), expression(phi*'(IP'~mu*mol*L^-1*')'), expression(phi*'(PN:PP)'), expression(phi*'(PN'~mu*mol*L^-1*')'), expression(phi*'(PP'~mu*mol*L^-1*')'), expression(phi*'(TDN:TDP)'), expression(phi*'(TDN'~mu*mol*L^-1*')'), expression(phi*'(TDP'~mu*mol*L^-1*')'),expression(phi*'(TN:TP)'), expression(phi*'(TN'~mu*mol*L^-1*')'), expression(phi*'(TP'~mu*mol*L^-1*')')))
 
 ## plotting ####
-# note, I am cutting the x-axis to be less than 500. This changes the appearance of IN:IP, which has stream results extending beyond 3000 and bootstrapped results extending to 2000; PN:PP, which has stream results extending to 600; TDN:TDP, which has stream results extending beyond 9000 and bootstrapped results extending beyond 3000; and TN:TP, which has stream results extending beyond 600
+
 library(colorblindr)
 # Get the full Okabe-Ito palette
 library(scales)
