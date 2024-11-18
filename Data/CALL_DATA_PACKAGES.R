@@ -37,20 +37,20 @@ library(patchwork)
 
 
 
-# call in data
-
-# ions <- read.csv('Data/ions_outliers_removed.csv') |>
-#   mutate(date = as.Date(date)) |>
-#   filter(site != 'FLUME') |>
-#   mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
-#                                                                 '7','8','9','10','11','12',
-#                                                                 '12a','13','14','15','16'))) |>
-#   mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec'))) |>
-#   dplyr::select(-X)
+# call in data  ####
+# add in streamflow based seasonal component ####
+ave_percentile_days <- read.csv('Data/szn_streamflow/ave_percentile_days.csv') 
+ave_percentile_days #166, 194, 229
+percentile_days <- read.csv('Data/szn_streamflow/percentile_days.csv') |>
+  mutate(day_20th = as.Date(day_20th),
+         day_50th = as.Date(day_50th),
+         day_80th = as.Date(day_80th)) |>
+  select(-X)
 
 nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
+  select(-season) |>
   filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
-  mutate(date = as.Date(date)) |>
+  mutate(Date = as.Date(date)) |>
   filter(site != 'FLUME',
          #eco_type != 'glacier',
          site != 'ALB_CAMP') |>
@@ -58,14 +58,28 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe
-  mutate(season = case_when(mon %in% c(12,1,2,3,4,5) ~ "Winter",
-                            mon %in% c(6,7)  ~ "Snowmelt runoff",
-                            mon %in% c(8,9,10,11) ~ "Summer")) |>
-  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
-  dplyr::select(-X)
+  dplyr::select(-X) |>
+  addWaterYear() |>
+  # join calculated days
+  left_join(percentile_days) |>
+  # add estimated average days for 20th, 50th, 80th percentiles
+  mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
+  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  mutate(day_80th = as.Date(day_80th)) |>
+  #  add seasons
+  mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
+                    ifelse(between(Date, day_50th, day_80th), 'falling limb',
+                           'baseflow'))) |>
+  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
+
 
 stoich <- read.csv('Data/stoich_outliers_removed.csv')|>
-  mutate(date = as.Date(date)) |>
+  mutate(Date = as.Date(date)) |>
+  select(-season) |>
   filter(site != 'FLUME',
         # eco_type != 'glacier',
          site != 'ALB_CAMP') |>
@@ -73,19 +87,55 @@ stoich <- read.csv('Data/stoich_outliers_removed.csv')|>
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15'))) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe
-  mutate(season = case_when(mon %in% c(12,1,2,3,4,5) ~ "Winter",
-                            mon %in% c(6,7)  ~ "Snowmelt runoff",
-                            mon %in% c(8,9,10,11) ~ "Summer")) |>
-  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
-  dplyr::select(-X)
+  dplyr::select(-X) |>
+  addWaterYear() |>
+  # join calculated days
+  left_join(percentile_days) |>
+  # add estimated average days for 20th, 50th, 80th percentiles
+  mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
+  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  mutate(day_80th = as.Date(day_80th)) |>
+  #  add seasons
+  mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
+                    ifelse(between(Date, day_50th, day_80th), 'falling limb',
+                           'baseflow'))) |>
+  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
 
 discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
-  mutate(date = as.Date(date)) |>
+  mutate(Date = as.Date(date)) |>
   filter(site != 'FLUME') |>
   mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6',
                                                                 '7','8','9','10','11','12',
                                                                 '12a','13','14','15','16'))) |>
-  dplyr::select(-X)
+  dplyr::select(-X) |>
+  addWaterYear() |>
+  # join calculated days
+  left_join(percentile_days) |>
+  # add estimated average days for 20th, 50th, 80th percentiles
+  mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
+  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  mutate(day_80th = as.Date(day_80th)) |>
+  #  add seasons
+  mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
+                    ifelse(between(Date, day_50th, day_80th), 'falling limb',
+                           'baseflow'))) |>
+  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
+
+
+rm(percentile_days)
+rm(ave_percentile_days)
+
+
+
+
 
 #### frequency plots outlier removed data ####
 # ggplot(ions) +
@@ -168,7 +218,7 @@ rm(Correct_Colnames)
 get_stats <- function(data) {
   
   tmp <- data |>
-    group_by(site, eco_type, network_position, param, season) |>
+    group_by(site, eco_type, network_position, param, szn) |>
     summarise(mean = mean(result),
               median = median(result),
               min = min(result),
@@ -188,7 +238,7 @@ get_stats <- function(data) {
               n = n()) |>
     ungroup() |>
     mutate(#CV = (SD/mean) * 100,
-      season = 'All data') 
+      szn = 'All data') 
   
   df <- rbind(tmp, tmp2)
   
@@ -208,7 +258,7 @@ stats_stoich <- get_stats(stoich)
 get_stats_eco <- function(data) {
   
   tmp <- data |>
-    group_by(eco_type,param, season) |>
+    group_by(eco_type,param, szn) |>
     summarise(mean = mean(result),
               median = median(result),
               min = min(result),
@@ -228,7 +278,7 @@ get_stats_eco <- function(data) {
               n = n()) |>
     ungroup() |>
     mutate(#CV = (SD/mean) * 100,
-      season = 'All data') 
+      szn = 'All data') 
   
   df <- rbind(tmp, tmp2)
   
