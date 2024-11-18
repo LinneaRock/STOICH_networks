@@ -90,12 +90,13 @@ ggsave('Figures/Map/countryinsert.png', width=4.5,height=6.5,units='in',dpi=1200
 
 
 # 4. count of observations ####
+source('Data/CALL_DATA_PACKAGES.R')
 count_szn <- nuts |>
-  group_by(season) |>
+  group_by(szn) |>
   summarise(n=n())
 
 count_szn <- stoich |>
-  group_by(season) |>
+  group_by(szn) |>
   summarise(n=n())
 
 
@@ -109,10 +110,10 @@ count_params <- stoich |>
 
 
 count_params_szn <- nuts |>
-  group_by(param, season) |>
+  group_by(param, szn) |>
   summarise(n=n())
 
 count_params_szn <- stoich |>
-  group_by(param, season) |>
+  group_by(param, szn) |>
   summarise(n=n())
 

@@ -24,13 +24,13 @@ waterfeatures <- st_transform(readRDS('Data/Spatial_Data/ALB_waterFeatures.RDS',
 # 2. Calculating source/sink ####
 
 ## lakes ####
-# seasonal
+# sznal
 nuts_prod_lakes <- nuts |>
-  group_by(site, date, season, param) |>
+  group_by(site, date, szn, param) |>
   summarise(averesult = mean(result)) |>
   ungroup() |>
   pivot_wider(names_from = site, values_from = averesult) |>
- # group_by(eco_type, date, season, param) |>
+ # group_by(eco_type, date, szn, param) |>
   mutate(GL5 = GL5_OUTLET - GL5_INLET,
          GL4 = GL4_OUTLET - GL4_INLET,
          GL3 = GL3_OUTLET - GL3_INLET,
@@ -55,7 +55,7 @@ nuts_prod_lakes <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream,season, param, significance,site1,site2) |> # used to look at trend along network
+  group_by(lake_stream,szn, param, significance,site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in lakes
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -72,7 +72,7 @@ ave_prod_lakes <- nuts |>
   summarise(averesult = mean(result)) |>
   ungroup() |>
   pivot_wider(names_from = site, values_from = averesult) |>
-  # group_by(eco_type, date, season, param) |>
+  # group_by(eco_type, date, szn, param) |>
   mutate(GL5 = GL5_OUTLET - GL5_INLET,
          GL4 = GL4_OUTLET - GL4_INLET,
          GL3 = GL3_OUTLET - GL3_INLET,
@@ -108,13 +108,13 @@ ave_prod_lakes <- nuts |>
   ungroup()
 
 ## streams ####
-#seasonal
+#sznal
 nuts_prod_streams <- nuts |>
-  group_by(site, date, season, param) |>
+  group_by(site, date, szn, param) |>
   summarise(averesult = mean(result)) |>
   ungroup() |>
   pivot_wider(names_from = site, values_from = averesult) |>
- # group_by(eco_type, date, season, param) |>
+ # group_by(eco_type, date, szn, param) |>
   mutate(reach1 = GL5_INLET - ARIKAREE,
     reach2 = GL4_INLET - GL5_OUTLET,
     reach3 = GL3_INLET - GL4_OUTLET,
@@ -142,7 +142,7 @@ nuts_prod_streams <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream, param, season, significance,site1,site2) |> # used to look at trend along network
+  group_by(lake_stream, param, szn, significance,site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in streams
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -158,7 +158,7 @@ ave_prod_streams <- nuts |>
   summarise(averesult = mean(result)) |>
   ungroup() |>
   pivot_wider(names_from = site, values_from = averesult) |>
-  # group_by(eco_type, date, season, param) |>
+  # group_by(eco_type, date, szn, param) |>
   mutate(reach1 = GL5_INLET - ARIKAREE,
          reach2 = GL4_INLET - GL5_OUTLET,
          reach3 = GL3_INLET - GL4_OUTLET,
@@ -255,10 +255,10 @@ sigSourceSink <- nuts_prod_lakes |>
   filter(significance != '-') |>
   mutate(param = sub('_.*','',param))|>
   mutate(img = ifelse(mean<0, '\U2193', '\U2191')) |>
-  mutate(season = factor(season, levels = c('Winter','Snowmelt runoff','Summer'))) |>
-  mutate(seasoncol=case_when(season=='Winter'~'blue4',
-                              season=='Snowmelt runoff'~'palegreen4',
-                              season=='Summer'~'goldenrod3')) |>
+  #mutate(szn = factor(szn, levels = c('Winter','Snowmelt runoff','Summer'))) |>
+  mutate(szncol=case_when(szn=='baseflow'~'blue4',
+                              szn=='spring snowmelt'~'palegreen4',
+                              szn=='falling limb'~'goldenrod3')) |>
   st_as_sf() 
 
 data_with_coords <- st_coordinates(sigSourceSink) |>
@@ -301,8 +301,8 @@ plot_list <- lapply(unique(medians$param), function(param_val) {
     geom_sf(data = subset(medians, param == param_val), aes(size = med, fill=pointcolor),alpha=0.25, shape=21) +
     scale_fill_identity()+
     ggtitle(as.expression(param_val)) +
-   # geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=seasoncol),size=8) +
-    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=seasoncol), size=8, width=0.002) +
+   # geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=szncol),size=8) +
+    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=szncol), size=8, width=0.002) +
     scale_shape_identity() +
     scale_color_identity() +
     labs(x='',y='') +
@@ -392,33 +392,34 @@ ggplot(dat_test,aes(no_upstream_lakes, abs(mean))) +
   geom_point() +
   geom_smooth() +
   facet_wrap(~nut_type, scales='free')
+ggsave('Figures/source_sink_vsLakes.png', width=6.5, height=4.5)
 
 
 m0<-lm(abs(mean)~no_upstream_lakes, dat_test)
-summary(m0) #Adjusted R-squared:  0.00589 
+summary(m0) #Adjusted R-squared:   -0.00894  
 
 # add nutrient type (N or P)
 m1<-lm(abs(mean)~no_upstream_lakes*nut_type, dat_test)
-summary(m1) #Adjusted R-squared:  0.2312 
+summary(m1) #Adjusted R-squared:  0.2359 
 anova(m1,m0) # interaction provides better fit
 
 # try stream vs lake
 m2<-lm(abs(mean)~no_upstream_lakes*ecotype, dat_test)
-summary(m2) #Adjusted R-squared:  0.02011 
+summary(m2) #Adjusted R-squared: 0.008845 
 anova(m2,m1) #no evidence of stream/lake making diff
 
 
 m3 <-lm(abs(mean)~no_upstream_lakes*nut_type*ecotype, dat_test)
-summary(m3) #Adjusted R-squared:  0.3028 
-anova(m3,m1) # technically better, but just nutrient type should suffice, evidence is weak (p=0.07)
+summary(m3) #Adjusted R-squared: 0.3062 
+anova(m3,m1) # technically better
 
 m4 <-lmer(abs(mean)~no_upstream_lakes + (1|param), dat_test)
 summary(m4)
-performance::r2(m4) #0.310
+performance::r2(m4) #0.330
 anova(m4,m1) # model 1 is a better fit
 
 m5<-lm(abs(mean)~no_upstream_lakes*param, dat_test)
-summary(m5) #Adjusted R-squared:  0.1626 
+summary(m5) #Adjusted R-squared:  0.2084  
 anova(m5,m1) # not better than m1
 
 anova(m1)

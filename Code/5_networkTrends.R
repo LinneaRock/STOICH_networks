@@ -58,32 +58,32 @@ mk_df <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_po
   left_join(sens.estimates)
 
 
-## 3a. Mann-Kendall (non-parametric) test varied by season ####
-## get sen's slopes and intercepts by season 
+## 3a. Mann-Kendall (non-parametric) test varied by szn ####
+## get sen's slopes and intercepts by szn 
 params <- unique(all_data_trend$param)
-seasons <-unique(all_data_trend$season)
+szns <-unique(all_data_trend$szn)
 sens.estimates <- data.frame()
 
 for(p in 1:length(params)) {
-  for(s in 1:length(seasons)) {
+  for(s in 1:length(szns)) {
     tmp <- all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
       filter(param == params[p],
-             season == seasons[s])
+             szn == szns[s])
     
     intercept = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[1]])
     senslope = as.numeric(zyp.sen(result~network_position, tmp)$coefficients[[2]])
     
-    tmp2 <- data.frame(param = params[p],season = seasons[s], intercept = intercept, sensslope = senslope)
+    tmp2 <- data.frame(param = params[p],szn = szns[s], intercept = intercept, sensslope = senslope)
     
     sens.estimates <- rbind(sens.estimates, tmp2)
   }
 }
 
 
-## test slopes varied by season
-mk_df_season <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
+## test slopes varied by szn
+mk_df_szn <-  all_data_trend[order(as.numeric(as.character(all_data_trend$network_position))),] |>
   # we need to order by network position ^^^ so that the Mann Kendall and Sens slopes use the vector over the network, rather than treat it as timeseries
-  group_by(param, season) |>
+  group_by(param, szn) |>
   summarise(z.stat = glance(mk.test(result))$statistic,
             p.value = glance(mk.test(result))$p.value,
             n = glance(mk.test(result))$parameter) |>
@@ -98,17 +98,17 @@ mk_df_season <-  all_data_trend[order(as.numeric(as.character(all_data_trend$net
 ## 4a. format dataset for plotting ####
 
 mk_plot_global <- mk_df |>
-  mutate(season = 'Global slope') |>
+  mutate(szn = 'Global slope') |>
   # this madness is making pretty labels
   mutate(param = factor(param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) |>
   filter(!is.na(significance))
   
 
-mk_plot_season <- mk_df_season |>
+mk_plot_szn <- mk_df_szn |>
   filter(!is.na(significance))
  
 
-plot_trend <- full_join(all_data_trend, mk_plot_season|> select(-n))
+plot_trend <- full_join(all_data_trend, mk_plot_szn|> select(-n))
 
 # this madness is just making pretty labels
 plot_trend$param <- factor(plot_trend$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
@@ -141,13 +141,13 @@ ggplot(plot_trend) +
   geom_segment(data = mk_plot_global, 
                aes(x = network_range[1], xend = network_range[2],
                    y = y_start, yend = y_end,
-                   color = season)) +
+                   color = szn)) +
                #lwd = 1.5) +
   # Manually plot the line with geom_segment
-  geom_segment( # using plot_trend for seasonal data
+  geom_segment( # using plot_trend for sznal data
                aes(x = network_range[1], xend = network_range[2],
                    y = y_start, yend = y_end,
-                   color = season)) +
+                   color = szn)) +
                #lwd = 1.5) +
   scale_shape_manual('', values=c(21,22,23)) +
   scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8','grey50','blue4','palegreen4','goldenrod3')) +
@@ -164,18 +164,18 @@ ggsave('Figures/networkTrends.png', width=10.5, height=8.5, units='in', dpi=1200
 
 
 # 5. Slopes plot ####
-slopes <- mk_plot_season |>
-  select(param, season, sensslope, intercept, significance) |>
+slopes <- mk_plot_szn |>
+  select(param, szn, sensslope, intercept, significance) |>
   distinct() |>
   drop_na() |>
   rbind(mk_df |>
           select(param, sensslope, intercept, significance) |>
-          mutate(season='Global slope')) |>
+          mutate(szn='Global slope')) |>
   mutate(nutrient = NA) |>
   mutate(nutrient = case_when(grepl('N', param)~'N',
                               grepl('P',param)~'P',
                               is.na(nutrient)~'Ratio')) |>
-  mutate(season=factor(season, levels=c('Global slope', 'Winter', 'Snowmelt runoff','Summer'))) |>
+  mutate(szn=factor(szn, levels=c('Global slope', 'baseflow', 'spring snowmelt','falling limb'))) |>
   drop_na() |>
   mutate(param = sub('_.*','',param),
          param = ifelse(param=='don.dop', 'DON:DOP',
@@ -186,27 +186,27 @@ slopes <- mk_plot_season |>
 
 
 r <- ggplot(slopes|>filter(nutrient=='Ratio')) +
-  geom_boxplot(aes(sensslope, season, color=season)) +
-  geom_jitter(aes(sensslope, season,shape=param),size=2) +
+  geom_boxplot(aes(sensslope, szn, color=szn)) +
+  geom_jitter(aes(sensslope, szn,shape=param),size=2) +
   scale_color_manual('',values=c('grey50','blue4','palegreen4','goldenrod3')) +
   geom_vline(xintercept = 0, color='grey20') +
   labs(y='',x='', title='Ratio') +
   theme_bw() +
   guides(color='none') +
-  scale_shape_manual('', values=c(0,1,2,3)) +
+  scale_shape_manual('', values=c(0,1,2,3,4)) +
   theme(legend.position=c(0.15,0.5),
         legend.box.background = element_rect(),
         legend.title=element_blank())
 
 n <- ggplot(slopes|>filter(nutrient=='N')) +
-  geom_boxplot(aes(sensslope, season, color=season)) +
-  geom_jitter(aes(sensslope, season,shape=param),size=2) +
+  geom_boxplot(aes(sensslope, szn, color=szn)) +
+  geom_jitter(aes(sensslope, szn,shape=param),size=2) +
   scale_color_manual('',values=c('grey50','blue4','palegreen4','goldenrod3')) +
   geom_vline(xintercept = 0, color='grey20') +
   labs(y='',x='Slope',title='Nitrogen') +
   theme_bw() +
   guides(color='none') +
-  scale_shape_manual('', values=c(4,5,6,7,8)) +
+  scale_shape_manual('', values=c(0,1,2,3,4)) +
   theme(legend.position=c(0.1,0.75),
         legend.box.background = element_rect(),
         legend.title=element_blank(),
@@ -215,14 +215,14 @@ n <- ggplot(slopes|>filter(nutrient=='N')) +
 
 
 p <- ggplot(slopes|>filter(nutrient=='P')) +
-  geom_boxplot(aes(sensslope, season, color=season)) +
-  geom_jitter(aes(sensslope, season,shape=param),size=2) +
+  geom_boxplot(aes(sensslope, szn, color=szn)) +
+  geom_jitter(aes(sensslope, szn,shape=param),size=2) +
   scale_color_manual('',values=c('grey50','blue4','palegreen4','goldenrod3')) +
   geom_vline(xintercept = 0, color='grey20') +
   labs(y='',x='',title='Phosphorus') +
   theme_bw() +
   guides(color='none') +
-  scale_shape_manual('', values=c(9,10,11,12,13)) +
+  scale_shape_manual('', values=c(0,1,2,3,4)) +
   theme(legend.position=c(0.1,0.75),
         legend.box.background = element_rect(),
         legend.title=element_blank(),
@@ -231,4 +231,4 @@ p <- ggplot(slopes|>filter(nutrient=='P')) +
 
 r|n|p 
 
-ggsave('Figures/SenSlope_MKTrends/slopes.png', height=4.5,width=15.5,units='in',dpi=1200)
+ggsave('Figures/slopes.png', height=4.5,width=15.5,units='in',dpi=1200)
