@@ -2,7 +2,7 @@
 source('Data/CALL_DATA_PACKAGES.R') 
 
 
-# 2. prepare data ####
+
 data <- nuts |>
   mutate(nutrient = case_when(grepl('N', param)~'Nitrogen',
                               grepl('P', param)~'Phosphorus')) |>
@@ -51,7 +51,7 @@ data <- nuts |>
 
 
 
-# 2. Zscore subwatershed  ####
+# 2. Z-score subwatershed  ####
 # get zscores for each site and param within it's subwatershed
 scored_data <- data |>
   group_by(WS_Group, param) |>
@@ -103,7 +103,7 @@ ggsave('Figures/zscore_params.png',width=8.5,height=4.5,units='in',dpi=1200)
 
 
 
-# 3. Zscore full watershed  ####
+# 3. Z-score full watershed  ####
 # get zscores for each site and param within it's subwatershed
 scored_data_fullwat <- data |>
   group_by(param) |>
@@ -144,7 +144,7 @@ ggplot(scores_fullwat, aes(position, ave_z)) +
   scale_color_manual('',values=c('grey50', okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('glacier','inlets','lakes','outlets')) +
   scale_fill_manual('',values=c(okabe_ito_colors[1:5])) +
   facet_wrap(~nutrient, scales='free_y') +
-  labs(x='', y='Average z-score of each parameter and site') +
+  labs(x='', y='Average z-score') +
   theme_bw()+
   theme() +
   theme(panel.grid.major = element_blank(), 
@@ -154,6 +154,19 @@ ggplot(scores_fullwat, aes(position, ave_z)) +
 ggsave('Figures/zscore_allWatershed.png',width=8.5,height=4.5,units='in',dpi=1200)
 
 
+# part a of final zscore fig
+pta<-ggplot(scores_fullwat |> filter(nutrient!='Ratio'), aes(position, ave_z)) +
+  geom_violin(aes(color=position)) +
+  geom_jitter(aes(fill=nut_type),shape=21) +
+  scale_color_manual('',values=c('grey50', okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('glacier','inlets','lakes','outlets')) +
+  scale_fill_manual('',values=c(okabe_ito_colors[1:5])) +
+  facet_wrap(~nutrient, scales='free_y') +
+  labs(x='', y='') +
+  theme_bw()+
+  theme() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color='none')
 
 
 
@@ -207,9 +220,17 @@ ggplot(scores_lake, aes(distancefromglacier_Km, ave_z, color=position)) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) 
   
-  ggsave('Figures/zscore_insouts.png',width=8.5,height=4.5,units='in',dpi=1200)
+ggsave('Figures/zscore_insouts.png',width=8.5,height=4.5,units='in',dpi=1200)
 
-
+# part b of final zscore fig
+ptb<-ggplot(scores_lake |> filter(nutrient !='Ratio'), aes(distancefromglacier_Km, ave_z, color=position)) +
+  geom_jitter(size=2) +
+  facet_wrap(~nutrient, scales='free_y') +
+  labs(x='', y='Average z-score') +
+  theme_bw() +
+  scale_color_manual('',values=c(okabe_ito_colors[6], okabe_ito_colors[7])) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) 
 
 
 # 5. Z-scores of lakes around their own population means ####
@@ -266,3 +287,22 @@ ggplot(scores_lake, aes(distancefromglacier_Km, ave_z, color=szn, shape=nut_type
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) 
 ggsave('Figures/zscore_lakes_form.png',width=8.5,height=4.5,units='in',dpi=1200)
+
+
+
+# part c of final zscore fig
+ptc<-ggplot(scores_lake |> filter(nutrient != 'Ratio'), aes(distancefromglacier_Km, ave_z, color=szn)) +
+  geom_jitter(size=2) +
+  facet_wrap(~nutrient, scales='free_y') +
+  labs(x='Distance from glacier (km)', y='') +
+  theme_bw() +
+  scale_color_manual('',values=c('blue4','goldenrod3','palegreen4')) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) 
+
+
+
+
+pta/ptb/ptc +
+  plot_annotation(tag_levels = 'a', tag_suffix = ')')
+ggsave('Figures/zscore_combined.png',width=6.5,height=8.5,units='in',dpi=1200)
