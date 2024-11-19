@@ -63,6 +63,8 @@ ggplot(gams, aes(distancefromglacier_Km, result, color=nut_type)) +
   geom_smooth(method = "gam", se = TRUE) + #fit a gam
   labs(y='', x="Distance from glacier (km)") +
   theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
   scale_color_manual('',values=c(okabe_ito_colors[1:5])) +
   scale_shape_manual('', values=c(21,22,23)) 
 
