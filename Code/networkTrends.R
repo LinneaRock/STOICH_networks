@@ -187,14 +187,14 @@ slopes <- mk_plot_szn |>
 
 r <- ggplot(slopes|>filter(nutrient=='Ratio')) +
   geom_boxplot(aes(sensslope, szn, color=szn)) +
-  geom_jitter(aes(sensslope, szn,shape=param),size=2) +
+  geom_jitter(aes(sensslope, szn, shape=param),size=2) +
   scale_color_manual('',values=c('grey50','blue4','palegreen4','goldenrod3')) +
   geom_vline(xintercept = 0, color='grey20') +
   labs(y='',x='', title='Ratio') +
   theme_bw() +
   guides(color='none') +
   scale_shape_manual('', values=c(0,1,2,3,4)) +
-  theme(legend.position=c(0.15,0.5),
+  theme(#legend.position=c(0.15,0.5),
         legend.box.background = element_rect(),
         legend.title=element_blank())
 
@@ -207,10 +207,9 @@ n <- ggplot(slopes|>filter(nutrient=='N')) +
   theme_bw() +
   guides(color='none') +
   scale_shape_manual('', values=c(0,1,2,3,4)) +
-  theme(legend.position=c(0.1,0.75),
+  theme(#legend.position=c(0.1,0.75),
         legend.box.background = element_rect(),
-        legend.title=element_blank(),
-        axis.text.y=element_blank())
+        legend.title=element_blank())
 
 
 
@@ -223,12 +222,11 @@ p <- ggplot(slopes|>filter(nutrient=='P')) +
   theme_bw() +
   guides(color='none') +
   scale_shape_manual('', values=c(0,1,2,3,4)) +
-  theme(legend.position=c(0.1,0.75),
+  theme(#legend.position=c(0.1,0.75),
         legend.box.background = element_rect(),
-        legend.title=element_blank(),
-        axis.text.y=element_blank())
+        legend.title=element_blank())
 
 
-r|n|p 
+r/n/p
 
-ggsave('Figures/slopes.png', height=4.5,width=15.5,units='in',dpi=1200)
+ggsave('Figures/slopes.png', height=8.5,width=6.5,units='in',dpi=1200)
