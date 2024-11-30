@@ -227,7 +227,7 @@ ggplot(sync_dist_mean_N, aes(as.numeric(distance_Km), meancorr, color=meancorr))
   geom_point() +
   #geom_smooth(se=FALSE) +
   theme_classic() +
-  geom_abline(slope=senslope, intercept=intercept) +
+  geom_abline(slope=senslopeN, intercept=interceptN) +
   scale_color_gradient2(~rho,low="#336a98", high='red4') +
   annotate('text', x=0.5, y=-0.75, label=paste0('p=',round(p.valueN, 5))) +
   labs(x='Distance between sites (km)', y='Average correlation coefficient for N')
@@ -255,7 +255,7 @@ ggplot(sync_dist_mean_P, aes(as.numeric(distance_Km), meancorr, color=meancorr))
   geom_point() +
   #geom_smooth(se=FALSE) +
   theme_classic() +
-  geom_abline(slope=senslope, intercept=intercept) +
+  geom_abline(slope=senslopeP, intercept=interceptP) +
   scale_color_gradient2(~rho,low="#336a98", high='red4') +
   annotate('text', x=0.5, y=-0.75, label=paste0('p=',round(p.valueP, 5))) +
   labs(x='Distance between sites (km)', y='Average correlation coefficient for P')
@@ -284,7 +284,7 @@ ggplot(sync_dist_mean_stoich, aes(as.numeric(distance_Km), meancorr,color=meanco
   geom_point() +
   #geom_smooth(se=FALSE) +
   theme_classic() +
-  geom_abline(slope=senslope, intercept=intercept) +
+  geom_abline(slope=senslopeNP, intercept=interceptNP) +
   scale_color_gradient2(~rho,low="#336a98", high='red4') +
   annotate('text', x=0.5, y=-0.75, label=paste0('p=',round(p.valueNP, 5))) +
   labs(x='Distance between sites (km)', y='Average correlation coefficient for N:P')
