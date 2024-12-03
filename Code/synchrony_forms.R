@@ -41,7 +41,7 @@ corr_dat <- sync |>
   filter(nutrient=='Nitrogen') |>
   arrange(date) |>
   pivot_wider(names_from = param, values_from = result) |>
-  select(-c(1:13)) |>
+  select(-c(1:15)) |>
   scale()
 
 # Spearman's correlation with pairwise complete observations
@@ -61,7 +61,7 @@ corr_dat <- sync |>
   filter(nutrient=='Phosphorus') |>
   arrange(date) |>
   pivot_wider(names_from = param, values_from = result) |>
-  select(-c(1:13)) |>
+  select(-c(1:15)) |>
   scale()
 
 # Spearman's correlation with pairwise complete observations
@@ -81,7 +81,7 @@ corr_dat <- sync |>
   filter(nutrient=='Ratio') |>
   arrange(date) |>
   pivot_wider(names_from = param, values_from = result) |>
-  select(-c(1:13)) |>
+  select(-c(1:15)) |>
   scale()
 
 # Spearman's correlation with pairwise complete observations
