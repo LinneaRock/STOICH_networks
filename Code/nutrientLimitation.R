@@ -31,16 +31,16 @@ nuts_wide <- nuts |>
 IN <- ggplot() +
   geom_jitter(nuts_wide, mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
                                       fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
-  geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
-  geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
+  geom_abline(slope = 0, intercept = log10(3.4*2.211353), linetype = "dashed") + # bergstrom P limitation line, multiply by constant to get molar ratio (assuming DIN is as N in DIN:TP)
+  geom_abline(slope = 0, intercept = log10(1.5*2.211353), linetype = "dashed") +  # bergstrom N limitation line, multiply by constant to get molar ratio
   theme_classic() +
   scale_color_viridis_c('Distance from  glacier (km)') +
   scale_fill_viridis_c('Distance from \nglacier (km)') +
   labs(y = "log(IN:TP)", x = "log(IN)") +
   annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
-           x = 0.45, y = 0.05, hjust = 0, size = 3) +
+           x = 0.45, y = 0.15, hjust = 0, size = 3) +
   annotate('text', label = 'Predicted P limitation above \ndashed line (Bergström, 2010)', 
-           x = 0.45, y = 0.65, hjust = 0, size = 3) +
+           x = 0.45, y = 0.85, hjust = 0, size = 3) +
   theme(legend.position='left') 
 
 IN
@@ -48,16 +48,16 @@ IN
 TP <- ggplot() +
   geom_jitter(nuts_wide, mapping = aes(log10(TP_umolL), log10(IN_umolL/TP_umolL), 
                                        fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
-  geom_abline(slope = 0, intercept = log10(3.4), linetype = "dashed") + # bergstrom P limitation line
-  geom_abline(slope = 0, intercept = log10(1.5), linetype = "dashed") +  # bergstrom N limitation line
+  geom_abline(slope = 0, intercept = log10(3.4*2.211353), linetype = "dashed") + # bergstrom P limitation line
+  geom_abline(slope = 0, intercept = log10(1.5*2.211353), linetype = "dashed") +  # bergstrom N limitation line
   theme_classic() +
   scale_color_viridis_c('Distance from glacier (km)') +
   scale_fill_viridis_c('Distance from glacier (km)') +
   labs(y = "log(IN:TP)", x = "log(TP)") +
   annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
-           x = -1.25, y = 0.1, hjust = 0, size = 5) +
+           x = -1.25, y = 0.15, hjust = 0, size = 5) +
   annotate('text', label = 'Predicted P limitation above \ndashed line (Bergström, 2010)', 
-           x = -1.25, y = 0.65, hjust = 0, size = 5)
+           x = -1.25, y = 0.85, hjust = 0, size = 5)
 
 
 violin <- nuts_wide|>
@@ -68,6 +68,22 @@ violin <- nuts_wide|>
   mutate(WS_Group=factor(WS_Group, levels=c('GL5','GL4','GL3','ALB')))
 
 TP
+
+
+ggplot() +
+  geom_jitter(nuts_wide, mapping = aes(distancefromglacier_km, log10(IN_umolL/TP_umolL), 
+                                       fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
+  geom_abline(slope = 0, intercept = log10(3.4*2.211353), linetype = "dashed") + # bergstrom P limitation line, multiply by constant to get molar ratio (assuming DIN is as N in DIN:TP)
+  geom_abline(slope = 0, intercept = log10(1.5*2.211353), linetype = "dashed") +  # bergstrom N limitation line, multiply by constant to get molar ratio
+  theme_classic() +
+  scale_color_viridis_c('Distance from  glacier (km)') +
+  scale_fill_viridis_c('Distance from \nglacier (km)') +
+  labs(y = "log(IN:TP)", x = "log(IN)") +
+  annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.15, hjust = 0, size = 3) +
+  annotate('text', label = 'Predicted P limitation above \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.85, hjust = 0, size = 3) +
+  theme(legend.position='left') 
 
 # 4. compare szns ####
 sig.letters <- data.frame(NA)
