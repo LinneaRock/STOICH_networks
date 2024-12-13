@@ -161,7 +161,7 @@ pta<-ggplot(scores_fullwat |> filter(nutrient!='Ratio'), aes(position, ave_z)) +
   geom_jitter(aes(fill=nut_type),shape=21) +
   scale_color_manual('',values=c('grey50', okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('glacier','inlets','lakes','outlets')) +
   scale_fill_manual('',values=c(okabe_ito_colors[1:5])) +
-  facet_wrap(~nutrient, scales='free_y') +
+  facet_wrap(~nutrient) +
   labs(x='', y='') +
   theme_bw()+
   theme() +
@@ -226,7 +226,7 @@ ggsave('Figures/zscore_insouts.png',width=8.5,height=4.5,units='in',dpi=1200)
 # part b of final zscore fig
 ptb<-ggplot(scores_lake |> filter(nutrient !='Ratio'), aes(distancefromglacier_Km, ave_z, color=position)) +
   geom_jitter(size=2) +
-  facet_wrap(~nutrient, scales='free_y') +
+  facet_wrap(~nutrient) +
   labs(x='', y='Average z-score') +
   theme_bw() +
   scale_color_manual('',values=c(okabe_ito_colors[6], okabe_ito_colors[7])) +
@@ -281,7 +281,7 @@ ggsave('Figures/zscore_lakes.png',width=8.5,height=4.5,units='in',dpi=1200)
 # add shape for nutrient form discussion
 ggplot(scores_lake, aes(distancefromglacier_Km, ave_z, color=szn, shape=nut_type)) +
   geom_jitter(size=2) +
-  facet_wrap(~nutrient, scales='free_y') +
+  facet_wrap(~nutrient) +
   labs(x='Distance from glacier (km)', y='Average Z-score of each parameter and site') +
   theme_bw() +
   scale_color_manual('',values=c('blue4','goldenrod3','palegreen4')) +
@@ -294,7 +294,7 @@ ggsave('Figures/zscore_lakes_form.png',width=8.5,height=4.5,units='in',dpi=1200)
 # part c of final zscore fig
 ptc<-ggplot(scores_lake |> filter(nutrient != 'Ratio'), aes(distancefromglacier_Km, ave_z, color=szn)) +
   geom_jitter(size=2) +
-  facet_wrap(~nutrient, scales='free_y') +
+  facet_wrap(~nutrient) +
   labs(x='Distance from glacier (km)', y='') +
   theme_bw() +
   scale_color_manual('',values=c('blue4','goldenrod3','palegreen4')) +
@@ -306,4 +306,4 @@ ptc<-ggplot(scores_lake |> filter(nutrient != 'Ratio'), aes(distancefromglacier_
 
 pta/ptb/ptc +
   plot_annotation(tag_levels = 'a', tag_suffix = ')')
-ggsave('Figures/zscore_combined.png',width=6.5,height=8.5,units='in',dpi=1200)
+ggsave('Figures/F_zscore_combined.png',width=6.5,height=8.5,units='in',dpi=1200)
