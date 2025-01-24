@@ -463,8 +463,12 @@ ggplot() +
         axis.ticks.y = element_blank()) +
   labs(x='', y='') +
   scale_color_manual(values=c(okabe_ito_colors[6], okabe_ito_colors[8], okabe_ito_colors[7]), labels=c('inlets','lakes','outlets')) +
-  scale_fill_manual(values='grey80') #+
+  scale_fill_manual(values='grey80') + 
+  theme(strip.background = element_blank(),
+         strip.text.x = element_blank())# removes facet titles +
   # scale_linetype_manual(values=c('dotted', 'solid', 'longdash'), labels = c('Inlets', 'Lakes', 'Outlets'))
 
-ggsave('Figures/k_densities_all_colors.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+# ggsave('Figures/k_densities_all_colors.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
+
+ggsave('Figures/k_densities_noLabels.png', height = 6.5, width = 8.5, units = 'in', dpi = 1200)
 
