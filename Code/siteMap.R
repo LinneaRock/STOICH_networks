@@ -47,7 +47,7 @@ v <- colors$color
 # sampling locations
 sites <- read.csv('Data/sites.csv') |>
   filter(site != 'FLUME',
-         eco_type != 'glacier',
+         #eco_type != 'glacier',
          site != 'ALB_CAMP') |>
   mutate(WS_Group = ifelse(site %in% c('ALB_INLET', 'ALB_LAKE', 'ALB_OUTLET', 'GL1_LAKE'),'ALB',
                            ifelse(site %in% c('GL2_LAKE'),'GL2',
@@ -72,11 +72,11 @@ ggplot() +
   geom_sf(GL5, mapping=aes(), color='black', alpha=0) +
   geom_sf(GL4, mapping=aes(), color='black', alpha=0) +
   geom_sf(GL3, mapping=aes(), color='black', alpha=0) +
-  geom_sf(sites, mapping=aes(), color = 'hotpink') +
+  geom_sf_text(sites, mapping=aes(label = network_position), color = '#231c01', fontface='bold', size=5) +
   theme_minimal() +
   labs(x='',y='')
 
-ggsave('Figures/Map/nlcd_sites.png', height=6.5,width=8.5, units='in',dpi=1200)
+ggsave('Figures/nlcd_sites.png', height=6.5,width=8.5, units='in',dpi=1200)
 
 
 # 3. US map insert ####
