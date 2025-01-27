@@ -133,8 +133,8 @@ plot_trend <- plot_trend |>
 
 
 ggplot(plot_trend) +
-  geom_jitter(aes(network_position, result, color=WS_Group), alpha=0.1) +
-  geom_point(aes(network_position, mean, fill=WS_Group, shape=eco_type), 
+  geom_jitter(aes(as.factor(network_position), result), alpha=0.1) +
+  geom_point(aes(as.factor(network_position), mean, fill=WS_Group, shape=eco_type), 
              color = "black", size = 2) +
 #  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
   # Manually plot the line with geom_segment
@@ -150,16 +150,19 @@ ggplot(plot_trend) +
                    color = szn)) +
                #lwd = 1.5) +
   scale_shape_manual('', values=c(21,22,23)) +
-  scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8','grey50','blue4','palegreen4','goldenrod3')) +
+  scale_color_manual('', values=c('grey50','blue4','palegreen4','goldenrod3')) +
   scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
-  theme_bw() +
+  theme_classic() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
   scale_y_log10() + # log for better viewing
-  facet_wrap(.~param, scales='free', labeller=label_parsed, nrow=5) +
-  labs(x = 'Network Position', y = '') +
-  theme(legend.position = 'none')
-ggsave('Figures/networkTrends.png', width=10.5, height=8.5, units='in', dpi=1200)
+  facet_wrap(.~param, scales='free_y', labeller=label_parsed, nrow=5, axes='all',axis.labels='all_y') +
+  labs(x = '', y = '') +
+  theme(legend.position = 'none') +
+  theme(strip.background = element_blank(),
+        strip.text.x = element_blank()) #+ # removes facet titles
+ 
+ggsave('Figures/networkTrends_noLabels.png', width=10.5, height=8.5, units='in', dpi=1200)
 
 
 
