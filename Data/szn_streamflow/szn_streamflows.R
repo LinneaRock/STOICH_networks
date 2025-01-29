@@ -70,8 +70,11 @@ percentile_days %>%
 ave_percentile_days <- percentile_days|>
   filter(!waterYear %in% c(2015, 2018, 2021)) |>
   summarise(average20_doy = mean(day_20th_doy),
+            std20 = sd(day_20th_doy),
             average50_doy = mean(day_50th_doy),
-            average80_doy = mean(day_80th_doy))
+            std50 = sd(day_50th_doy),
+            average80_doy = mean(day_80th_doy),
+            std80 = sd(day_80th_doy),)
 
 percentile_days_ex <- percentile_days|>
   filter(!waterYear %in% c(2015, 2018, 2021))
