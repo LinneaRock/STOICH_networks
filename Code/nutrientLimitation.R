@@ -151,13 +151,13 @@ sens.slope(mk_lim_dat$lim) # this one line provides all the same information as 
 
 
 # data:  mk_lim_dat$lim
-# z = -5.7516, n = 987, p-value = 8.84e-09
+# z = -5.6906, n = 986, p-value = 1.266e-08
 # alternative hypothesis: true z is not equal to 0
 # 95 percent confidence interval:
-#   -0.0002873674 -0.0001406540
+#   -0.0002851751 -0.0001382792
 # sample estimates:
 #   Sen's slope 
-# -0.0002126189 
+# -0.0002105964  
 
 ## N:P vs TP ####
 mk_lim_dat <- nuts_wide|>
@@ -170,13 +170,13 @@ mk_lim_dat <- nuts_wide|>
 sens.slope(mk_lim_dat$lim) 
 
 # data:  mk_lim_dat$lim
-# z = -18.269, n = 987, p-value < 2.2e-16
+# z = -18.245, n = 986, p-value < 2.2e-16
 # alternative hypothesis: true z is not equal to 0
 # 95 percent confidence interval:
-#   -0.0007070226 -0.0005844776
+#   -0.0007068016 -0.0005840990
 # sample estimates:
 #   Sen's slope 
-# -0.0006442713 
+# -0.00064405 
 
 
 ## N:P vs IN ####
@@ -190,13 +190,13 @@ mk_lim_dat <- nuts_wide|>
 sens.slope(mk_lim_dat$lim) 
 
 # data:  mk_lim_dat$lim
-# z = 27.265, n = 987, p-value < 2.2e-16
+# z = 27.229, n = 986, p-value < 2.2e-16
 # alternative hypothesis: true z is not equal to 0
 # 95 percent confidence interval:
-#   0.0008424348 0.0009437187
+#   0.0008423834 0.0009439332
 # sample estimates:
 #   Sen's slope 
-# 0.0008929035 
+# 0.0008928972 
 
 
 

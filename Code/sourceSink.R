@@ -37,7 +37,7 @@ nuts_prod_lakes <- nuts |>
          GL2 = ALB_INLET - GL3_OUTLET,
          ALBION = ALB_OUTLET - ALB_INLET) |>
  # ungroup() |>
-  dplyr::select(1:3, 19:23) |>
+  dplyr::select(1:3, 18:22) |>
   pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result)  |>
   # add in distance data - we only have GL5, GL4, and Albion here - all others did not have enough data
@@ -79,7 +79,7 @@ ave_prod_lakes <- nuts |>
          GL2 = ALB_INLET - GL3_OUTLET,
          ALBION = ALB_OUTLET - ALB_INLET) |>
   # ungroup() |>
-  dplyr::select(1:2, 18:22) |>
+  dplyr::select(1:2, 17:21) |>
   pivot_longer(3:7, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result)  |>
   # add in distance data - we only have GL5, GL4, and Albion here - all others did not have enough data
@@ -119,19 +119,19 @@ nuts_prod_streams <- nuts |>
     reach2 = GL4_INLET - GL5_OUTLET,
     reach3 = GL3_INLET - GL4_OUTLET,
     reach4 = GL2_LAKE - GL3_OUTLET,
-    reach5 = ALB_INLET - GL2_LAKE,
-    reach5a = ALB_LAKE - GL1_LAKE) |>
+    reach5 = ALB_INLET - GL2_LAKE) |>
+    #reach5a = ALB_LAKE - GL1_LAKE) |>
   #reach6 = ALB_CAMP - ALB_OUTLET) |>
   ungroup() |>
-  dplyr::select(1:3, 19:24) |>
-  pivot_longer(4:9, names_to = 'lake_stream', values_to = 'result') |>
+  dplyr::select(1:3, 18:22) |>
+  pivot_longer(4:8, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result) |>
   # add in distance data - we only have reach1, reach2, reach3 and Reach5a here - all others did not have enough data
   left_join(distances |>
               mutate(lake_stream = case_when(site1=='Arikaree_GLACIER' & site2=='GL5_INLET'~'reach1',
                                              site1=='GL5_OUTLET' & site2=='GL4_INLET'~'reach2',
-                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach3',
-                                             site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach5a')) |>
+                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach3')) |>
+                                            # site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach5a')) |>
               drop_na()) |>
   mutate(normalized_result = result/distance_km) |>
   group_by(param) |>
@@ -163,19 +163,19 @@ ave_prod_streams <- nuts |>
          reach2 = GL4_INLET - GL5_OUTLET,
          reach3 = GL3_INLET - GL4_OUTLET,
          reach4 = GL2_LAKE - GL3_OUTLET,
-         reach5 = ALB_INLET - GL2_LAKE,
-         reach5a = ALB_LAKE - GL1_LAKE) |>
+         reach5 = ALB_INLET - GL2_LAKE) |>
+         #reach5a = ALB_LAKE - GL1_LAKE) |>
   #reach6 = ALB_CAMP - ALB_OUTLET) |>
   ungroup() |>
-  dplyr::select(1:2, 18:23) |>
-  pivot_longer(3:8, names_to = 'lake_stream', values_to = 'result') |>
+  dplyr::select(1:2, 17:21) |>
+  pivot_longer(3:7, names_to = 'lake_stream', values_to = 'result') |>
   drop_na(result) |>
   # add in distance data - we only have reach1, reach2, reach3 and Reach5a here - all others did not have enough data
   left_join(distances |>
               mutate(lake_stream = case_when(site1=='Arikaree_GLACIER' & site2=='GL5_INLET'~'reach1',
                                              site1=='GL5_OUTLET' & site2=='GL4_INLET'~'reach2',
-                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach3',
-                                             site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach5a')) |>
+                                             site1=='GL4_OUTLET' & site2=='GL3_INLET'~'reach3')) |>
+                                             # site1=='GL1_LAKE' & site2=='ALB_LAKE'~'reach5a')) |>
               drop_na()) |>
   mutate(normalized_result = result/distance_km) |>
   group_by(param) |>
@@ -237,8 +237,8 @@ reach_centroids <- centroids |>
   filter(from %in% c(25, 50, 40, 46)) |>
   mutate(lake_stream=case_when(from==25~'reach1',
                                from==50~'reach2',
-                               from==40~'reach3',
-                               from==46~'reach5a')) |>
+                               from==40~'reach3')) |>
+                               #from==46~'reach5a')) |>
   dplyr::select(lake_stream, Shape) |>
   rename(geometry=Shape)
 
@@ -259,6 +259,7 @@ sigSourceSink <- nuts_prod_lakes |>
   mutate(szncol=case_when(szn=='baseflow'~'blue4',
                               szn=='spring snowmelt'~'palegreen4',
                               szn=='falling limb'~'goldenrod3')) |>
+  filter(n>2) |> # 3 or more observations went into the calculation
   st_as_sf() 
 
 data_with_coords <- st_coordinates(sigSourceSink) |>
@@ -285,7 +286,8 @@ AVEsigSourceSink <- ave_prod_lakes |>
                                          param %in% c('PN','PP','PN:PP')~'particulate',
                                          param %in% c('IN','IP','IN:IP')~'inorganic',
                                          param %in% c('DON','DOP','DON:DOP')~'dissolved organic'),
-                    nut_type = factor(nut_type, levels = c('dissolved organic', 'inorganic', 'particulate', 'total dissolved', 'total')))
+                    nut_type = factor(nut_type, levels = c('dissolved organic', 'inorganic', 'particulate', 'total dissolved', 'total'))) |>
+  filter(n>2)  # 3 or more observations went into the calculation
 
 ave_with_coords <- st_coordinates(AVEsigSourceSink) |>
   as.data.frame() |>
@@ -379,8 +381,8 @@ dat_test <- sigSourceSink |>
                                        lake_stream=='GL5'~0,
                                        lake_stream=='reach1'~0,
                                        lake_stream=='reach2'~1,
-                                       lake_stream=='reach3'~2,
-                                       lake_stream=='reach5a'~1),
+                                       lake_stream=='reach3'~2),
+                                      # lake_stream=='reach5a'~1),
          ecotype = ifelse(grepl('reach', lake_stream), 'stream', 'lake')) |>
   # use absolute value of mean source/sink
   #mutate(mean = ifelse(mean<0, mean*-1, mean)) |>
@@ -396,30 +398,30 @@ ggsave('Figures/source_sink_vsLakes.png', width=6.5, height=4.5)
 
 
 m0<-lm(abs(mean)~no_upstream_lakes, dat_test)
-summary(m0) #Adjusted R-squared:   -0.00894  
+summary(m0) #Adjusted R-squared:   0.0227   p=0.131
 
 # add nutrient type (N or P)
 m1<-lm(abs(mean)~no_upstream_lakes*nut_type, dat_test)
-summary(m1) #Adjusted R-squared:  0.2359 
+summary(m1) #Adjusted R-squared:  0.223, p=0.0007251
 anova(m1,m0) # interaction provides better fit
 
 # try stream vs lake
 m2<-lm(abs(mean)~no_upstream_lakes*ecotype, dat_test)
-summary(m2) #Adjusted R-squared: 0.008845 
+summary(m2) #Adjusted R-squared: 0.01307 p=0.2985
 anova(m2,m1) #no evidence of stream/lake making diff
 
 
 m3 <-lm(abs(mean)~no_upstream_lakes*nut_type*ecotype, dat_test)
-summary(m3) #Adjusted R-squared: 0.3062 
+summary(m3) #Adjusted R-squared: 0.2795, p=0.0006306
 anova(m3,m1) # technically better
 
 m4 <-lmer(abs(mean)~no_upstream_lakes + (1|param), dat_test)
 summary(m4)
-performance::r2(m4) #0.330
+performance::r2(m4) #0.260
 anova(m4,m1) # model 1 is a better fit
 
 m5<-lm(abs(mean)~no_upstream_lakes*param, dat_test)
-summary(m5) #Adjusted R-squared:  0.2084  
+summary(m5) #Adjusted R-squared:  0.1667 p=0.04361 
 anova(m5,m1) # not better than m1
 
 anova(m1)

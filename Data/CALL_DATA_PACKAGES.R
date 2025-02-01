@@ -41,11 +41,13 @@ library(patchwork)
 # add in streamflow based seasonal component ####
 ave_percentile_days <- read.csv('Data/szn_streamflow/ave_percentile_days.csv') 
 ave_percentile_days #166, 194, 229
-percentile_days <- read.csv('Data/szn_streamflow/percentile_days.csv') |>
-  mutate(day_20th = as.Date(day_20th),
-         day_50th = as.Date(day_50th),
-         day_80th = as.Date(day_80th)) |>
-  select(-X)
+
+# this is all the actual dates of season differences for 2009-2020 - but we are now using the average for all years instead
+# percentile_days <- read.csv('Data/szn_streamflow/percentile_days.csv') |>
+#   mutate(day_20th = as.Date(day_20th),
+#          day_50th = as.Date(day_50th),
+#          day_80th = as.Date(day_80th)) |>
+#   select(-X)
 
 nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   select(-season) |>
@@ -61,20 +63,27 @@ nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   dplyr::select(-X) |>
   addWaterYear() |>
   # join calculated days
-  left_join(percentile_days) |>
+  #left_join(percentile_days) |>
   # add estimated average days for 20th, 50th, 80th percentiles
   mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
-  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
-  mutate(day_20th = as.Date(day_20th)) |>
-  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
-  mutate(day_50th = as.Date(day_50th)) |>
-  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
-  mutate(day_80th = as.Date(day_80th)) |>
+  mutate(day_20th = as.Date(166, origin=origin)-1) |>
+ # mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = as.Date(194, origin=origin)-1) |>
+ # mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = as.Date(229, origin=origin)-1) |>
+ # mutate(day_80th = as.Date(day_80th)) |>
+  # mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  # mutate(day_20th = as.Date(day_20th)) |>
+  # mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  # mutate(day_50th = as.Date(day_50th)) |>
+  # mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  # mutate(day_80th = as.Date(day_80th)) |>
   #  add seasons
   mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
                     ifelse(between(Date, day_50th, day_80th), 'falling limb',
                            'baseflow'))) |>
-  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
+  select(-c(day_80th,day_50th,day_20th, origin))
+ # select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
 
 
 stoich <- read.csv('Data/stoich_outliers_removed.csv')|>
@@ -90,20 +99,27 @@ stoich <- read.csv('Data/stoich_outliers_removed.csv')|>
   dplyr::select(-X) |>
   addWaterYear() |>
   # join calculated days
-  left_join(percentile_days) |>
+  #left_join(percentile_days) |>
   # add estimated average days for 20th, 50th, 80th percentiles
   mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
-  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
-  mutate(day_20th = as.Date(day_20th)) |>
-  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
-  mutate(day_50th = as.Date(day_50th)) |>
-  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
-  mutate(day_80th = as.Date(day_80th)) |>
+  mutate(day_20th = as.Date(166, origin=origin)-1) |>
+  # mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = as.Date(194, origin=origin)-1) |>
+  # mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = as.Date(229, origin=origin)-1) |>
+  # mutate(day_80th = as.Date(day_80th)) |>
+  # mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  # mutate(day_20th = as.Date(day_20th)) |>
+  # mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  # mutate(day_50th = as.Date(day_50th)) |>
+  # mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  # mutate(day_80th = as.Date(day_80th)) |>
   #  add seasons
   mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
                     ifelse(between(Date, day_50th, day_80th), 'falling limb',
                            'baseflow'))) |>
-  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
+  select(-c(day_80th,day_50th,day_20th, origin))
+# select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
 
 discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
   mutate(Date = as.Date(date)) |>
@@ -114,23 +130,29 @@ discharge <- read.csv('Data/discharge_outliers_removed.csv')|>
   dplyr::select(-X) |>
   addWaterYear() |>
   # join calculated days
-  left_join(percentile_days) |>
+  #left_join(percentile_days) |>
   # add estimated average days for 20th, 50th, 80th percentiles
   mutate(origin = as.Date(paste0(waterYear, '-01-01'))) |>
-  mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
-  mutate(day_20th = as.Date(day_20th)) |>
-  mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
-  mutate(day_50th = as.Date(day_50th)) |>
-  mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
-  mutate(day_80th = as.Date(day_80th)) |>
+  mutate(day_20th = as.Date(166, origin=origin)-1) |>
+  # mutate(day_20th = as.Date(day_20th)) |>
+  mutate(day_50th = as.Date(194, origin=origin)-1) |>
+  # mutate(day_50th = as.Date(day_50th)) |>
+  mutate(day_80th = as.Date(229, origin=origin)-1) |>
+  # mutate(day_80th = as.Date(day_80th)) |>
+  # mutate(day_20th = ifelse(is.na(day_20th), as.Date(166, origin=origin)-1, day_20th)) |>
+  # mutate(day_20th = as.Date(day_20th)) |>
+  # mutate(day_50th = ifelse(is.na(day_50th), as.Date(194, origin=origin)-1, day_50th)) |>
+  # mutate(day_50th = as.Date(day_50th)) |>
+  # mutate(day_80th = ifelse(is.na(day_80th), as.Date(229, origin=origin)-1, day_80th)) |>
+  # mutate(day_80th = as.Date(day_80th)) |>
   #  add seasons
   mutate(szn=ifelse(between(Date, day_20th, day_50th), 'spring snowmelt',
                     ifelse(between(Date, day_50th, day_80th), 'falling limb',
                            'baseflow'))) |>
-  select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
+  select(-c(day_80th,day_50th,day_20th, origin))
+# select(-c(day_80th,day_50th,day_20th,day_80th_doy,day_50th_doy,day_20th_doy, origin))
 
-
-rm(percentile_days)
+#rm(percentile_days)
 rm(ave_percentile_days)
 
 
@@ -293,3 +315,16 @@ eco_stats_nuts <- get_stats_eco(nuts)
 eco_stats_stoich <- get_stats_eco(stoich)
 
 rm(get_stats_eco, get_stats)
+
+
+# removing GL1 from analyses becuase nothing really interesting showed up and we decided we needed to simplify the MS a lot from the original behemoth I wrote :(
+
+
+discharge <- discharge |> filter(site!='GL1_LAKE')
+distances_Km <- distances_Km |> filter(site1!='GL1_LAKE',
+                                       site2!='GL1_LAKE')
+nuts <- nuts |> filter(site!='GL1_LAKE')
+sites <- sites |> filter(site!='GL1_LAKE')
+stats_nuts <- stats_nuts |> filter(site!='GL1_LAKE')
+stats_stoich <- stats_stoich |> filter(site!='GL1_LAKE')
+stoich <- stoich |> filter(site!='GL1_LAKE')

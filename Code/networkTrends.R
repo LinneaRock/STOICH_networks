@@ -19,10 +19,7 @@ all_data_trend <- rbind(nuts, stoich) |>
          n = n()) |>
   ungroup() |>
   distinct() |>
-  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) |>
-  # remove GL1 from these analyses
-  filter(site != 'GL1_LAKE') #|>
-  #mutate(network_position = network_position+1)
+  mutate(WS_Group = ifelse(WS_Group == 'GL2', 'ALB', WS_Group)) 
 
 
 # 2. get sen's slopes and intercepts ####
@@ -134,8 +131,6 @@ plot_trend <- plot_trend |>
 
 ggplot(plot_trend) +
   geom_jitter(aes(as.factor(network_position), result), alpha=0.1) +
-  geom_point(aes(as.factor(network_position), mean, fill=WS_Group, shape=eco_type), 
-             color = "black", size = 2) +
 #  geom_errorbar(aes(network_position, mean, ymin = mean-SE, ymax = mean+SE), linetype = 'dashed')  +
   # Manually plot the line with geom_segment
   geom_segment(data = mk_plot_global, 
@@ -149,6 +144,8 @@ ggplot(plot_trend) +
                    y = y_start, yend = y_end,
                    color = szn)) +
                #lwd = 1.5) +
+  geom_point(aes(as.factor(network_position), mean, fill=WS_Group, shape=eco_type), 
+             color = "black", size = 2.5) +
   scale_shape_manual('', values=c(21,22,23)) +
   scale_color_manual('', values=c('grey50','blue4','palegreen4','goldenrod3')) +
   scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +

@@ -47,7 +47,7 @@ v <- colors$color
 # sampling locations
 sites <- read.csv('Data/sites.csv') |>
   filter(site != 'FLUME',
-         #eco_type != 'glacier',
+         eco_type != 'glacier',
          site != 'ALB_CAMP') |>
   mutate(WS_Group = ifelse(site %in% c('ALB_INLET', 'ALB_LAKE', 'ALB_OUTLET', 'GL1_LAKE'),'ALB',
                            ifelse(site %in% c('GL2_LAKE'),'GL2',
