@@ -234,7 +234,7 @@ ggplot() +
 # from=46 reach5a = ALB_LAKE - GL1_LAKE
 
 reach_centroids <- centroids |>
-  filter(from %in% c(25, 50, 40, 46)) |>
+  filter(from %in% c(25, 50, 40)) |>
   mutate(lake_stream=case_when(from==25~'reach1',
                                from==50~'reach2',
                                from==40~'reach3')) |>
@@ -304,7 +304,7 @@ plot_list <- lapply(unique(medians$param), function(param_val) {
     scale_fill_identity()+
     ggtitle(as.expression(param_val)) +
    # geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=szncol),size=8) +
-    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=szncol), size=8, width=0.002) +
+    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=szncol), size=8, width=0.001,height=0.001) +
     scale_shape_identity() +
     scale_color_identity() +
     labs(x='',y='') +
