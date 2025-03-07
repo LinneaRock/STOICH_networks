@@ -55,7 +55,8 @@ nuts_prod_lakes <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream,szn, param, significance,site1,site2) |> # used to look at trend along network
+  filter(significance!='-') |>
+  group_by(lake_stream,szn, param, site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in lakes
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -97,7 +98,8 @@ ave_prod_lakes <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream, param, significance,site1,site2) |> # used to look at trend along network
+  filter(significance!='-') |>
+  group_by(lake_stream, param, site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in lakes
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -142,7 +144,8 @@ nuts_prod_streams <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream, param, szn, significance,site1,site2) |> # used to look at trend along network
+  filter(significance!='-') |>
+  group_by(lake_stream, param, szn, site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in streams
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -186,7 +189,8 @@ ave_prod_streams <- nuts |>
                                       ifelse(between(p.value, 0.001, 0.01), '<0.01',
                                              ifelse(p.value <= 0.001, '<0.001', significance))))) |>
   ungroup() |>
-  group_by(lake_stream, param, significance,site1,site2) |> # used to look at trend along network
+  filter(significance!='-') |>
+  group_by(lake_stream, param, site1,site2) |> # used to look at trend along network
   #group_by(param, significance) |> # used to look at overall trend in streams
   summarise(mean = mean(normalized_result),
             median = median(normalized_result),
@@ -252,7 +256,7 @@ sigSourceSink <- nuts_prod_lakes |>
               dplyr::select(site, geometry)) |>
   bind_rows(nuts_prod_streams |>
               left_join(reach_centroids)) |>
-  filter(significance != '-') |>
+ # filter(significance != '-') |>
   mutate(param = sub('_.*','',param))|>
   mutate(img = ifelse(mean<0, '\U2193', '\U2191')) |>
   #mutate(szn = factor(szn, levels = c('Winter','Snowmelt runoff','Summer'))) |>
@@ -277,7 +281,7 @@ AVEsigSourceSink <- ave_prod_lakes |>
               dplyr::select(site, geometry)) |>
   bind_rows(ave_prod_streams |>
               left_join(reach_centroids)) |>
-  filter(significance != '-') |>
+  #filter(significance != '-') |>
   mutate(param = sub('_.*','',param))|>
   mutate(img = ifelse(mean<0, '\U2193', '\U2191')) |>
   st_as_sf() |>
@@ -323,7 +327,7 @@ combined_plot <- patchwork::wrap_plots(plot_list, ncol = 2)
 combined_plot
 
 # save plot ####
-ggsave('Figures/sourceSink_significants.png', height = 8.5, width = 6.5, units = 'in', dpi = 1200)
+ggsave('Figures/sourceSink_significantsNEW.png', height = 8.5, width = 6.5, units = 'in', dpi = 1200)
 
 # save data for results writing ####
 write.csv(sigSourceSink, 'Data/Results/SourceSink.csv')

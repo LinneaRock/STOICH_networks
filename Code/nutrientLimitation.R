@@ -29,7 +29,7 @@ nuts_wide <- nuts |>
 
 # 3. Nutrient limitation using DIN:TP from Bergstrom ####
 IN <- ggplot() +
-  geom_jitter(nuts_wide, mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
+  geom_jitter(nuts_wide |> filter(is.finite(log10(IN_umolL/TP_umolL))), mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
                                       fill = distancefromglacier_km), shape = 21, alpha = 0.5) +
   geom_abline(slope = 0, intercept = log10(3.4*2.211353), linetype = "dashed") + # bergstrom P limitation line, multiply by constant to get molar ratio (assuming DIN is as N in DIN:TP)
   geom_abline(slope = 0, intercept = log10(1.5*2.211353), linetype = "dashed") +  # bergstrom N limitation line, multiply by constant to get molar ratio
@@ -114,10 +114,11 @@ means <- left_join(violin, cld2) |>
 
 
 
-compare<-ggplot(violin) +
+compare<-ggplot(violin |> filter(is.finite(log10(IN_umolL/TP_umolL)))) +
   geom_violin(aes(szn, log10(IN_umolL/TP_umolL))) +
-  geom_jitter(aes(szn, log10(IN_umolL/TP_umolL), color=WS_Group)) +
+  geom_jitter(aes(szn, log10(IN_umolL/TP_umolL), fill=WS_Group, color=WS_Group),shape=21, alpha=0.65) +
   geom_point(means, mapping=aes(szn, mean)) +
+  scale_fill_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
   scale_color_manual('Subwatershed', values=c('#906388','#9398D2','#81C4E7','#B5DDD8')) +
   geom_text(means, mapping=aes(szn, 
                                max.result+0.5, label = letters), 

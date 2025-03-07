@@ -97,7 +97,7 @@ mk_df_szn <-  all_data_trend[order(as.numeric(as.character(all_data_trend$networ
 mk_plot_global <- mk_df |>
   mutate(szn = 'Global slope') |>
   # this madness is making pretty labels
-  mutate(param = factor(param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')')))) |>
+  mutate(param = factor(param,levels=c('DON_umolL','DOP_umolL','don.dop', 'IN_umolL','IP_umolL','in.ip', 'PN_umolL','PP_umolL', 'pn.pp','TDN_umolL','TDP_umolL','tdn.tdp','TN_umolL','TP_umolL','tn.tp'), labels = c(expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'),expression('(DON:DOP)'),  expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'),expression('(IN:IP)'),  expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'),expression('(PN:PP)'),  expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TDN:TDP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'),expression('(TN:TP)')))) |>
   filter(!is.na(significance))
   
 
@@ -108,7 +108,7 @@ mk_plot_szn <- mk_df_szn |>
 plot_trend <- full_join(all_data_trend, mk_plot_szn|> select(-n))
 
 # this madness is just making pretty labels
-plot_trend$param <- factor(plot_trend$param, labels = c(expression('(DON:DOP)'), expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'), expression('(IN:IP)'), expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'), expression('(PN:PP)'), expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'), expression('(TDN:TDP)'), expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TN:TP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'))) 
+plot_trend$param <- factor(plot_trend$param, levels=c('DON_umolL','DOP_umolL','don.dop', 'IN_umolL','IP_umolL','in.ip', 'PN_umolL','PP_umolL', 'pn.pp','TDN_umolL','TDP_umolL','tdn.tdp','TN_umolL','TP_umolL','tn.tp'), labels = c(expression('(DON'~mu*mol*L^-1*')'), expression('(DOP'~mu*mol*L^-1*')'),expression('(DON:DOP)'),  expression('(IN'~mu*mol*L^-1*')'), expression('(IP'~mu*mol*L^-1*')'),expression('(IN:IP)'),  expression('(PN'~mu*mol*L^-1*')'), expression('(PP'~mu*mol*L^-1*')'),expression('(PN:PP)'),  expression('(TDN'~mu*mol*L^-1*')'), expression('(TDP'~mu*mol*L^-1*')'),expression('(TDN:TDP)'), expression('(TN'~mu*mol*L^-1*')'), expression('(TP'~mu*mol*L^-1*')'),expression('(TN:TP)')))
 
 
 

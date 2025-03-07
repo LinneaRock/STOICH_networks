@@ -47,7 +47,7 @@ gams <- nuts |>
 
 
 # for pretty labels
-gams$nutrient <- factor(gams$nutrient, labels=c(expression('N concentrations'~(mu*mol~L^-1)), expression('P concentrations'~(mu*mol~L^-1)), expression('Molar~ratio')))
+gams$nutrient <- factor(gams$nutrient, labels=c(expression('N concentrations'~(mu*mol~L^-1)), expression('P concentrations'~(mu*mol~L^-1)), expression('N:P~ratio')))
 
 
 
@@ -68,7 +68,7 @@ ggplot(gams, aes(distancefromglacier_Km, result, color=nut_type)) +
   scale_color_manual('',values=c(okabe_ito_colors[1:5])) +
   scale_shape_manual('', values=c(21,22,23)) 
 
-ggsave('Figures/F_GAMS.png', width=8.5, height=4.5, units='in', dpi=1200)
+ggsave('Figures/F6_GAMS.png', width=8.5, height=4.5, units='in', dpi=1200)
 
 
 
