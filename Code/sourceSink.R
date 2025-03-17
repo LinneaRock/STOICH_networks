@@ -432,3 +432,38 @@ anova(m1)
 
 visreg::visreg(m1, xvar="no_upstream_lakes", by="nut_type", data=dat_test, overlay = TRUE)
 
+
+
+
+# dark theme fig for presentation ####
+library(ggdark)
+
+
+## Create individual plots for each parameter ####
+plot_list <- lapply(unique(medians$param), function(param_val) {
+  ggplot() +
+    geom_sf(data = waterfeatures, aes(),color='grey') +
+    geom_sf(data = subset(medians, param == param_val), aes(size = med, fill=pointcolor),alpha=0.25, shape=21) +
+    scale_fill_identity()+
+    ggtitle(as.expression(param_val)) +
+    # geom_sf(subset(sigSourceSink, param==param_val), mapping=aes(shape=img,color=szncol),size=8) +
+    geom_jitter(subset(data_with_coords, param==param_val), mapping=aes(x=X, y=Y,shape=img,color=szncol), size=8, width=0.001,height=0.001) +
+    scale_shape_identity() +
+    scale_color_identity() +
+    labs(x='',y='') +
+    dark_theme_classic() +
+    theme(axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          legend.text = element_text(size = 8),
+          legend.title = element_text(size = 10),
+          legend.key.size = unit(0.4, "cm"),
+          legend.spacing.y = unit(0.2, "cm")) +
+    labs(size = expression(mu*mol*L^-1)) 
+})
+
+## Combine all plots ####
+combined_plot <- patchwork::wrap_plots(plot_list, ncol = 2)
+combined_plot
+
+# save plot ####
+ggsave('Figures/darkTheme/sourcesink.png', height = 8.5, width = 6.5, units = 'in', dpi = 1200)
