@@ -278,3 +278,23 @@ ggplot(compare_lims) +
   geom_point(aes(lakes,outlets)) +
   geom_abline(slope=1, intercept = 0)
 
+
+# dark theme fig for presentation ####
+library(ggdark)
+
+ggplot() +
+  geom_jitter(nuts_wide |> filter(is.finite(log10(IN_umolL/TP_umolL))), mapping = aes(log10(IN_umolL), log10(IN_umolL/TP_umolL), 
+                                                                                      fill = distancefromglacier_km), shape = 21, alpha = 0.5) + # alpha=0)+ 
+  geom_abline(slope = 0, intercept = log10(3.4*2.211353), linetype = "dashed") + # bergstrom P limitation line, multiply by constant to get molar ratio (assuming DIN is as N in DIN:TP)
+  geom_abline(slope = 0, intercept = log10(1.5*2.211353), linetype = "dashed") +  # bergstrom N limitation line, multiply by constant to get molar ratio
+  dark_theme_classic() +
+  scale_color_viridis_c('Distance from  glacier (km)') +
+  scale_fill_viridis_c('Distance from \nglacier (km)') +
+  labs(y = "log(IN:TP)", x = "log(IN)") +
+  annotate('text', label = 'Predicted N limitation below \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.15, hjust = 0, size = 3) +
+  annotate('text', label = 'Predicted P limitation above \ndashed line (Bergström, 2010)', 
+           x = 0.45, y = 0.85, hjust = 0, size = 3) +
+  theme(legend.position='left') 
+ggsave('Figures/darkTheme/limitation.png',height=4.5,width=6.5,units='in',dpi=1200)
+#ggsave('Figures/darkTheme/limitation_nopoints.png',height=4.5,width=6.5,units='in',dpi=1200)

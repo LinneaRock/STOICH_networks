@@ -197,3 +197,22 @@ ggplot(plotting_deriv_vars |> filter(nutrient=='Ratio'),
 
 ggsave('Figures/GAMs/GAMS_deriv_stoich.png', width=3.5, height=4.5, units='in', dpi=1200)
 
+
+# dark theme fig for presentation ####
+library(ggdark)
+
+show_col(colorblindr::palette_OkabeIto_black)
+okabe_ito_colors <- palette_OkabeIto_black
+
+ggplot(gams, aes(distancefromglacier_Km, result, color=nut_type)) +
+  facet_wrap(~nutrient, scales='free_y', labeller=label_parsed) +
+  geom_jitter(aes(shape=eco_type))+
+  geom_smooth(method = "gam", se = TRUE) + #fit a gam
+  labs(y='', x="Distance from glacier (km)") +
+  dark_theme_bw() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  scale_color_manual('',values=c(okabe_ito_colors[1:5])) +
+  scale_shape_manual('', values=c(21,22,23)) 
+
+ggsave('Figures/darkTheme/GAMS.png', width=8.5, height=4.5, units='in', dpi=1200)
