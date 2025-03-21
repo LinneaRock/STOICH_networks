@@ -206,7 +206,7 @@ okabe_ito_colors <- palette_OkabeIto_black
 
 ggplot(gams, aes(distancefromglacier_Km, result, color=nut_type)) +
   facet_wrap(~nutrient, scales='free_y', labeller=label_parsed) +
-  geom_jitter(aes(shape=eco_type))+
+  geom_jitter(aes(shape=eco_type), alpha=0.05)+
   geom_smooth(method = "gam", se = TRUE) + #fit a gam
   labs(y='', x="Distance from glacier (km)") +
   dark_theme_bw() +
