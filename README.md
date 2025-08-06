@@ -1,4 +1,4 @@
-# Nutrient concentration and stoichiometry variations along a high-elevation lake-stream network in the Rocky Mountains of Colorado, U.S.
+# The interplay of hydrology and biogeochemistry in a glacier-fed headwater network
 
 Authors: Linnea A. Rock, Isabella A. Oleksy, Sarah M. Collins
 
