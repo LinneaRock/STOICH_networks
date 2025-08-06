@@ -5,25 +5,25 @@ sites <- read.csv("Data/sites.csv")
 
 gl_network <- read.csv("Data/greenlakes_network.csv") |>
   left_join(sites) |>
-  mutate(date = as.Date(date, format = '%m/%d/%Y')) # |>
+  mutate(date = as.Date(date, format = '%Y-%m-%d')) # |>
 #  mutate(season = factor(season, levels = c('Jan-Mar','Apr-Jun','Jul-Sep','Oct-Dec')))
 
 # subset and format datasets for plotting ####
 ions <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, 21:31) |>
-  pivot_longer(7:17, names_to = 'param', values_to = 'result') |>
+  select(site, network_position, eco_type, date, depth_m, 21:31) |>
+  pivot_longer(7:16, names_to = 'param', values_to = 'result') |>
   drop_na(network_position) |>
   drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m)) |> # just look at photic zone
-  group_by(site, network_position, eco_type, date, season, depth_m, param) |>
+  filter(depth_m == 0 | is.na(depth_m)) |> # just look at surface
+  group_by(site, network_position, eco_type, date,  depth_m, param) |>
   summarise(result = mean(result))
 
 nuts <- gl_network |>
-  select(site, network_position, eco_type, date, season, depth_m, 2:14) |>
+  select(site, network_position, eco_type, date, depth_m, 2:14) |>
   pivot_longer(7:19, names_to = 'param', values_to = 'result') |>
   drop_na(network_position)  |>
   drop_na(result) |>
-  filter(depth_m <=3 | is.na(depth_m))  |> # just look at photic zone
+  filter(depth_m ==0 | is.na(depth_m))  |> # just look at surface
   group_by(site, network_position, eco_type, date, season, depth_m, param) |>
   summarise(result = mean(result))
 

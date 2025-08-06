@@ -357,8 +357,8 @@ gl_network <- read.csv("Data/greenlakes_network.csv") |>
 write.csv(gl_network, "Data/greenlakes_network.csv")
 
 
-#| umol/L IP is umol PO4 as P.
-#| ueq/L NO3 and ueq/L NH4 is umol NO3 as N and NH4 as N!!!!!!!!!!!
+#| umol/L IP is umol PO4 as P  -- convert to as P by dividing PO4 ueq/L by 3
+#| ueq/L NO3 and ueq/L NH4 is umol NO3 as N and NH4 as N
 
 
 #   mutate(IP_umolL = ifelse(IP_umolL < 0, NA, IP_umolL))|>

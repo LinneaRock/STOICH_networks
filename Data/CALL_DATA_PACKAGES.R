@@ -51,14 +51,14 @@ ave_percentile_days #166, 194, 229
 
 nuts <- read.csv('Data/nuts_outliers_removed.csv')|>
   select(-season) |>
-  filter(!param %in% c('DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
+  filter(!param %in% c('TOC_mgL','DOC_mgL', 'NO3_ueqL', 'NH4_ueqL')) |>
   mutate(Date = as.Date(date)) |>
-  filter(site != 'FLUME',
+  filter(site != 'FLUME') |>
          #eco_type != 'glacier',
-         site != 'ALB_CAMP') |>
-  mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
-                                                                '7','8','9','10','11','12',
-                                                                '12a','13','14','15'))) |>
+         #site != 'ALB_CAMP') |>
+  # mutate(network_position = factor(network_position, levels = c('1','2','3','4', '5', '6', 
+  #                                                               '7','8','9','10','11','12',
+  #                                                               '12a','13','14','15'))) |>
   mutate(mon = month(date)) |> #and add seasons to the dataframe
   dplyr::select(-X) |>
   addWaterYear() |>
