@@ -3,7 +3,17 @@
 library(tidyverse)
 library(dataRetrieval)
 
-GL4discharge <- read.csv('Data/discharge_outliers_removed.csv') |>
+
+GL4discharge <-  read.csv('Archive/Version1/Data/greenlakes_network.csv') |>
+  mutate(Date=as.Date(date)) |>
+  filter(site=='GL4_OUTLET',
+         year(Date)>2008) |>
+  addWaterYear() |>
+  select(site, waterYear, Date, daily_dis_m3) |> drop_na(daily_dis_m3) |>
+  rename(result=daily_dis_m3)
+
+
+GL4discharge <- read.csv('Archive/Version1/Data/discharge_outliers_removed.csv') |>
   mutate(Date=as.Date(date)) |>
   filter(site=='GL4_OUTLET',
          year(Date)>2008) |>

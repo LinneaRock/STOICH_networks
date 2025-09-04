@@ -3,43 +3,77 @@
 library(tidyverse)
 library(dataRetrieval)
 
-GL4discharge <- read.csv('Data/discharge_outliers_removed.csv') |>
-  mutate(Date=as.Date(date)) |>
-  filter(site=='GL4_OUTLET',
-         year(Date)>2008) |>
+gl_nutrients <- read.csv('Data/gl_network_nuts_raw.csv')|> select(-X) |> mutate(date=as.Date(date))
+gl_discharge <- read.csv('Data/gl_network_discharge_raw.csv')  |> select(-X) |> mutate(date=as.Date(date)) |> drop_na(discharge_vol_cm)
+
+ggplot(gl_discharge, aes(date,discharge_vol_cm,color=local_site)) +
+  geom_line()
+
+
+
+# ALB has good data 1994 on, with a few years we'll likely need to remove (looks like 2011-2013)
+# GL4 has good data 2009 on, with a few years we'll likely need to remove (looks like 2014-2015)
+
+
+GL4discharge <- left_join(gl_nutrients, gl_discharge) |>
+  drop_na(discharge_vol_cm) |>
+  filter(local_site=='GL4',
+         year(date)>2008) |>
+  mutate(Date=date) |>
   addWaterYear()
 
-ggplot(GL4discharge, aes(Date,result)) +
+ggplot() +
+  geom_point(GL4discharge, mapping=aes(date, discharge_vol_cm)) +
+  geom_line(GL4discharge, mapping=aes(date, discharge_vol_cm)) 
+ 
+
+ALBdischarge <- gl_discharge |>
+  filter(local_site=='ALB',
+         year(date)>1993) |>
+  mutate(Date=date) |>
+  addWaterYear()
+
+ggplot(ALBdischarge, aes(date, discharge_vol_cm)) +
   geom_point()  +
   geom_line()
-#there's a lot of missing data still. But let's see what we can find
 
-
-percentile_days <- GL4discharge %>%
-  group_by(waterYear) %>%
-  arrange(Date) %>%
-  mutate(cumulative_dis = cumsum(result),
-         total_flow = sum(result)) %>%
+# we are just going to use GL4 though because it will be more representative of the network due to proximity
+percentile_days_old <- old_dis |> rename(discharge_vol_cm=result) |>
+  group_by(waterYear) |>
+  arrange(Date) |>
+  mutate(cumulative_dis = cumsum(discharge_vol_cm),
+         total_flow = sum(discharge_vol_cm)) |>
   summarise(
     day_20th = cur_data()$Date[which(cumulative_dis >= 0.2 * total_flow)[1]],
     day_50th = cur_data()$Date[which(cumulative_dis >= 0.5 * total_flow)[1]],
     day_80th = cur_data()$Date[which(cumulative_dis >= 0.8 * total_flow)[1]]
-  ) %>%
+  ) |>
   mutate(day_20th_doy = yday(day_20th),
          day_50th_doy = yday(day_50th),
-         day_80th_doy = yday(day_80th))
-# things look reasonable except 2015, 2018, 2021 - which really don't make sense
+         day_80th_doy = yday(day_80th)) |>
+  ungroup()
+# things look reasonable except 2015, 2018 - which really don't make sense (GL4)
 
 
-library(ggdark)
-percentile_days %>%
+
+checks <- GL4discharge |>
+  mutate(fakedate = as.Date(paste('1990',month(date), day(date), sep='-'), format='%Y-%m-%d'))
+
+ggplot(checks, aes(fakedate, discharge_vol_cm, color=waterYear)) +
+  geom_point() +
+
+  scale_color_viridis_c()
+
+
+
+percentile_days |>
   filter(!waterYear %in% c(2015, 2018, 2021)) |>
-  #filter(site_no == 401733105392404) %>%
-  pivot_longer(day_20th_doy:day_80th_doy) %>%
+  #filter(site_no == 401733105392404) |>
+  pivot_longer(day_20th_doy:day_80th_doy) |>
   mutate(name=factor(name,
                      labels=c("20th",
                               "50th",
-                              "80th"))) %>%
+                              "80th"))) |>
   ggplot(aes(x=waterYear, y=value, color=name))+#,
   #shape=site_no,
   # linetype=site_no))+
@@ -55,13 +89,13 @@ percentile_days %>%
     # subtitle="USGS Site no. 06614800",
     x="Year",
     y="Day of year")+
-  dark_theme_bw(base_size=18)+
+  theme_bw(base_size=18)+
   theme(legend.position="bottom") +
   facet_wrap(name~., scales="free_y")+
   # scale_y_continuous(
   #       breaks = c(106,136,167,197,228,251),
   #                    labels = c("Apr 15", "May 15", "June 15", "July 15","Aug 15","Sept 15")) +
-  scale_x_continuous(breaks = c(1990, 2005, 2020))+
+ # scale_x_continuous(breaks = c(1990, 2005, 2020))+
   theme(legend.position="none")
 
 
