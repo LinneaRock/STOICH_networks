@@ -1,0 +1,20 @@
+site,arik_flow_site,network_position,lat,long,notes,eco_type,elevation_m,drainage_area_ha,upstream_network_lakes
+ARIKAREE,NAVAJO,0,40.05057403,-105.6428909,"Sampling location varied from the channel at the lip of the cirque, where it is first exposed by snowmelt, at the beginning of the season to the outlet from the pond at the foot of the glacier.",glacier,3785,9.2,0
+GL5_INLET,NA,1,40.05142,-105.631877,,stream,,,0
+GL5_LAKE,NA,2,40.052439,-105.630303,,lake,3620,,0
+GL5_OUTLET,NA,3,40.053672,-105.628126,,stream,3615,135.2,1
+GL4_INLET,NA,4,40.053929,-105.622126,,stream,,,1
+GL4_LAKE,NA,5,40.055253,-105.620318,,lake,3550,,1
+GL4_OUTLET,NA,6,40.055807,-105.617178,,stream,3550,220.9,2
+GL3_INLET,NA,7,40.052614,-105.615705,,stream,,,2
+GL3_LAKE,NA,8,40.051527,-105.616125,,lake,3450,,2
+GL3_OUTLET,NA,9,40.050867,-105.614129,,stream,,,3
+GL2_LAKE,NA,10,40.04934,-105.611345,,lake,3400,,3
+ALB_INLET,NA,11,40.047178,-105.607123,,stream,3345,354.7,4
+ALB_LAKE,NA,12,40.046352,-105.604015,,lake,,,5
+ALB_OUTLET,NA,13,40.045151,-105.602094,,stream,,,5
+ALB_CAMP,NA,14,40.04287468,-105.592296,,stream,3250,709.7,
+FLUME,NA,15,40.01368597,-105.5578493,remove,stream,,,
+GL1_LAKE,NA,0,40.049773,-105.60542,flows into Albion Lake,lake,3452,,0
+GL4_WATERFALL,NA,,,,remove,,,,
+GL4_WATERFALL TOP,NA,,,,remove,,,,
