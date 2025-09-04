@@ -15,7 +15,8 @@ ggplot(gl_discharge, aes(date,discharge_vol_cm,color=local_site)) +
 # GL4 has good data 2009 on, with a few years we'll likely need to remove (looks like 2014-2015)
 
 
-GL4discharge <- left_join(gl_nutrients, gl_discharge) |>
+#GL4discharge <- left_join(gl_nutrients, gl_discharge) |>
+GL4discharge <- gl_discharge |>
   drop_na(discharge_vol_cm) |>
   filter(local_site=='GL4',
          year(date)>2008) |>
@@ -38,7 +39,7 @@ ggplot(ALBdischarge, aes(date, discharge_vol_cm)) +
   geom_line()
 
 # we are just going to use GL4 though because it will be more representative of the network due to proximity
-percentile_days_old <- old_dis |> rename(discharge_vol_cm=result) |>
+percentile_days<- GL4discharge |>
   group_by(waterYear) |>
   arrange(Date) |>
   mutate(cumulative_dis = cumsum(discharge_vol_cm),
